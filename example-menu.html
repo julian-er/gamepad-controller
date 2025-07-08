@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamepad Menu Navigation Example</title>
+    <link rel="stylesheet" href="example-menu.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Gamepad Menu Navigation</h1>
+        
+        <div class="menu">
+            <div class="menu-item" onclick="handleMenuSelect('new-game')">
+                🎲 New Game
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('continue')">
+                ▶️ Continue
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('settings')">
+                ⚙️ Settings
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('achievements')">
+                🏆 Achievements
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('leaderboard')">
+                📊 Leaderboard
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('quit')">
+                🚪 Quit Game
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🎮 How to Use</h3>
+            <p><strong>Connect your gamepad</strong> and use the <strong>D-pad</strong> or <strong>left stick</strong> to navigate between menu items.</p>
+            <p>Press <strong>A</strong> (Xbox), <strong>Cross</strong> (PlayStation), or <strong>A</strong> (Nintendo) to select an item.</p>
+            <p>The system automatically detects your controller type and maps buttons accordingly!</p>
+        </div>
+    </div>
+
+    <div id="gamepad-status" class="status-overlay">
+        No gamepad connected
+    </div>
+
+    <script type="module">
+        import { gamepadService, gamepadUtils } from './gamepadService.js';
+
+        // Initialize gamepad navigation for menu
+        const gamepad = gamepadService('.menu', {
+            navigationMode: 'spatial',
+            focusedClass: 'menu-focused',
+            selectedClass: 'menu-selected',
+            statusElementId: 'gamepad-status'
+        });
+
+        // Handle menu selection
+        window.handleMenuSelect = function(action) {
+            console.log('Menu selected:', action);
+            
+            // Add visual feedback
+            const currentElement = gamepadUtils.getCurrentElement();
+            if (currentElement) {
+                currentElement.style.background = '#28a745';
+                setTimeout(() => {
+                    currentElement.style.background = '';
+                }, 300);
+            }
+            
+            // Handle different menu actions
+            switch(action) {
+                case 'new-game':
+                    alert('Starting new game... 🎮');
+                    break;
+                case 'continue':
+                    alert('Continuing game... ▶️');
+                    break;
+                case 'settings':
+                    alert('Opening settings... ⚙️');
+                    break;
+                case 'achievements':
+                    alert('Viewing achievements... 🏆');
+                    break;
+                case 'leaderboard':
+                    alert('Showing leaderboard... 📊');
+                    break;
+                case 'quit':
+                    if (confirm('Are you sure you want to quit?')) {
+                        alert('Thanks for playing! 👋');
+                    }
+                    break;
+            }
+        };
+
+        // Add custom event handlers
+        gamepadUtils.onFocus((element, index) => {
+            console.log(`Focused on menu item ${index + 1}`);
+        });
+
+        gamepadUtils.onSelect((element, index) => {
+            console.log(`Selected menu item ${index + 1}`);
+            // Trigger the click event
+            element.click();
+        });
+
+        gamepadUtils.onControllerConnect((gamepad, controllerType) => {
+            console.log(`Controller connected: ${controllerType}`);
+            document.body.style.background = controllerType === 'xbox' ? 
+                'linear-gradient(135deg, #107c10 0%, #0e6b0e 100%)' :
+                controllerType === 'playstation' ?
+                'linear-gradient(135deg, #003087 0%, #00246b 100%)' :
+                controllerType === 'nintendo' ?
+                'linear-gradient(135deg, #e60012 0%, #cc0010 100%)' :
+                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        });
+
+        // Add default styles
+        gamepadUtils.addDefaultStyles();
+    </script>
+</body>
+</html> 

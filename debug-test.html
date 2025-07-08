@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test - Gamepad Navigation</title>
+    <link rel="stylesheet" href="debug-test.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Test - Gamepad Navigation</h1>
+        
+        <div id="test-status" class="status loading">
+            Loading modules...
+        </div>
+
+        <div class="test-grid">
+            <div class="test-item" tabindex="0" onclick="testClick(1)">Test Item 1</div>
+            <div class="test-item" tabindex="0" onclick="testClick(2)">Test Item 2</div>
+            <div class="test-item" tabindex="0" onclick="testClick(3)">Test Item 3</div>
+            <div class="test-item" tabindex="0" onclick="testClick(4)">Test Item 4</div>
+            <div class="test-item" tabindex="0" onclick="testClick(5)">Test Item 5</div>
+            <div class="test-item" tabindex="0" onclick="testClick(6)">Test Item 6</div>
+        </div>
+
+        <div id="module-status" class="status">
+            Module loading status will appear here...
+        </div>
+
+        <div id="gamepad-debug" class="status">
+            Gamepad debug info will appear here...
+        </div>
+
+        <div class="status">
+            <h3>🎮 Debug Controls:</h3>
+            <button onclick="debugRefresh()">🔄 Refresh Navigation</button>
+            <button onclick="debugInfo()">ℹ️ Show Debug Info</button>
+            <button onclick="debugElements()">📋 List Elements</button>
+            <button onclick="debugStyles()">🎨 Add Example Styles</button>
+            <button onclick="debugCSSExamples()">📄 Print CSS Examples</button>
+        </div>
+    </div>
+
+    <script type="module">
+        console.log('🔧 Debug Test Started');
+        
+        let gamepadInstance = null;
+        
+        const updateStatus = (id, message, type = '') => {
+            const element = document.getElementById(id);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        };
+
+        // Test 1: Module Loading
+        try {
+            updateStatus('test-status', '1️⃣ Testing module imports...', 'warning');
+            
+            // Import using the new simplified API
+            const { initGamepadNavigation, gamepadUtils } = await import('./gamepadService.js');
+            updateStatus('module-status', '✅ All modules loaded successfully!', 'success');
+            
+            // Test 2: Service Initialization
+            updateStatus('test-status', '2️⃣ Initializing gamepad service...', 'warning');
+            
+            gamepadInstance = initGamepadNavigation({
+                containerSelector: '.test-grid',
+                navigationMode: 'grid',
+                focusedClass: 'gamepad-focused',
+                selectedClass: 'gamepad-selected',
+                statusElementId: null, // We'll handle status updates manually
+                autoAddStyles: false,   // Styles are now opt-in only
+                autoCreateStatusElement: false,
+                useDataAttributes: true, // Use data attributes for better style isolation
+                gamepadContext: 'grid'
+            });
+
+            // Test 3: Event Handlers
+            gamepadUtils.onFocus((element, index) => {
+                updateStatus('gamepad-debug', `🎯 Focused on item ${index + 1}`, 'success');
+                console.log('Focus:', element, index);
+            });
+
+            gamepadUtils.onSelect((element, index) => {
+                updateStatus('gamepad-debug', `✅ Selected item ${index + 1}`, 'success');
+                console.log('Select:', element, index);
+            });
+
+            gamepadUtils.onControllerConnect((gamepad, controllerType) => {
+                updateStatus('gamepad-debug', `🎮 Controller connected: ${controllerType}`, 'success');
+                console.log('Controller connected:', controllerType);
+            });
+
+            gamepadUtils.onControllerDisconnect((gamepad) => {
+                updateStatus('gamepad-debug', `🎮 Controller disconnected`, 'warning');
+                console.log('Controller disconnected');
+            });
+
+            // Test 4: Final status
+            updateStatus('test-status', '✅ All tests passed! Connect a gamepad to test navigation.', 'success');
+            
+        } catch (error) {
+            console.error('❌ Module loading failed:', error);
+            updateStatus('test-status', `❌ Error: ${error.message}`, 'error');
+            updateStatus('module-status', `Module Error: ${error.stack}`, 'error');
+        }
+
+        // Test click function
+        window.testClick = function(itemNumber) {
+            console.log(`Clicked item ${itemNumber}`);
+            updateStatus('gamepad-debug', `🖱️ Clicked item ${itemNumber} with mouse`, 'warning');
+        };
+
+        // Debug functions
+        window.debugRefresh = function() {
+            if (gamepadInstance) {
+                gamepadInstance.refresh();
+                updateStatus('gamepad-debug', '🔄 Navigation refreshed', 'success');
+            } else {
+                updateStatus('gamepad-debug', '❌ No gamepad instance available', 'error');
+            }
+        };
+
+        window.debugInfo = function() {
+            const info = gamepadUtils.getNavigationInfo();
+            if (info) {
+                const debugText = `
+                Connected: ${info.isConnected ? '✅' : '❌'}
+                Controller: ${info.controllerType}
+                Current Index: ${info.currentIndex}
+                Total Elements: ${info.totalElements}
+                Navigation: ${info.navigationEnabled ? '✅' : '❌'}
+                Back Button: ${info.backButtonEnabled ? '✅' : '❌'}
+                Shoulder Nav: ${info.shoulderNavigationEnabled ? '✅' : '❌'}
+                `;
+                updateStatus('gamepad-debug', debugText, 'success');
+                console.log('Debug Info:', info);
+            } else {
+                updateStatus('gamepad-debug', '❌ No debug info available', 'error');
+            }
+        };
+
+        window.debugElements = function() {
+            const elements = gamepadUtils.getElements();
+            console.log('Detected elements:', elements);
+            updateStatus('gamepad-debug', `📋 Found ${elements.length} elements (check console)`, 'success');
+        };
+        
+        window.debugStyles = function() {
+            import('./gamepadUtils.js').then(({ addNavigationStyles }) => {
+                addNavigationStyles();
+                updateStatus('gamepad-debug', '🎨 Example styles added', 'success');
+            });
+        };
+        
+        window.debugCSSExamples = function() {
+            import('./gamepadUtils.js').then(({ printCSSExamples }) => {
+                printCSSExamples();
+                updateStatus('gamepad-debug', '📄 CSS examples printed to console', 'success');
+            });
+        };
+
+        // Debug gamepad connections
+        window.addEventListener('gamepadconnected', (e) => {
+            console.log('Gamepad connected:', e.gamepad.id);
+            updateStatus('gamepad-debug', `🎮 Raw gamepad connected: ${e.gamepad.id}`, 'success');
+        });
+
+        window.addEventListener('gamepaddisconnected', (e) => {
+            console.log('Gamepad disconnected:', e.gamepad.id);
+            updateStatus('gamepad-debug', `🎮 Raw gamepad disconnected: ${e.gamepad.id}`, 'warning');
+        });
+
+        // Additional debug info
+        console.log('🔧 Debug info:');
+        console.log('- Current URL:', window.location.href);
+        console.log('- User Agent:', navigator.userAgent);
+        console.log('- Gamepads API available:', 'getGamepads' in navigator);
+        console.log('- Current gamepads:', navigator.getGamepads());
+        
+        // Live gamepad monitoring
+        setInterval(() => {
+            const gamepads = navigator.getGamepads();
+            const connected = Array.from(gamepads).filter(gp => gp && gp.connected);
+            if (connected.length > 0) {
+                console.log('Live gamepad data:', connected.map(gp => ({
+                    id: gp.id,
+                    buttons: gp.buttons.map((btn, i) => btn.pressed ? i : null).filter(i => i !== null),
+                    axes: gp.axes.map(axis => Math.round(axis * 100) / 100)
+                })));
+            }
+        }, 2000);
+    </script>
+</body>
+</html> 
