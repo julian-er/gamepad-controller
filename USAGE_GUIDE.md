@@ -5,7 +5,7 @@
 The fastest way to add gamepad navigation to any page:
 
 ```javascript
-import { initGamepadForPage } from './gamepadService.js';
+import { initGamepadForPage } from './dist/gamepadService.js';
 
 // One line = full gamepad support with zero style conflicts
 initGamepadForPage();
@@ -79,7 +79,7 @@ Add to any existing HTML page:
 
     <!-- Add gamepad support in one line -->
     <script type="module">
-        import { initGamepadForPage } from './gamepadService.js';
+        import { initGamepadForPage } from './dist/gamepadService.js';
         initGamepadForPage();
     </script>
 </body>
@@ -89,7 +89,7 @@ Add to any existing HTML page:
 ### Method 2: Custom Configuration
 
 ```javascript
-import { initGamepadNavigation } from './gamepadService.js';
+import { initGamepadNavigation } from './dist/gamepadService.js';
 
 const gamepad = initGamepadNavigation({
     // Navigation behavior
@@ -126,7 +126,7 @@ gamepad.onSelect = (element, index) => {
 ### Method 3: Presets for Common Use Cases
 
 ```javascript
-import { presets } from './gamepadService.js';
+import { presets } from './dist/gamepadService.js';
 
 // Menu navigation
 presets.menu('.navigation');
@@ -152,7 +152,7 @@ presets.dualContext('.nav-menu', '.content-area');
 Create separate navigation contexts for different UI regions with mutual exclusion:
 
 ```javascript
-import { initDualContextGamepad } from './gamepadService.js';
+import { initDualContextGamepad } from './dist/gamepadService.js';
 
 const gamepad = initDualContextGamepad({
     // Menu context (R1/L1 navigation)
@@ -324,7 +324,7 @@ export function GamepadNavigationWrapper({ children, options = {} }) {
     
     useEffect(() => {
         // Initialize gamepad service
-        import('./gamepadService.js').then(({ initGamepadNavigation }) => {
+        import('./dist/gamepadService.js').then(({ initGamepadNavigation }) => {
             gamepadRef.current = initGamepadNavigation({
                 useDataAttributes: true,
                 autoAddStyles: false,
@@ -383,7 +383,7 @@ export function useGamepadNavigation(options = {}) {
     const gamepadRef = useRef(null);
     
     useEffect(() => {
-        import('./gamepadService.js').then(({ initGamepadNavigation }) => {
+        import('./dist/gamepadService.js').then(({ initGamepadNavigation }) => {
             gamepadRef.current = initGamepadNavigation({
                 useDataAttributes: true,
                 autoAddStyles: false,
@@ -437,7 +437,7 @@ export class GamepadNavigationService {
             this.gamepadService.destroy();
         }
         
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         
         this.gamepadService = initGamepadNavigation({
             useDataAttributes: true,
@@ -544,7 +544,7 @@ export default {
         };
     },
     async mounted() {
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         
         this.gamepadService = initGamepadNavigation({
             containerSelector: '.gamepad-container',
@@ -692,7 +692,7 @@ gamepad.destroy();
 ### Print CSS Examples
 
 ```javascript
-import { gamepadUtils } from './gamepadService.js';
+import { gamepadUtils } from './dist/gamepadService.js';
 
 // Print ready-to-use CSS examples
 gamepadUtils.printCSSExamples();
@@ -714,7 +714,7 @@ gamepadUtils.removeStyles();
 ### Context Management
 
 ```javascript
-import { setGamepadContext } from './gamepadUtils.js';
+import { setGamepadContext } from './dist/gamepadUtils.js';
 
 // Set context for styling
 setGamepadContext('grid');     // Grid layouts
@@ -726,7 +726,7 @@ setGamepadContext('buttons');  // Button groups
 ### Dual Context Utilities
 
 ```javascript
-import { gamepadUtils } from './gamepadService.js';
+import { gamepadUtils } from './dist/gamepadService.js';
 
 // Check if dual context is enabled
 const isDualContext = gamepadUtils.isDualContextEnabled();
@@ -788,7 +788,7 @@ function App() {
     
     useEffect(() => {
         // Refresh navigation on route changes
-        import('./gamepadService.js').then(({ gamepadUtils }) => {
+        import('./dist/gamepadService.js').then(({ gamepadUtils }) => {
             gamepadUtils.refresh();
         });
     }, [location]);
@@ -812,7 +812,7 @@ export class AppComponent {
         this.router.events.subscribe(event => {
             if (event instanceof NavigationEnd) {
                 // Refresh navigation on route changes
-                import('./gamepadService.js').then(({ gamepadUtils }) => {
+                import('./dist/gamepadService.js').then(({ gamepadUtils }) => {
                     gamepadUtils.refresh();
                 });
             }
@@ -825,7 +825,7 @@ export class AppComponent {
 
 ### Debug Tools
 
-Visit `debug-test.html` for comprehensive debugging:
+Visit `pages/home-page/debug-test.html` for comprehensive debugging:
 - Controller connection status
 - Element detection
 - Button mapping
@@ -841,7 +841,7 @@ initGamepadForPage({
 });
 
 // Manual debug info
-import { gamepadUtils } from './gamepadService.js';
+import { gamepadUtils } from './dist/gamepadService.js';
 const info = gamepadUtils.getNavigationInfo();
 console.log('Debug info:', info);
 ```
@@ -904,11 +904,11 @@ initGamepadNavigation({
 ## 📚 Examples
 
 Check out the included examples:
-- **`index.html`** - Basic demo
+- **`pages/home-page/index.html`** - Basic demo
 - **`example-menu.html`** - Menu navigation
 - **`example-simple.html`** - Simple setup
 - **`example-style-isolation.html`** - Style isolation demo
-- **`debug-test.html`** - Debug tools
+- **`pages/home-page/debug-test.html`** - Debug tools
 
 ## 🏆 Success Stories
 

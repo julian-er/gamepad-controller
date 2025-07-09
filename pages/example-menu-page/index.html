@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamepad Menu Navigation Example</title>
+    <link rel="stylesheet" href="example-menu.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Gamepad Menu Navigation</h1>
+        
+        <div class="menu">
+            <div class="menu-item" onclick="handleMenuSelect('new-game')">
+                🎲 New Game
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('continue')">
+                ▶️ Continue
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('settings')">
+                ⚙️ Settings
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('achievements')">
+                🏆 Achievements
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('leaderboard')">
+                📊 Leaderboard
+            </div>
+            <div class="menu-item" onclick="handleMenuSelect('quit')">
+                🚪 Quit Game
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🎮 How to Use</h3>
+            <p><strong>Connect your gamepad</strong> and use the <strong>D-pad</strong> or <strong>left stick</strong> to navigate between menu items.</p>
+            <p>Press <strong>A</strong> (Xbox), <strong>Cross</strong> (PlayStation), or <strong>A</strong> (Nintendo) to select an item.</p>
+            <p>The system automatically detects your controller type and maps buttons accordingly!</p>
+        </div>
+    </div>
+
+    <div id="gamepad-status" class="status-overlay">
+        No gamepad connected
+    </div>
+
+    <script type="module" src="../../dist/pages/exampleMenuPage.js"></script>
+</body>
+</html> 

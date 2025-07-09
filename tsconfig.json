@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "esnext",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": false,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "rootDir": "."
+  },
+  "include": [
+    "*.ts",
+    "typescript/controllerMappings.ts",
+    "typescript/gamepadContextManager.ts",
+    "typescript/gamepadService.ts",
+    "typescript/gamepadServiceModel.ts",
+    "typescript/gamepadUtils.ts",
+    "pages/home-page/ts/homePage.ts",
+    "pages/style-isolation-page/ts/styleIsolationPage.ts",
+    "pages/example-page/ts/examplePage.ts",
+    "pages/debug-page/ts/debugPage.ts",
+    "pages/example-auto-init-page/ts/exampleAutoInitPage.ts",
+    "pages/example-menu-page/ts/exampleMenuPage.ts"
+  ],
+  "exclude": ["node_modules"]
+} 

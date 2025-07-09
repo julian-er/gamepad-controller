@@ -1,0 +1,14 @@
+{
+  "name": "gamepad-controller",
+  "version": "1.0.0",
+  "description": "Gamepad navigation controller with TypeScript support.",
+  "scripts": {
+    "build": "tsc",
+    "serve": "npx http-server . -c-1 -o pages/home-page",
+    "start": "npm i && npm run build && npm run serve"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "http-server": "^14.1.1"
+  }
+} 

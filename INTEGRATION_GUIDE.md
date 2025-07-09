@@ -30,10 +30,10 @@ your-project/
 
 ```javascript
 // ES6 Modules (recommended)
-import { initGamepadForPage } from './assets/gamepad/gamepadService.js';
+import { initGamepadForPage } from './dist/gamepadService.js';
 
 // Or dynamic import
-const { initGamepadForPage } = await import('./assets/gamepad/gamepadService.js');
+const { initGamepadForPage } = await import('./dist/gamepadService.js');
 ```
 
 ## 🚀 Integration Patterns
@@ -44,7 +44,7 @@ const { initGamepadForPage } = await import('./assets/gamepad/gamepadService.js'
 
 ```javascript
 // Add to your existing page
-import { initGamepadForPage } from './gamepadService.js';
+import { initGamepadForPage } from './dist/gamepadService.js';
 
 // Zero visual changes - navigation works invisibly
 initGamepadForPage();
@@ -62,7 +62,7 @@ initGamepadForPage();
 
 ```javascript
 // Initialize without built-in styles
-import { initGamepadNavigation } from './gamepadService.js';
+import { initGamepadNavigation } from './dist/gamepadService.js';
 
 const gamepad = initGamepadNavigation({
     useDataAttributes: true,    // Use data attributes
@@ -170,7 +170,7 @@ export function GamepadWrapper({
     
     useEffect(() => {
         const initGamepad = async () => {
-            const { initGamepadNavigation } = await import('./gamepadService.js');
+            const { initGamepadNavigation } = await import('./dist/gamepadService.js');
             
             gamepadRef.current = initGamepadNavigation({
                 useDataAttributes: true,
@@ -249,7 +249,7 @@ export function useGamepad(options = {}) {
     
     useEffect(() => {
         const initGamepad = async () => {
-            const { initGamepadNavigation } = await import('./gamepadService.js');
+            const { initGamepadNavigation } = await import('./dist/gamepadService.js');
             
             gamepadRef.current = initGamepadNavigation({
                 useDataAttributes: true,
@@ -318,7 +318,7 @@ export function GamepadProvider({ children }) {
     
     useEffect(() => {
         const initGamepad = async () => {
-            const { initGamepadNavigation } = await import('./gamepadService.js');
+            const { initGamepadNavigation } = await import('./dist/gamepadService.js');
             
             gamepadRef.current = initGamepadNavigation({
                 useDataAttributes: true,
@@ -389,7 +389,7 @@ export class GamepadNavigationService {
             this.gamepadService.destroy();
         }
         
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         
         this.gamepadService = initGamepadNavigation({
             useDataAttributes: true,
@@ -441,7 +441,7 @@ export class GamepadNavigationDirective implements OnInit, OnDestroy {
     constructor(private elementRef: ElementRef) {}
     
     async ngOnInit() {
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         
         this.gamepadService = initGamepadNavigation({
             containerSelector: this.elementRef.nativeElement,
@@ -509,7 +509,7 @@ export class GamepadNavigationComponent implements OnInit, OnDestroy {
     private gamepadService: any;
     
     async ngOnInit() {
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         
         this.gamepadService = initGamepadNavigation({
             containerSelector: '.gamepad-container',
@@ -562,7 +562,7 @@ export function useGamepad(options = {}) {
     const gamepadService = ref(null);
     
     onMounted(async () => {
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         
         gamepadService.value = initGamepadNavigation({
             useDataAttributes: true,
@@ -646,7 +646,7 @@ export default {
         };
     },
     async mounted() {
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         
         this.gamepadService = initGamepadNavigation({
             containerSelector: '.gamepad-wrapper',
@@ -688,7 +688,7 @@ function App() {
     
     useEffect(() => {
         // Refresh gamepad navigation on route changes
-        import('./gamepadService.js').then(({ gamepadUtils }) => {
+        import('./dist/gamepadService.js').then(({ gamepadUtils }) => {
             gamepadUtils.refresh();
         });
     }, [location.pathname]);
@@ -710,7 +710,7 @@ export class AppComponent {
     constructor(private router: Router) {
         this.router.events.subscribe(async (event) => {
             if (event instanceof NavigationEnd) {
-                const { gamepadUtils } = await import('./gamepadService.js');
+                const { gamepadUtils } = await import('./dist/gamepadService.js');
                 gamepadUtils.refresh();
             }
         });
@@ -728,7 +728,7 @@ export default {
         const route = useRoute();
         
         watch(() => route.path, async () => {
-            const { gamepadUtils } = await import('./gamepadService.js');
+            const { gamepadUtils } = await import('./dist/gamepadService.js');
             gamepadUtils.refresh();
         });
     }
@@ -745,7 +745,7 @@ describe('Gamepad Integration', () => {
     let gamepadService;
     
     beforeEach(async () => {
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         gamepadService = initGamepadNavigation({
             autoAddStyles: false
         });
@@ -802,7 +802,7 @@ describe('Gamepad Navigation', () => {
 async function initGamepadWhenNeeded() {
     // Only load if gamepad is detected
     if (navigator.getGamepads().some(gp => gp && gp.connected)) {
-        const { initGamepadForPage } = await import('./gamepadService.js');
+        const { initGamepadForPage } = await import('./dist/gamepadService.js');
         initGamepadForPage();
     }
 }
@@ -825,7 +825,7 @@ class GamepadManager {
             this.gamepadService.destroy();
         }
         
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         this.gamepadService = initGamepadNavigation();
     }
     

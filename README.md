@@ -86,7 +86,7 @@ ruby -run -e httpd . -p 8000
     </div>
 
     <script type="module">
-        import { initGamepadForPage } from './gamepadService.js';
+        import { initGamepadForPage } from './dist/gamepadService.js';
         
         // One-line setup - no style conflicts!
         initGamepadForPage();
@@ -98,7 +98,7 @@ ruby -run -e httpd . -p 8000
 ### Custom Integration
 
 ```javascript
-import { initGamepadNavigation } from './gamepadService.js';
+import { initGamepadNavigation } from './dist/gamepadService.js';
 
 // Initialize with custom options
 const gamepad = initGamepadNavigation({
@@ -124,7 +124,7 @@ gamepad.onSelect = (element, index) => {
 ### Dual Context Integration
 
 ```javascript
-import { initDualContextGamepad } from './gamepadService.js';
+import { initDualContextGamepad } from './dist/gamepadService.js';
 
 // Initialize with dual context support
 const gamepad = initDualContextGamepad({
@@ -168,7 +168,7 @@ function GamepadEnabledComponent({ items }) {
     
     useEffect(() => {
         // Initialize gamepad service
-        import('./gamepadService.js').then(({ initGamepadNavigation }) => {
+        import('./dist/gamepadService.js').then(({ initGamepadNavigation }) => {
             gamepadRef.current = initGamepadNavigation({
                 containerSelector: '.my-container',
                 navigationMode: 'spatial',
@@ -259,7 +259,7 @@ export class GamepadNavigationComponent implements OnInit, OnDestroy {
     
     async ngOnInit() {
         // Dynamic import to load gamepad service
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         
         this.gamepadService = initGamepadNavigation({
             containerSelector: '.navigation-container',
@@ -324,7 +324,7 @@ export default {
     },
     async mounted() {
         // Initialize gamepad service
-        const { initGamepadNavigation } = await import('./gamepadService.js');
+        const { initGamepadNavigation } = await import('./dist/gamepadService.js');
         
         this.gamepadService = initGamepadNavigation({
             containerSelector: '.vue-gamepad-container',
@@ -439,7 +439,7 @@ const gamepad = initGamepadForPage({
 });
 
 // Or add them later
-import { gamepadUtils } from './gamepadService.js';
+import { gamepadUtils } from './dist/gamepadService.js';
 gamepadUtils.addStyles({
     primaryColor: '#007bff',
     focusWidth: '2px'
@@ -465,7 +465,7 @@ import {
     initGamepadNavigation,   // Custom setup
     gamepadService,          // Quick setup
     gamepadUtils             // Utility functions
-} from './gamepadService.js';
+} from './dist/gamepadService.js';
 
 // One-line initialization
 initGamepadForPage();
@@ -541,46 +541,7 @@ Visit `debug-test.html` for comprehensive debugging tools:
 ### Print CSS Examples
 
 ```javascript
-import { gamepadUtils } from './gamepadService.js';
+import { gamepadUtils } from './dist/gamepadService.js';
 gamepadUtils.printCSSExamples();
 // Prints ready-to-use CSS examples to console
 ```
-
-### Common Issues
-
-1. **Module loading errors**: Ensure you're using a local server
-2. **Navigation not working**: Check if elements are focusable
-3. **Style conflicts**: Use data attributes instead of CSS classes
-4. **SPA routing**: Refresh navigation after route changes
-
-## 🌟 Examples
-
-- **`index.html`** - Basic demo with navigation menu
-- **`example-menu.html`** - Menu navigation example
-- **`example-simple.html`** - Simple setup example
-- **`example-style-isolation.html`** - Style isolation demo
-- **`debug-test.html`** - Debug and testing tools
-
-## 📱 Browser Support
-
-- **Chrome**: ✅ Full support
-- **Firefox**: ✅ Full support
-- **Safari**: ✅ Full support
-- **Edge**: ✅ Full support
-- **Mobile**: ⚠️ Limited (gamepad support varies)
-
-## 🤝 Contributing
-
-Contributions welcome! Areas for improvement:
-- Additional controller support
-- Framework-specific optimizations
-- Accessibility enhancements
-- Performance optimizations
-
-## 📄 License
-
-MIT License - feel free to use in any project!
-
----
-
-**Perfect for:** Gaming UIs, TV interfaces, accessibility navigation, dashboard controls, kiosk applications, and any web app that needs gamepad support! 🎮✨

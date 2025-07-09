@@ -15,7 +15,7 @@ your-project/
 
 ```javascript
 // Option 1: Zero config (recommended)
-import { initGamepadForPage } from './gamepadService.js';
+import { initGamepadForPage } from './dist/gamepadService.js';
 initGamepadForPage();
 
 // Option 2: Custom config
@@ -44,7 +44,7 @@ import { useEffect } from 'react';
 
 function App() {
     useEffect(() => {
-        import('./gamepadService.js').then(({ initGamepadForPage }) => {
+        import('./dist/gamepadService.js').then(({ initGamepadForPage }) => {
             initGamepadForPage();
         });
     }, []);
@@ -57,7 +57,7 @@ function App() {
 ```typescript
 // app.component.ts
 async ngOnInit() {
-    const { initGamepadForPage } = await import('./gamepadService.js');
+    const { initGamepadForPage } = await import('./dist/gamepadService.js');
     initGamepadForPage();
 }
 ```
@@ -68,7 +68,7 @@ async ngOnInit() {
 import { onMounted } from 'vue';
 
 onMounted(async () => {
-    const { initGamepadForPage } = await import('./gamepadService.js');
+    const { initGamepadForPage } = await import('./dist/gamepadService.js');
     initGamepadForPage();
 });
 </script>
@@ -120,7 +120,7 @@ initGamepadForPage({ autoAddStyles: true });
 ```javascript
 // React Router
 useEffect(() => {
-    import('./gamepadService.js').then(({ gamepadUtils }) => {
+    import('./dist/gamepadService.js').then(({ gamepadUtils }) => {
         gamepadUtils.refresh();
     });
 }, [location]);
@@ -129,7 +129,7 @@ useEffect(() => {
 ### Dynamic Content
 ```javascript
 // After content changes
-import { gamepadUtils } from './gamepadService.js';
+import { gamepadUtils } from './dist/gamepadService.js';
 gamepadUtils.refresh();
 ```
 
@@ -155,7 +155,7 @@ gamepad.onSelect = (element, index) => {
 
 ### Debug Tools
 ```javascript
-import { gamepadUtils } from './gamepadService.js';
+import { gamepadUtils } from './dist/gamepadService.js';
 
 // Print CSS examples
 gamepadUtils.printCSSExamples();

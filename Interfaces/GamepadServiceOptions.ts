@@ -1,0 +1,24 @@
+// Opciones para GamepadService
+
+export interface GamepadServiceOptions {
+    debounceTime?: number;
+    deadzone?: number;
+    containerSelector?: string | null;
+    statusElementId?: string | null;
+    focusedClass?: string;
+    selectedClass?: string;
+    navigationMode?: 'grid' | 'spatial';
+    wrapNavigation?: boolean;
+    autoDetectElements?: boolean;
+    enableNavigation?: boolean;
+    enableBackButton?: boolean;
+    enableShoulderNavigation?: boolean;
+    navigationMenuSelector?: string;
+    autoCreateStatusElement?: boolean;
+    autoAddStyles?: boolean;
+    useDataAttributes?: boolean;
+    gamepadContext?: string;
+    enableDualContext?: boolean;
+    menuContextSelector?: string;
+    contentContextSelector?: string | null;
+} 
