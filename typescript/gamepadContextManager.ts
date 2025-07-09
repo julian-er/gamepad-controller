@@ -31,11 +31,11 @@ export class GamepadNavigationContext {
     this.id = id;
     this.options = {
       ...options,
-      focusedClass: "gamepad-focused",
-      selectedClass: "gamepad-selected",
-      useDataAttributes: true,
-      wrapNavigation: true,
-      autoDetectElements: true,
+      focusedClass: options.focusedClass ?? "gamepad-focused",
+      selectedClass: options.selectedClass ?? "gamepad-selected",
+      useDataAttributes: options.useDataAttributes ?? true,
+      wrapNavigation: options.wrapNavigation ?? true,
+      autoDetectElements: options.autoDetectElements ?? true,
     };
 
     // Context state
