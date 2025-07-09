@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamepad Service App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Gamepad Service App</h1>
+
+    <!-- Navigation Menu -->
+    <div id="navigation-menu" tabindex="-1" class="nav-menu mb-8">
+        <a href="../example-menu-page/index.html" class="nav-item" data-title="Menu Navigation">
+            <div class="nav-icon">📱</div>
+            <div class="nav-text">Menu Navigation</div>
+        </a>
+        <a href="../example-page/index.html" class="nav-item" data-title="Simple Navigation">
+            <div class="nav-icon">⚡</div>
+            <div class="nav-text">Simple Navigation</div>
+        </a>
+        <a href="../debug-page/index.html" class="nav-item" data-title="Debug Test">
+            <div class="nav-icon">🔧</div>
+            <div class="nav-text">Debug Test</div>
+        </a>
+        <a href="../style-isolation-page/index.html" class="nav-item" data-title="Style Isolation">
+            <div class="nav-icon">🎨</div>
+            <div class="nav-text">Style Isolation</div>
+        </a>
+    </div>
+
+    <div class="instructions mb-4">
+        <p class="text-sm text-gray-600">
+            Use <strong>D-pad</strong> or <strong>analog stick</strong> to navigate • Press <strong>A/X/Cross</strong> to select • Press <strong>B/Circle</strong> to go back • Press <strong>R1/L1</strong> for page navigation
+        </p>
+    </div>
+
+    <div id="gamepad-status" class="mb-8">
+        Detectando gamepads...
+    </div>
+
+    <div id="item-container" class="container">
+        <div id="item-0" class="item bg-red-500">Item 1</div>
+        <div id="item-1" class="item bg-blue-500">Item 2</div>
+        <div id="item-2" class="item bg-green-500">Item 3</div>
+        <div id="item-3" class="item bg-yellow-500">Item 4</div>
+        <div id="item-4" class="item bg-purple-500">Item 5</div>
+        <div id="item-5" class="item bg-pink-500">Item 6</div>
+        <div id="item-6" class="item bg-indigo-500">Item 7</div>
+        <div id="item-7" class="item bg-teal-500">Item 8</div>
+        <div id="item-8" class="item bg-orange-500">Item 9</div>
+        <div id="item-9" class="item bg-cyan-500">Item 10</div>
+        <div id="item-10" class="item bg-lime-500">Item 11</div>
+        <div id="item-11" class="item bg-fuchsia-500">Item 12</div>
+    </div>
+
+    <!-- Dual context gamepad initialization -->
+    <script type="module" src="./homePage.ts"></script>
+</body>
+</html>
