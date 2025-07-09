@@ -35,9 +35,9 @@ const updateStatus = (id: string, message: string, type = '') => {
             updateStatus('gamepad-debug', `✅ Selected item ${index + 1}`, 'success');
             console.log('Select:', element, index);
         });
-        gamepadUtils.onControllerConnect((gamepad: any, controllerType: string) => {
-            updateStatus('gamepad-debug', `🎮 Controller connected: ${controllerType}`, 'success');
-            console.log('Controller connected:', controllerType);
+        gamepadUtils.onControllerConnect((gamepad: any) => {
+            updateStatus('gamepad-debug', `🎮 Controller connected`, 'success');
+            console.log('Controller connected:', gamepad);
         });
         gamepadUtils.onControllerDisconnect((gamepad: any) => {
             updateStatus('gamepad-debug', `🎮 Controller disconnected`, 'warning');

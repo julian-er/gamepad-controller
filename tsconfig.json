@@ -18,12 +18,12 @@
     "typescript/gamepadService.ts",
     "typescript/gamepadServiceModel.ts",
     "typescript/gamepadUtils.ts",
-    "pages/home-page/ts/homePage.ts",
-    "pages/style-isolation-page/ts/styleIsolationPage.ts",
-    "pages/example-page/ts/examplePage.ts",
-    "pages/debug-page/ts/debugPage.ts",
-    "pages/example-auto-init-page/ts/exampleAutoInitPage.ts",
-    "pages/example-menu-page/ts/exampleMenuPage.ts"
+    "typescript/pages/homePage.ts",
+    "typescript/pages/styleIsolationPage.ts",
+    "typescript/pages/examplePage.ts",
+    "typescript/pages/debugPage.ts",
+    "typescript/pages/exampleAutoInitPage.ts",
+    "typescript/pages/exampleMenuPage.ts"
   ],
   "exclude": ["node_modules"]
 } 
