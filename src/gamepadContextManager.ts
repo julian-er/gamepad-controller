@@ -1,4 +1,4 @@
-// gamepadContextManager.js
+// gamepadContextManager.ts
 // Context manager for handling multiple independent navigation contexts
 
 import {

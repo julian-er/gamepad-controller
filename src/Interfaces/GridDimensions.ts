@@ -1,4 +1,4 @@
-// Dimensiones de la grilla para navegación
+// Grid dimensions for navigation
 
 export interface GridDimensions {
     rows: number;

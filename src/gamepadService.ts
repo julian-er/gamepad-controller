@@ -1,4 +1,4 @@
-// gamepadService.js
+// gamepadService.ts
 // Convenience wrapper for easy gamepad navigation setup
 
 import { GamepadService } from './gamepadServiceModel.js';

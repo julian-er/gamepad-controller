@@ -1,4 +1,4 @@
-// gamepadUtils.js
+// gamepadUtils.ts
 // Utility functions for gamepad handling
 
 import { CONTROLLER_MAPPINGS } from './controllerMappings.js';
@@ -384,7 +384,7 @@ export const addDefaultStyles = addNavigationStyles;
 export default {
   addDefaultStyles,
   addNavigationStyles,
-  // ... puedes agregar aquí otras utilidades si es necesario
+  // ... you can add other utilities here if needed
 };
 
 // Remove gamepad styles completely

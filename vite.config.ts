@@ -12,7 +12,7 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      external: [], // puedes agregar dependencias externas aquí
+      external: [], // you can add external dependencies here
     },
   },
   plugins: [dts({
