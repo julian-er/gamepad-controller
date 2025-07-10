@@ -30,29 +30,6 @@ import type { GamepadNavigationContextOptions } from './Interfaces/GamepadNaviga
 import type { ControllerType } from './Interfaces/ControllerMappings.js';
 import type { GridDimensions } from './Interfaces/GridDimensions.js';
 
-export interface GamepadServiceOptions {
-    debounceTime?: number;
-    deadzone?: number;
-    containerSelector?: string | null;
-    statusElementId?: string | null;
-    focusedClass?: string;
-    selectedClass?: string;
-    navigationMode?: 'grid' | 'spatial';
-    wrapNavigation?: boolean;
-    autoDetectElements?: boolean;
-    enableNavigation?: boolean;
-    enableBackButton?: boolean;
-    enableShoulderNavigation?: boolean;
-    navigationMenuSelector?: string;
-    autoCreateStatusElement?: boolean;
-    autoAddStyles?: boolean;
-    useDataAttributes?: boolean;
-    gamepadContext?: string;
-    enableDualContext?: boolean;
-    menuContextSelector?: string;
-    contentContextSelector?: string | null;
-}
-
 export class GamepadService {
     options: GamepadServiceOptions;
     gamepads: { [key: string]: Gamepad };

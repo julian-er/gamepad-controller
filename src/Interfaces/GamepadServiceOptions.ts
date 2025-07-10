@@ -1,4 +1,4 @@
-// Opciones para GamepadService
+// Options for GamepadService
 
 export interface GamepadServiceOptions {
     debounceTime?: number;

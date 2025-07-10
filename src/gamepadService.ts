@@ -1,7 +1,8 @@
 // gamepadService.js
 // Convenience wrapper for easy gamepad navigation setup
 
-import { GamepadService, GamepadServiceOptions } from './gamepadServiceModel.js';
+import { GamepadService } from './gamepadServiceModel.js';
+import type { GamepadServiceOptions } from './Interfaces/GamepadServiceOptions.js';
 
 // Global instance
 let gamepadInstance: GamepadService | null = null;
