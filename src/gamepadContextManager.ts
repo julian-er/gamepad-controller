@@ -472,9 +472,29 @@ export class GamepadContextManager {
   }
 
   destroy(): void {
-    this.contexts.forEach((context) => context.deactivate());
+    // Deactivate all contexts first
+    this.contexts.forEach((context) => {
+      context.deactivate();
+      // Clear all callback references for each context
+      context.onFocus = null;
+      context.onSelect = null;
+      context.onActivate = null;
+      context.onDeactivate = null;
+      // Clear element references
+      context.elements = [];
+      context.lastFocusedElement = null;
+    });
+    
+    // Clear all contexts
     this.contexts.clear();
+    
+    // Clear active context references
     this.activeContext = null;
     this.lastActiveContext = null;
+    
+    // Clear context switch callback
+    this.onContextSwitch = null;
+    
+    console.log('GamepadContextManager destroyed and cleaned up');
   }
 }

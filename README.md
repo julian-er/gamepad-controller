@@ -9,6 +9,7 @@ A TypeScript library for advanced gamepad navigation and UI control in web appli
 - **Controller Support**: Xbox, PlayStation, Nintendo, and generic gamepads
 - **TypeScript Support**: Full type declarations and IntelliSense
 - **Modern Architecture**: Modular, tree-shakable codebase
+- **Memory Management**: Automatic cleanup and leak prevention
 - **Customizable Styling**: Optional CSS with theming support
 - **Auto-Detection**: Automatically finds navigable elements
 - **Accessibility**: ARIA support and keyboard fallbacks
@@ -94,6 +95,9 @@ Sets up dual context navigation for menu and content areas.
 #### `initGamepadNavigation(options?)`
 Low-level initialization function with full control.
 
+#### `cleanupGamepadService()`
+Manually cleanup the global gamepad service instance and free memory.
+
 ### Configuration Options
 
 ```ts
@@ -160,6 +164,25 @@ gamepad.onBackButton = () => {
 gamepad.onContextSwitch = (newContext: any, oldContext: any) => {
     console.log('Context switched');
 };
+```
+
+### Memory Management
+
+The library automatically handles memory cleanup, but you can also manage it manually:
+
+```ts
+import { cleanupGamepadService } from 'gamepad-controller';
+
+// Manual cleanup (useful in SPAs)
+cleanupGamepadService();
+
+// Or via service utility
+gamepadService.cleanup();
+
+// Service instance cleanup
+const gamepad = initGamepadForPage();
+// ... use gamepad
+gamepad.destroy(); // Clean up this specific instance
 ```
 
 ## 🎨 Styling
@@ -336,6 +359,50 @@ npm run dev
 4. **Test with Controller**: Verify navigation flow and behavior
 5. **Customize as Needed**: Adjust options and event handlers
 
+### Single-Page Applications (SPAs)
+
+For React, Vue, Angular, or other SPAs:
+
+```ts
+// React example
+import { useEffect, useRef } from 'react';
+import { initGamepadForPage } from 'gamepad-controller';
+
+function GamepadComponent() {
+    const gamepadRef = useRef(null);
+    
+    useEffect(() => {
+        gamepadRef.current = initGamepadForPage({
+            focusedClass: 'focused',
+            enableBackButton: true
+        });
+        
+        // Cleanup on unmount
+        return () => {
+            if (gamepadRef.current) {
+                gamepadRef.current.destroy();
+            }
+        };
+    }, []);
+    
+    return <div>Your navigable content</div>;
+}
+```
+
+```ts
+// Vue example
+export default {
+    mounted() {
+        this.gamepad = initGamepadForPage();
+    },
+    beforeUnmount() {
+        if (this.gamepad) {
+            this.gamepad.destroy();
+        }
+    }
+};
+```
+
 ### Advanced Integration
 
 ```ts
@@ -362,6 +429,62 @@ gamepad.onFocus = (element) => {
 };
 ```
 
+## 🧠 Memory Management
+
+### Automatic Cleanup
+
+The library automatically cleans up resources when:
+- Page is unloaded (`beforeunload` event)
+- New gamepad service instances are created
+- `destroy()` method is called on service instances
+
+### Manual Cleanup
+
+For single-page applications or long-running apps:
+
+```ts
+import { cleanupGamepadService } from 'gamepad-controller';
+
+// Clean up before navigation
+function navigateToNewPage() {
+    cleanupGamepadService();
+    // Navigate to new page/route
+}
+
+// Clean up on component unmount (React/Vue/Angular)
+useEffect(() => {
+    const gamepad = initGamepadForPage();
+    
+    return () => {
+        gamepad.destroy(); // or cleanupGamepadService()
+    };
+}, []);
+```
+
+### Service Lifecycle
+
+```ts
+// Create service
+const gamepad = new GamepadService(options);
+gamepad.init();
+
+// Use service
+// ... navigation logic
+
+// Clean up when done
+gamepad.destroy();
+```
+
+### Memory Leak Prevention
+
+The library prevents common memory leaks by:
+- ✅ Canceling animation frames on cleanup
+- ✅ Removing all event listeners
+- ✅ Clearing callback references
+- ✅ Nullifying DOM element references
+- ✅ Canceling debounced operations
+- ✅ Destroying context managers
+
 ## 🔧 Troubleshooting
 
 ### Common Issues
@@ -381,6 +504,11 @@ gamepad.onFocus = (element) => {
 - Check if `autoAddStyles` is enabled
 - Verify CSS specificity and conflicts
 
+**Memory Issues**:
+- Call `cleanupGamepadService()` before page transitions
+- Use `destroy()` method on service instances when done
+- Verify cleanup in browser DevTools Memory tab
+
 ### Debug Mode
 
 ```ts
@@ -396,11 +524,56 @@ console.log('Navigable elements:', gamepad.getNavigableElements());
 gamepad.onGamepadUpdate = (state) => {
     console.log('Gamepad state:', state);
 };
+
+// Memory debugging
+console.log('Service info:', gamepad.getNavigationInfo());
 ```
 
 ## 📄 License
 
 MIT License - see LICENSE file for details.
+
+## ⚡ Performance & Best Practices
+
+### Optimal Performance
+
+```ts
+// ✅ Good - Reuse single instance
+const gamepad = initGamepadForPage();
+
+// ❌ Avoid - Creating multiple instances
+setInterval(() => {
+    initGamepadForPage(); // Memory leak!
+}, 1000);
+```
+
+### Best Practices
+
+1. **One Instance Per Page**: Use a single gamepad service instance
+2. **Clean Up on Navigation**: Call `cleanupGamepadService()` before route changes
+3. **Debounce Settings**: Adjust `debounceTime` for your use case (default: 150ms)
+4. **Container Scoping**: Use `containerSelector` to limit navigation scope
+5. **Memory Monitoring**: Use browser DevTools to monitor memory usage
+
+### Framework Integration
+
+```ts
+// Angular service
+@Injectable()
+export class GamepadService {
+    private gamepad: any;
+    
+    init() {
+        this.gamepad = initGamepadForPage();
+    }
+    
+    ngOnDestroy() {
+        if (this.gamepad) {
+            this.gamepad.destroy();
+        }
+    }
+}
+```
 
 ## 🤝 Contributing
 

@@ -10,9 +10,11 @@ let gamepadInstance: GamepadService | null = null;
 
 // Simple initialization function with navigation support
 export function initGamepadNavigation(options: GamepadServiceOptions = {}): GamepadService {
-    // Destroy existing instance if any
+    // Destroy existing instance if any to prevent memory leaks
     if (gamepadInstance) {
+        console.log('🧹 Cleaning up previous gamepad instance...');
         gamepadInstance.destroy();
+        gamepadInstance = null;
     }
 
     // Enhanced default options with navigation enabled
@@ -121,6 +123,15 @@ export function initGamepadForPage(options: GamepadServiceOptions = {}): Gamepad
     console.log('💡 Quick styling: gamepadService.addStyles() or gamepadService.printCSSExamples()');
     
     return instance;
+}
+
+// Global cleanup utility function
+export function cleanupGamepadService(): void {
+    if (gamepadInstance) {
+        console.log('🧹 Cleaning up global gamepad instance...');
+        gamepadInstance.destroy();
+        gamepadInstance = null;
+    }
 }
 
 // Dual context initialization - separate navigation for menu and content
@@ -368,6 +379,11 @@ export const gamepadUtils = {
         printCSSExamples();
     },
 
+    // Cleanup utility
+    cleanup: () => {
+        cleanupGamepadService();
+    },
+
     // Get navigation information
     getNavigationInfo: () => {
         if (!gamepadInstance) return null;
@@ -484,6 +500,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         console.log(`🎮 Auto-initialized gamepad with preset: ${preset}`);
     }
+});
+
+// Clean up on page unload to prevent memory leaks
+window.addEventListener('beforeunload', () => {
+    cleanupGamepadService();
 });
 
 // Export for global access

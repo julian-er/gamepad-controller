@@ -1,12 +1,15 @@
 // gamepadEventHandler.ts
 // Event handling and game loop for gamepad input
 
-import { CONTROLLER_MAPPINGS, getPrimaryActionButtonIndex, getDpadIndices } from '../controllerMappings.js';
+import { NavigationState, handleSelection, handleBackButton, handleShoulderNavigation, navigateGrid, navigateSpatial, updateStatus } from './gamepadNavigation.js';
 import { isValidGamepad, detectControllerType, applyDeadzone } from '../utils/controllerUtils.js';
-import { handleSelection, handleBackButton, handleShoulderNavigation, updateStatus, navigateGrid, navigateSpatial } from './gamepadNavigation.js';
-import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
+import { getPrimaryActionButtonIndex, getDpadIndices } from '../controllerMappings.js';
 import type { ControllerType } from '../Interfaces/ControllerMappings.js';
-import type { NavigationState } from './gamepadNavigation.js';
+
+// GamepadEvent interface for typed gamepad events
+export interface GamepadEvent extends Event {
+    gamepad: Gamepad;
+}
 
 export interface GamepadEventState {
     isRunning: boolean;
@@ -19,6 +22,8 @@ export interface GamepadEventState {
     lastR1State: boolean;
     lastL1State: boolean;
     lastShoulderTime: number;
+    // Add animation frame ID for proper cleanup
+    animationFrameId: number | null;
     onControllerConnect: ((gamepad: Gamepad) => void) | null;
     onControllerDisconnect: ((gamepad: Gamepad) => void) | null;
     onNavigationMenuOpen: ((button: string) => void) | null;
@@ -35,7 +40,7 @@ export function setupEventListeners(
     window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
 }
 
-// Remove event listeners
+// Remove event listeners and cancel animation frame
 export function removeEventListeners(
     handleGamepadConnected: (event: GamepadEvent) => void,
     handleGamepadDisconnected: (event: GamepadEvent) => void
@@ -96,13 +101,25 @@ export function handleNavigation(
     }
 }
 
-// Start the game loop
+// Start the game loop with proper animation frame management
 export function startGameLoop(state: GamepadEventState, gameLoop: () => void) {
+    // Stop any existing game loop first
+    stopGameLoop(state);
+    
     state.isRunning = true;
     gameLoop();
 }
 
-// Main game loop with enhanced navigation support
+// Stop the game loop and clean up animation frames
+export function stopGameLoop(state: GamepadEventState) {
+    state.isRunning = false;
+    if (state.animationFrameId !== null) {
+        cancelAnimationFrame(state.animationFrameId);
+        state.animationFrameId = null;
+    }
+}
+
+// Main game loop with enhanced navigation support and proper cleanup
 export function gameLoop(
     eventState: GamepadEventState, 
     navState: NavigationState,
@@ -110,7 +127,11 @@ export function gameLoop(
     updateFocusCallback?: () => void
 ): () => void {
     return function gameLoopImpl() {
-        if (!eventState.isRunning) return;
+        // Check if loop should continue running
+        if (!eventState.isRunning) {
+            eventState.animationFrameId = null;
+            return;
+        }
 
         const currentTimestamp = performance.now();
         const connectedGamepads = navigator.getGamepads();
@@ -226,6 +247,7 @@ export function gameLoop(
             }
         }
 
-        requestAnimationFrame(gameLoopImpl);
+        // Schedule next frame and store the ID for cleanup
+        eventState.animationFrameId = requestAnimationFrame(gameLoopImpl);
     };
 } 

@@ -1,17 +1,25 @@
 // navigationUtils.ts
 // Navigation-specific utility functions
 
-// Debounce function for input handling
-export function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T {
+// Debounce function for input handling with cleanup capability
+export function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T & { cancel: () => void } {
     let timeout: ReturnType<typeof setTimeout>;
-    return function executedFunction(this: any, ...args: any[]) {
+    
+    const debouncedFunction = function executedFunction(this: any, ...args: any[]) {
         const later = () => {
             clearTimeout(timeout);
             func.apply(this, args);
         };
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
-    } as T;
+    } as T & { cancel: () => void };
+    
+    // Add cancel method to clear pending timeouts
+    debouncedFunction.cancel = () => {
+        clearTimeout(timeout);
+    };
+    
+    return debouncedFunction;
 }
 
 // Throttle function for continuous input
