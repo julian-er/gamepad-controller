@@ -1,7 +1,10 @@
-# Ignorar archivos de salida de TypeScript
+# Ignore output of TypeScript
 /dist/
 
-# Ignorar configuración de VSCode
+# Documentation output
+/docs/
+
+# Ignore VSCode configuration
 .vscode/
 
 # Node modules
