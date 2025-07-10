@@ -205,6 +205,12 @@ export function initDualContextGamepad(options: GamepadServiceOptions = {}): Gam
 
     gamepadInstance.onBackButton = () => {
         console.log('🔙 Back button pressed');
+        // Default back button behavior
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            console.log('🔙 No history to go back to');
+        }
     };
 
     gamepadInstance.onContextSwitch = (newContext: any, oldContext: any) => {

@@ -61,7 +61,12 @@ export function findNearestInDirection(currentElement: Element, allElements: Ele
             candidates = candidates.filter((el: Element) => {
                 const rect = el.getBoundingClientRect();
                 const elY = rect.top + rect.height / 2;
-                return elY < currentY; // Element is above current
+                const verticalDistance = currentY - elY;
+                const isSignificantlyAbove = verticalDistance > 30; // Must be at least 30px above
+                if (!isSignificantlyAbove) {
+                    console.log(`   ❌ Filtered out: ${el.tagName} at Y=${elY.toFixed(0)} (distance=${verticalDistance.toFixed(0)}px, need >30px)`);
+                }
+                return isSignificantlyAbove; // Element must be significantly above current
             });
             // Sort by: closest vertically, then closest horizontally
             candidates.sort((a, b) => {
@@ -89,8 +94,19 @@ export function findNearestInDirection(currentElement: Element, allElements: Ele
             candidates = candidates.filter((el: Element) => {
                 const rect = el.getBoundingClientRect();
                 const elY = rect.top + rect.height / 2;
-                return elY > currentY; // Element is below current
+                const verticalDistance = elY - currentY;
+                const isSignificantlyBelow = verticalDistance > 30; // Must be at least 30px below
+                if (!isSignificantlyBelow) {
+                    console.log(`   ❌ Filtered out: ${el.tagName} at Y=${elY.toFixed(0)} (distance=${verticalDistance.toFixed(0)}px, need >30px)`);
+                }
+                return isSignificantlyBelow; // Element must be significantly below current
             });
+            candidates.forEach((el, i) => {
+                const rect = el.getBoundingClientRect();
+                const elY = rect.top + rect.height / 2;
+                console.log(`     ${i + 1}. ${el.tagName} at Y=${elY.toFixed(0)} - "${el.textContent?.slice(0, 30)}"`);
+            });
+            
             candidates.sort((a, b) => {
                 const rectA = a.getBoundingClientRect();
                 const rectB = b.getBoundingClientRect();
@@ -167,5 +183,10 @@ export function findNearestInDirection(currentElement: Element, allElements: Ele
     }
     
     // Return the best candidate (first after sorting)
-    return candidates.length > 0 ? candidates[0] : null;
+    const result = candidates.length > 0 ? candidates[0] : null;
+    if (result) {
+        const resultRect = result.getBoundingClientRect();
+    } else {
+    }
+    return result;
 } 

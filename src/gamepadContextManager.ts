@@ -221,35 +221,17 @@ export class GamepadNavigationContext {
       direction
     );
     
-    // If no element found, try fallback strategies
-    if (!nearestElement && this.options.wrapNavigation) {
-      // For horizontal navigation, try wrapping
-      if (direction === 'left' || direction === 'right') {
-        if (direction === 'left') {
-          // Go to last element in same row or last element overall
-          nearestElement = this.elements[this.elements.length - 1];
-        } else if (direction === 'right') {
-          // Go to first element in same row or first element overall
-          nearestElement = this.elements[0];
-        }
-      }
-      // For vertical navigation, try edge elements
-      else if (direction === 'up' || direction === 'down') {
-        if (direction === 'up') {
-          // Try elements at the top of the screen
-          nearestElement = this.elements.find(el => {
-            const rect = el.getBoundingClientRect();
-            return rect.top < currentElement.getBoundingClientRect().top;
-          }) || this.elements[this.elements.length - 1];
-        } else if (direction === 'down') {
-          // Try elements at the bottom of the screen
-          nearestElement = this.elements.find(el => {
-            const rect = el.getBoundingClientRect();
-            return rect.top > currentElement.getBoundingClientRect().top;
-          }) || this.elements[0];
-        }
-      }
-    }
+         // If no element found, try simple wrapping (only for horizontal)
+     if (!nearestElement && this.options.wrapNavigation) {
+       if (direction === 'left') {
+         // Go to last element
+         nearestElement = this.elements[this.elements.length - 1];
+       } else if (direction === 'right') {
+         // Go to first element
+         nearestElement = this.elements[0];
+       }
+       // Don't wrap for vertical navigation - it's confusing
+     }
     
     if (nearestElement) {
       const newIndex = this.elements.indexOf(nearestElement);
