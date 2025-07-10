@@ -2,6 +2,7 @@
 // Convenience wrapper for easy gamepad navigation setup
 
 import { GamepadService } from './core/GamepadService.js';
+import { addNavigationStyles, removeNavigationStyles, printCSSExamples } from './utils/cssUtils.js';
 import type { GamepadServiceOptions } from './Interfaces/GamepadServiceOptions.js';
 
 // Global instance
@@ -353,24 +354,18 @@ export const gamepadUtils = {
     // CSS Styling (imported from utils)
     addStyles: (options: GamepadServiceOptions = {}) => {
         if (gamepadInstance) {
-            import('./utils/cssUtils.js').then(({ addNavigationStyles }) => {
-                addNavigationStyles(options);
-            });
+            addNavigationStyles(options);
         }
     },
     
     // Remove styles
     removeStyles: () => {
-        import('./utils/cssUtils.js').then(({ removeNavigationStyles }) => {
-            removeNavigationStyles();
-        });
+        removeNavigationStyles();
     },
     
     // Print CSS examples to console
     printCSSExamples: () => {
-        import('./utils/cssUtils.js').then(({ printCSSExamples }) => {
-            printCSSExamples();
-        });
+        printCSSExamples();
     },
 
     // Get navigation information
