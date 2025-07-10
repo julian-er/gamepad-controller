@@ -7,7 +7,7 @@ import {
   addGamepadDataAttributes,
   removeGamepadDataAttributes,
   setGamepadContext,
-} from "./gamepadUtils.js";
+} from "./utils/index.js";
 
 import type { GamepadNavigationContextOptions } from "./Interfaces/GamepadNavigationContextOptions.js";
 import type { GamepadContextManagerCallback } from "./Interfaces/GamepadContextManagerCallback.js";

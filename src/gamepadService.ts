@@ -1,7 +1,7 @@
 // gamepadService.ts
 // Convenience wrapper for easy gamepad navigation setup
 
-import { GamepadService } from './gamepadServiceModel.js';
+import { GamepadService } from './core/GamepadService.js';
 import type { GamepadServiceOptions } from './Interfaces/GamepadServiceOptions.js';
 
 // Global instance
@@ -117,7 +117,7 @@ export function initGamepadForPage(options: GamepadServiceOptions = {}): Gamepad
     console.log('✅ Gamepad navigation initialized with full functionality');
     console.log('📖 Controls: D-pad/Analog stick to navigate • A/X to select • B/Circle to go back • R1/L1 for page navigation');
     console.log('🎨 Note: No styles applied by default. Use data attributes or CSS classes to style navigation.');
-    console.log('💡 Quick styling: gamepadUtils.addNavigationStyles() or gamepadUtils.printCSSExamples()');
+    console.log('💡 Quick styling: gamepadService.addStyles() or gamepadService.printCSSExamples()');
     
     return instance;
 }
@@ -191,7 +191,7 @@ export function initDualContextGamepad(options: GamepadServiceOptions = {}): Gam
     console.log('✅ Dual context gamepad navigation initialized!');
     console.log('📖 Controls: Left stick to navigate content • R1/L1 to navigate menu • A/X to select • B/Circle to go back');
     console.log('🎨 Note: No styles applied by default. Use data attributes or CSS classes to style navigation.');
-    console.log('💡 Quick styling: gamepadUtils.addNavigationStyles() or gamepadUtils.printCSSExamples()');
+    console.log('💡 Quick styling: gamepadService.addStyles() or gamepadService.printCSSExamples()');
     
     return gamepadInstance;
 }
@@ -350,10 +350,10 @@ export const gamepadUtils = {
         }
     },
 
-    // CSS Styling (imported from gamepadUtils)
+    // CSS Styling (imported from utils)
     addStyles: (options: GamepadServiceOptions = {}) => {
         if (gamepadInstance) {
-            import('./gamepadUtils.js').then(({ addNavigationStyles }) => {
+            import('./utils/cssUtils.js').then(({ addNavigationStyles }) => {
                 addNavigationStyles(options);
             });
         }
@@ -361,14 +361,14 @@ export const gamepadUtils = {
     
     // Remove styles
     removeStyles: () => {
-        import('./gamepadUtils.js').then(({ removeNavigationStyles }) => {
+        import('./utils/cssUtils.js').then(({ removeNavigationStyles }) => {
             removeNavigationStyles();
         });
     },
     
     // Print CSS examples to console
     printCSSExamples: () => {
-        import('./gamepadUtils.js').then(({ printCSSExamples }) => {
+        import('./utils/cssUtils.js').then(({ printCSSExamples }) => {
             printCSSExamples();
         });
     },
