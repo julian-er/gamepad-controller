@@ -131,6 +131,7 @@ interface GamepadServiceOptions {
     autoCreateStatusElement?: boolean;   // Auto-create status display
     autoAddStyles?: boolean;            // Auto-add default styles
     useDataAttributes?: boolean;        // Use data-* attributes
+    useGamepadIndex?: boolean;          // Enable gamepad-index attribute ordering
 }
 ```
 
@@ -222,6 +223,35 @@ addNavigationStyles();
 </button>
 ```
 
+### Custom Navigation Order
+
+Use `gamepad-index` attributes to control navigation order (similar to `tabindex`):
+
+```html
+<!-- Enable gamepad-index in service options -->
+<script>
+const gamepad = initGamepadForPage({
+    useGamepadIndex: true
+});
+</script>
+
+<!-- HTML with custom navigation order -->
+<div class="menu">
+    <button gamepad-index="1">First</button>
+    <button gamepad-index="3">Third</button>
+    <button gamepad-index="2">Second</button>
+    <!-- Elements without gamepad-index appear after indexed ones -->
+    <button>Fourth (no index)</button>
+</div>
+```
+
+**Navigation Order Features:**
+- Elements with `gamepad-index` are navigated in numerical order
+- Elements without `gamepad-index` follow after indexed elements
+- Invalid index values are treated as unindexed
+- Works with both spatial and grid navigation modes
+- Supports negative values for prioritization
+
 ## 🎯 Navigation Controls
 
 | Controller | Navigate | Select | Back | Menu Navigation |
@@ -269,6 +299,30 @@ gamepad.onSelect = (element) => {
 };
 ```
 
+### Custom Navigation Order Example
+
+```ts
+import { gamepadService } from 'gamepad-controller';
+
+const gamepad = gamepadService('.form-container', {
+    useGamepadIndex: true,
+    navigationMode: 'spatial'
+});
+```
+
+```html
+<!-- Form with custom navigation order -->
+<form class="form-container">
+    <input gamepad-index="1" type="text" placeholder="First Name" />
+    <input gamepad-index="2" type="text" placeholder="Last Name" />
+    <input gamepad-index="3" type="email" placeholder="Email" />
+    <button gamepad-index="5" type="submit">Submit</button>
+    <button gamepad-index="4" type="button">Cancel</button>
+    <!-- This input will be navigated last (no gamepad-index) -->
+    <input type="text" placeholder="Optional Notes" />
+</form>
+```
+
 ## 🛠️ Development
 
 ### Project Structure
@@ -298,298 +352,3 @@ npm run build
 # Create package for distribution
 npm pack
 ```
-
-### Running Examples
-
-```sh
-# Go to examples directory
-cd examples
-
-# Install dependencies and local package
-npm install
-npm install ../gamepad-controller-1.0.0.tgz
-
-# Start development server
-npm run dev
-
-# Open browser to
-# http://localhost:5173/pages/home-page/index.html
-```
-
-### Available Example Pages
-
-- **Home Page**: Main navigation and feature overview
-- **Simple Example**: Basic grid navigation with cards
-- **Menu Example**: Dual context navigation demo
-- **Debug Page**: Controller input debugging and testing
-- **Style Isolation**: CSS styling examples
-
-## 🚀 Integration Guide
-
-### For New Projects
-
-1. **Install the Package**:
-   ```sh
-   npm install /path/to/gamepad-controller-1.0.0.tgz
-   ```
-
-2. **Basic Setup**:
-   ```ts
-   import { initGamepadForPage } from 'gamepad-controller';
-   
-   document.addEventListener('DOMContentLoaded', () => {
-       const gamepad = initGamepadForPage({
-           focusedClass: 'focused',
-           enableBackButton: true
-       });
-   });
-   ```
-
-3. **Add Navigation Styles**:
-   ```ts
-   import { addNavigationStyles } from 'gamepad-controller';
-   addNavigationStyles();
-   ```
-
-### For Existing Projects
-
-1. **Identify Navigation Areas**: Determine which elements should be navigable
-2. **Choose Navigation Mode**: Grid for structured layouts, spatial for flexible layouts
-3. **Add CSS Classes**: Style focused and selected states
-4. **Test with Controller**: Verify navigation flow and behavior
-5. **Customize as Needed**: Adjust options and event handlers
-
-### Single-Page Applications (SPAs)
-
-For React, Vue, Angular, or other SPAs:
-
-```ts
-// React example
-import { useEffect, useRef } from 'react';
-import { initGamepadForPage } from 'gamepad-controller';
-
-function GamepadComponent() {
-    const gamepadRef = useRef(null);
-    
-    useEffect(() => {
-        gamepadRef.current = initGamepadForPage({
-            focusedClass: 'focused',
-            enableBackButton: true
-        });
-        
-        // Cleanup on unmount
-        return () => {
-            if (gamepadRef.current) {
-                gamepadRef.current.destroy();
-            }
-        };
-    }, []);
-    
-    return <div>Your navigable content</div>;
-}
-```
-
-```ts
-// Vue example
-export default {
-    mounted() {
-        this.gamepad = initGamepadForPage();
-    },
-    beforeUnmount() {
-        if (this.gamepad) {
-            this.gamepad.destroy();
-        }
-    }
-};
-```
-
-### Advanced Integration
-
-```ts
-import { GamepadService } from 'gamepad-controller';
-
-// Custom service with full configuration
-const gamepad = new GamepadService({
-    containerSelector: '.app-container',
-    navigationMode: 'spatial',
-    enableDualContext: true,
-    menuContextSelector: '.sidebar',
-    contentContextSelector: '.main-content',
-    debounceTime: 100,
-    deadzone: 0.15
-});
-
-// Initialize with custom setup
-gamepad.init();
-
-// Add custom event handlers
-gamepad.onFocus = (element) => {
-    // Custom focus logic
-    element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-};
-```
-
-## 🧠 Memory Management
-
-### Automatic Cleanup
-
-The library automatically cleans up resources when:
-- Page is unloaded (`beforeunload` event)
-- New gamepad service instances are created
-- `destroy()` method is called on service instances
-
-### Manual Cleanup
-
-For single-page applications or long-running apps:
-
-```ts
-import { cleanupGamepadService } from 'gamepad-controller';
-
-// Clean up before navigation
-function navigateToNewPage() {
-    cleanupGamepadService();
-    // Navigate to new page/route
-}
-
-// Clean up on component unmount (React/Vue/Angular)
-useEffect(() => {
-    const gamepad = initGamepadForPage();
-    
-    return () => {
-        gamepad.destroy(); // or cleanupGamepadService()
-    };
-}, []);
-```
-
-### Service Lifecycle
-
-```ts
-// Create service
-const gamepad = new GamepadService(options);
-gamepad.init();
-
-// Use service
-// ... navigation logic
-
-// Clean up when done
-gamepad.destroy();
-```
-
-### Memory Leak Prevention
-
-The library prevents common memory leaks by:
-- ✅ Canceling animation frames on cleanup
-- ✅ Removing all event listeners
-- ✅ Clearing callback references
-- ✅ Nullifying DOM element references
-- ✅ Canceling debounced operations
-- ✅ Destroying context managers
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-**Controller Not Detected**:
-- Ensure controller is connected before page load
-- Check browser gamepad support
-- Try different USB ports or wireless re-pairing
-
-**Navigation Not Working**:
-- Verify elements have proper CSS selectors
-- Check if `autoDetectElements` is enabled
-- Ensure container selector is correct
-
-**Styling Issues**:
-- Confirm CSS classes are defined
-- Check if `autoAddStyles` is enabled
-- Verify CSS specificity and conflicts
-
-**Memory Issues**:
-- Call `cleanupGamepadService()` before page transitions
-- Use `destroy()` method on service instances when done
-- Verify cleanup in browser DevTools Memory tab
-
-### Debug Mode
-
-```ts
-const gamepad = initGamepadForPage({
-    // Enable detailed logging
-    debugMode: true
-});
-
-// Check detected elements
-console.log('Navigable elements:', gamepad.getNavigableElements());
-
-// Monitor gamepad state
-gamepad.onGamepadUpdate = (state) => {
-    console.log('Gamepad state:', state);
-};
-
-// Memory debugging
-console.log('Service info:', gamepad.getNavigationInfo());
-```
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
-
-## ⚡ Performance & Best Practices
-
-### Optimal Performance
-
-```ts
-// ✅ Good - Reuse single instance
-const gamepad = initGamepadForPage();
-
-// ❌ Avoid - Creating multiple instances
-setInterval(() => {
-    initGamepadForPage(); // Memory leak!
-}, 1000);
-```
-
-### Best Practices
-
-1. **One Instance Per Page**: Use a single gamepad service instance
-2. **Clean Up on Navigation**: Call `cleanupGamepadService()` before route changes
-3. **Debounce Settings**: Adjust `debounceTime` for your use case (default: 150ms)
-4. **Container Scoping**: Use `containerSelector` to limit navigation scope
-5. **Memory Monitoring**: Use browser DevTools to monitor memory usage
-
-### Framework Integration
-
-```ts
-// Angular service
-@Injectable()
-export class GamepadService {
-    private gamepad: any;
-    
-    init() {
-        this.gamepad = initGamepadForPage();
-    }
-    
-    ngOnDestroy() {
-        if (this.gamepad) {
-            this.gamepad.destroy();
-        }
-    }
-}
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## 📚 Additional Resources
-
-- [Examples Directory](./examples/) - Live examples and demos
-- [API Documentation](./docs/) - Detailed API reference
-- [Migration Guide](./MIGRATION.md) - Upgrading between versions
-- [Changelog](./CHANGELOG.md) - Version history and changes
-
----
-
-**Note**: This is a library for integration into your own projects, not a standalone application. The examples directory provides reference implementations and testing environments.

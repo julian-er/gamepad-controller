@@ -1,4 +1,4 @@
-// Opciones para GamepadNavigationContext
+// Options for GamepadNavigationContext
 
 export interface GamepadNavigationContextOptions {
     navigationMode: 'spatial' | 'horizontal';
@@ -6,6 +6,7 @@ export interface GamepadNavigationContextOptions {
     focusedClass?: string;
     selectedClass?: string;
     useDataAttributes?: boolean;
+    useGamepadIndex?: boolean; // Enable gamepad-index attribute for custom navigation order
     wrapNavigation?: boolean;
     autoDetectElements?: boolean;
 } 

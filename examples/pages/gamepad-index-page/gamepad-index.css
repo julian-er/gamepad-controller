@@ -1,0 +1,420 @@
+/* Gamepad-Index Demo Page Styles */
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #f39c12;
+    --success-color: #27ae60;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --background-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-color: #333;
+    --border-color: #e1e8ed;
+    --hover-color: #3a7bd5;
+    --focus-color: #2c5aa0;
+    --demo-border: #4a90e2;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+}
+
+.instructions {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.instructions h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+.instructions code {
+    background: #f1f3f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+/* Demo sections */
+.demo-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 2px solid var(--demo-border);
+}
+
+.demo-section h3 {
+    color: var(--demo-border);
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+}
+
+.demo-section p {
+    margin-bottom: 1.5rem;
+    color: #666;
+}
+
+/* Button groups */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
+.button-group button {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--primary-color);
+    background: white;
+    color: var(--primary-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.button-group button:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.button-group button:focus,
+.button-group button.gamepad-focused {
+    background: var(--focus-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+}
+
+/* Form demo styles */
+.form-demo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.form-demo input,
+.form-demo textarea {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-demo textarea {
+    grid-column: 1 / -1;
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-demo input:focus,
+.form-demo textarea:focus,
+.form-demo input.gamepad-focused,
+.form-demo textarea.gamepad-focused {
+    outline: none;
+    border-color: var(--focus-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+.button-row {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.button-row button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.button-row button[type="submit"] {
+    background: var(--success-color);
+    color: white;
+}
+
+.button-row button[type="button"] {
+    background: var(--border-color);
+    color: var(--text-color);
+}
+
+.button-row button:hover {
+    transform: translateY(-1px);
+}
+
+.button-row button[type="submit"]:hover {
+    background: #219a52;
+}
+
+.button-row button[type="button"]:hover {
+    background: #d1d1d1;
+}
+
+.button-row button:focus,
+.button-row button.gamepad-focused {
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+}
+
+/* Mixed content styles */
+.mixed-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: var(--hover-color);
+}
+
+.card:focus,
+.card.gamepad-focused {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    border-color: var(--focus-color);
+    background: #f0f7ff;
+}
+
+.card h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.card p {
+    margin-bottom: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Priority demo styles */
+.priority-demo {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+    align-items: center;
+}
+
+.priority-demo button {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--primary-color);
+    background: white;
+    color: var(--primary-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: bold;
+}
+
+.priority-demo button.emergency {
+    border-color: var(--warning-color);
+    color: var(--warning-color);
+    background: #fff8e1;
+}
+
+.priority-demo button.critical {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+    background: #ffebee;
+}
+
+.priority-demo button:hover {
+    transform: translateY(-1px);
+}
+
+.priority-demo button.emergency:hover {
+    background: var(--warning-color);
+    color: white;
+}
+
+.priority-demo button.critical:hover {
+    background: var(--danger-color);
+    color: white;
+}
+
+.priority-demo button:focus,
+.priority-demo button.gamepad-focused {
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+}
+
+/* Control buttons */
+.controls {
+    background: #f8f9fa !important;
+    border-color: #6c757d !important;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.control-buttons button {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #6c757d;
+    background: white;
+    color: #6c757d;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: bold;
+}
+
+.control-buttons button:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.control-buttons button:focus,
+.control-buttons button.gamepad-focused {
+    background: #5a6268;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.3);
+}
+
+/* Highlight section */
+.highlight {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+.highlight ul {
+    margin: 1rem 0 0 0;
+    padding-left: 1.5rem;
+}
+
+.highlight li {
+    margin-bottom: 0.5rem;
+}
+
+.highlight code {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Gamepad-specific focus styles */
+.gamepad-focused {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(74, 144, 226, 0.6);
+    }
+    100% {
+        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    }
+}
+
+/* Navigation order indicators */
+.nav-order-indicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--danger-color);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .form-demo {
+        grid-template-columns: 1fr;
+    }
+    
+    .mixed-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .button-group,
+    .priority-demo,
+    .control-buttons {
+        flex-direction: column;
+    }
+    
+    .button-row {
+        justify-content: stretch;
+    }
+    
+    .button-row button {
+        flex: 1;
+    }
+} 

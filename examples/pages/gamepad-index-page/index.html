@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Gamepad-Index Navigation Example</title>
+    <link rel="stylesheet" href="gamepad-index.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Gamepad-Index Navigation Demo</h1>
+        
+        <div class="instructions">
+            <h2>📋 Custom Navigation Order</h2>
+            <p>This page demonstrates the <code>gamepad-index</code> attribute for controlling navigation order!</p>
+            <p>Elements are navigated based on their <code>gamepad-index</code> value, similar to HTML's <code>tabindex</code>.</p>
+        </div>
+
+        <!-- Basic gamepad-index demo -->
+        <section class="demo-section">
+            <h3>Basic Navigation Order</h3>
+            <p>These buttons show custom navigation order using <code>gamepad-index</code>:</p>
+            <div class="button-group">
+                <button gamepad-index="3" onclick="showMessage('Third Button')">Third (index=3)</button>
+                <button gamepad-index="1" onclick="showMessage('First Button')">First (index=1)</button>
+                <button gamepad-index="4" onclick="showMessage('Fourth Button')">Fourth (index=4)</button>
+                <button gamepad-index="2" onclick="showMessage('Second Button')">Second (index=2)</button>
+                <button onclick="showMessage('Fifth Button (no index)')">Fifth (no index)</button>
+            </div>
+        </section>
+
+        <!-- Form example -->
+        <section class="demo-section">
+            <h3>Form Navigation Order</h3>
+            <p>Form fields with custom navigation order for better UX:</p>
+            <form class="form-demo">
+                <input gamepad-index="1" type="text" placeholder="First Name (index=1)" />
+                <input gamepad-index="2" type="text" placeholder="Last Name (index=2)" />
+                <input gamepad-index="3" type="email" placeholder="Email (index=3)" />
+                <textarea gamepad-index="6" placeholder="Comments (index=6)"></textarea>
+                <input gamepad-index="4" type="tel" placeholder="Phone (index=4)" />
+                <input gamepad-index="5" type="text" placeholder="Company (index=5)" />
+                <div class="button-row">
+                    <button gamepad-index="8" type="submit">Submit (index=8)</button>
+                    <button gamepad-index="7" type="button">Cancel (index=7)</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Mixed content example -->
+        <section class="demo-section">
+            <h3>Mixed Content Navigation</h3>
+            <p>Cards and buttons with strategic navigation order:</p>
+            <div class="mixed-content">
+                <div class="card" gamepad-index="2" onclick="showMessage('Important Card')">
+                    <h4>🔥 Priority Card (index=2)</h4>
+                    <p>This card has high priority in navigation order.</p>
+                </div>
+                <div class="card" onclick="showMessage('Regular Card 1')">
+                    <h4>📄 Regular Card (no index)</h4>
+                    <p>This card appears after indexed elements.</p>
+                </div>
+                <div class="card" gamepad-index="1" onclick="showMessage('First Card')">
+                    <h4>⭐ First Card (index=1)</h4>
+                    <p>This card is navigated first.</p>
+                </div>
+                <div class="card" onclick="showMessage('Regular Card 2')">
+                    <h4>📄 Another Regular Card (no index)</h4>
+                    <p>This card also appears after indexed elements.</p>
+                </div>
+                <div class="card" gamepad-index="3" onclick="showMessage('Third Card')">
+                    <h4>🎯 Final Indexed Card (index=3)</h4>
+                    <p>This card is navigated third.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Negative indices example -->
+        <section class="demo-section">
+            <h3>Negative Indices (High Priority)</h3>
+            <p>Using negative values for highest priority elements:</p>
+            <div class="priority-demo">
+                <button gamepad-index="-1" onclick="showMessage('Emergency Button')" class="emergency">🚨 Emergency (index=-1)</button>
+                <button gamepad-index="1" onclick="showMessage('Normal Button')">Normal (index=1)</button>
+                <button onclick="showMessage('No Index Button')">No Index</button>
+                <button gamepad-index="0" onclick="showMessage('Zero Button')">Zero (index=0)</button>
+                <button gamepad-index="-2" onclick="showMessage('Critical Button')" class="critical">🔴 Critical (index=-2)</button>
+            </div>
+        </section>
+
+        <!-- Test controls -->
+        <section class="demo-section controls">
+            <h3>🎮 Test Controls</h3>
+            <div class="control-buttons">
+                <button onclick="toggleGamepadIndex()" id="toggle-btn">🔄 Toggle Gamepad-Index (Currently: ON)</button>
+                <button onclick="refreshNavigation()">🔄 Refresh Navigation</button>
+                <button onclick="showNavigationOrder()">📋 Show Navigation Order</button>
+            </div>
+        </section>
+
+        <div class="highlight">
+            <strong>💡 Navigation Tips:</strong>
+            <ul>
+                <li>Elements with <code>gamepad-index</code> are navigated first, in numerical order</li>
+                <li>Elements without <code>gamepad-index</code> follow after indexed elements</li>
+                <li>Negative indices have highest priority</li>
+                <li>Invalid indices are treated as unindexed</li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="module" src="gamepadIndexPage.ts"></script>
+    
+    <script>
+        function showMessage(message) {
+            alert(`You selected: ${message}`);
+        }
+    </script>
+</body>
+</html> 

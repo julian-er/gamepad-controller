@@ -164,6 +164,7 @@ export class GamepadService {
             focusedClass: this.options.focusedClass,
             selectedClass: this.options.selectedClass,
             useDataAttributes: this.options.useDataAttributes,
+            useGamepadIndex: this.options.useGamepadIndex,
             wrapNavigation: this.options.wrapNavigation,
             autoDetectElements: true
         });
@@ -175,6 +176,7 @@ export class GamepadService {
             focusedClass: this.options.focusedClass,
             selectedClass: this.options.selectedClass,
             useDataAttributes: this.options.useDataAttributes,
+            useGamepadIndex: this.options.useGamepadIndex,
             wrapNavigation: this.options.wrapNavigation,
             autoDetectElements: true
         });
@@ -257,7 +259,10 @@ export class GamepadService {
 
     // Detect elements for navigation
     detectElements() {
-        this.navState.elements = getFocusableElementsInViewport(this.options.containerSelector);
+        this.navState.elements = getFocusableElementsInViewport(
+            this.options.containerSelector,
+            this.options.useGamepadIndex ?? false
+        );
         
         // Filter out disabled elements
         this.navState.elements = this.navState.elements.filter(el => 

@@ -17,6 +17,7 @@ export interface GamepadServiceOptions {
     autoCreateStatusElement?: boolean;
     autoAddStyles?: boolean;
     useDataAttributes?: boolean;
+    useGamepadIndex?: boolean; // Enable gamepad-index attribute for custom navigation order
     gamepadContext?: string;
     enableDualContext?: boolean;
     menuContextSelector?: string;

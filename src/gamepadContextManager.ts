@@ -81,7 +81,7 @@ export class GamepadNavigationContext {
           (el instanceof HTMLElement ? !el.hasAttribute("disabled") : false)
       );
     } else {
-      this.elements = getFocusableElementsInViewport(null);
+      this.elements = getFocusableElementsInViewport(null, this.options.useGamepadIndex ?? false);
     }
 
     // Ensure focused index is within bounds

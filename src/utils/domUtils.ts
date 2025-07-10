@@ -17,8 +17,11 @@ export function isElementInViewport(element: Element, rootMargin: number = 0): b
     );
 }
 
-// Get all focusable elements in the viewport
-export function getFocusableElementsInViewport(containerSelector: string | null = null): Element[] {
+// Get all focusable elements in the viewport with optional gamepad-index ordering
+export function getFocusableElementsInViewport(
+    containerSelector: string | null = null, 
+    useGamepadIndex: boolean = false
+): Element[] {
     const container = containerSelector ? document.querySelector(containerSelector) : document.body;
     
     if (!container) return [];
@@ -37,9 +40,14 @@ export function getFocusableElementsInViewport(containerSelector: string | null 
         '.item'
     ];
 
+    // Add gamepad-index selector if enabled
+    if (useGamepadIndex) {
+        focusableSelectors.push('[gamepad-index]');
+    }
+
     const elements = container.querySelectorAll(focusableSelectors.join(', '));
     
-    return Array.from(elements).filter(element => {
+    let filteredElements = Array.from(elements).filter(element => {
         // Check if element is visible and in viewport
         const style = window.getComputedStyle(element);
         const isVisible = style.display !== 'none' && 
@@ -48,6 +56,44 @@ export function getFocusableElementsInViewport(containerSelector: string | null 
         
         return isVisible && isElementInViewport(element);
     });
+
+    // Sort by gamepad-index if enabled and elements have the attribute
+    if (useGamepadIndex) {
+        filteredElements = sortElementsByGamepadIndex(filteredElements);
+    }
+
+    return filteredElements;
+}
+
+// Sort elements by their gamepad-index attribute value
+function sortElementsByGamepadIndex(elements: Element[]): Element[] {
+    // Separate elements with and without gamepad-index
+    const withIndex: { element: Element; index: number }[] = [];
+    const withoutIndex: Element[] = [];
+
+    elements.forEach(element => {
+        const gamepadIndex = element.getAttribute('gamepad-index');
+        if (gamepadIndex !== null) {
+            const indexValue = parseInt(gamepadIndex, 10);
+            if (!isNaN(indexValue)) {
+                withIndex.push({ element, index: indexValue });
+            } else {
+                // Invalid gamepad-index, treat as without index
+                withoutIndex.push(element);
+            }
+        } else {
+            withoutIndex.push(element);
+        }
+    });
+
+    // Sort elements with gamepad-index by their index value
+    withIndex.sort((a, b) => a.index - b.index);
+
+    // Return sorted elements with index first, then elements without index in original order
+    return [
+        ...withIndex.map(item => item.element),
+        ...withoutIndex
+    ];
 }
 
 // Calculate grid dimensions for elements

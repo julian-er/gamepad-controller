@@ -53,12 +53,21 @@ export function gamepadService(containerSelector: string | null | undefined = nu
         navigationMode: 'spatial', // Changed from 'grid' to 'spatial' for better nav menu support
         wrapNavigation: true,
         autoDetectElements: true,
-        // Enhanced navigation options
+        // Navigation-specific options
         enableNavigation: true,
         enableBackButton: true,
         enableShoulderNavigation: true,
+        navigationMenuSelector: '.nav-menu, nav, .navigation',
         autoCreateStatusElement: true,
-        autoAddStyles: false, // Styles are now completely opt-in
+        autoAddStyles: false, // Changed default to false - styles are now opt-in
+        // Style isolation options
+        useDataAttributes: true, // Use data attributes instead of classes for better isolation
+        useGamepadIndex: false, // Disable gamepad-index by default for backwards compatibility
+        gamepadContext: 'default', // Set context for styling hooks
+        // Dual context options
+        enableDualContext: false, // Enable dual context mode
+        menuContextSelector: '.nav-menu, nav, .navigation',
+        contentContextSelector: null,
         debounceTime: 150,
         deadzone: 0.1,
         ...options
@@ -80,6 +89,7 @@ export function initGamepadForPage(options: GamepadServiceOptions = {}): Gamepad
         enableShoulderNavigation: true,
         autoCreateStatusElement: true,
         autoAddStyles: false, // Styles are now completely opt-in
+        useGamepadIndex: false, // Disable gamepad-index by default for backwards compatibility
         ...options
     });
 
@@ -152,6 +162,7 @@ export function initDualContextGamepad(options: GamepadServiceOptions = {}): Gam
         focusedClass: 'gamepad-focused',
         selectedClass: 'gamepad-selected',
         useDataAttributes: false,
+        useGamepadIndex: false, // Disable gamepad-index by default for backwards compatibility
         statusElementId: 'gamepad-status',
         autoCreateStatusElement: true,
         autoAddStyles: false,
