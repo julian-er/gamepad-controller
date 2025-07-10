@@ -19,7 +19,7 @@
     "USAGE_GUIDE.md"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "npm i && vite build",
     "build:types": "tsc --emitDeclarationOnly",
     "serve": "npx http-server . -c-1 -o pages/home-page",
     "start": "npm i && npm run build && npm run serve"
