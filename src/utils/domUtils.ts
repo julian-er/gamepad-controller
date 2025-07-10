@@ -17,14 +17,17 @@ export function isElementInViewport(element: Element, rootMargin: number = 0): b
     );
 }
 
-// Get all focusable elements in the viewport with optional gamepad-index ordering
+// Get all focusable elements in the viewport with optional gamepad-index filtering
 export function getFocusableElementsInViewport(
     containerSelector: string | null = null, 
     useGamepadIndex: boolean = false
 ): Element[] {
     const container = containerSelector ? document.querySelector(containerSelector) : document.body;
     
-    if (!container) return [];
+    if (!container) {
+        console.warn('getFocusableElementsInViewport: Container not found', containerSelector);
+        return [];
+    }
 
     // Common focusable selectors
     const focusableSelectors = [
@@ -37,63 +40,43 @@ export function getFocusableElementsInViewport(
         '.gamepad-focusable',
         '.nav-item',
         '.menu-item',
-        '.item'
+        '.item',
+        '[onclick]' // Add elements with onclick
     ];
 
-    // Add gamepad-index selector if enabled
-    if (useGamepadIndex) {
-        focusableSelectors.push('[gamepad-index]');
-    }
-
-    const elements = container.querySelectorAll(focusableSelectors.join(', '));
+    let elements: NodeListOf<Element>;
     
-    let filteredElements = Array.from(elements).filter(element => {
+    // If gamepad-index is enabled, only look for elements with gamepad-index="true"
+    if (useGamepadIndex) {
+        console.log('🎯 Gamepad-Index filtering ENABLED - Looking for elements with gamepad-index="true"');
+        elements = container.querySelectorAll('[gamepad-index="true"]');
+        console.log(`🔍 Found ${elements.length} elements with gamepad-index="true"`);
+    } else {
+        console.log('❌ Gamepad-Index filtering DISABLED - Using all focusable elements');
+        elements = container.querySelectorAll(focusableSelectors.join(', '));
+        console.log(`🔍 Found ${elements.length} normally focusable elements`);
+    }
+    
+    const filteredElements = Array.from(elements).filter(element => {
         // Check if element is visible and in viewport
         const style = window.getComputedStyle(element);
         const isVisible = style.display !== 'none' && 
                          style.visibility !== 'hidden' && 
                          style.opacity !== '0';
         
-        return isVisible && isElementInViewport(element);
-    });
-
-    // Sort by gamepad-index if enabled and elements have the attribute
-    if (useGamepadIndex) {
-        filteredElements = sortElementsByGamepadIndex(filteredElements);
-    }
-
-    return filteredElements;
-}
-
-// Sort elements by their gamepad-index attribute value
-function sortElementsByGamepadIndex(elements: Element[]): Element[] {
-    // Separate elements with and without gamepad-index
-    const withIndex: { element: Element; index: number }[] = [];
-    const withoutIndex: Element[] = [];
-
-    elements.forEach(element => {
-        const gamepadIndex = element.getAttribute('gamepad-index');
-        if (gamepadIndex !== null) {
-            const indexValue = parseInt(gamepadIndex, 10);
-            if (!isNaN(indexValue)) {
-                withIndex.push({ element, index: indexValue });
-            } else {
-                // Invalid gamepad-index, treat as without index
-                withoutIndex.push(element);
-            }
-        } else {
-            withoutIndex.push(element);
+        const inViewport = isElementInViewport(element);
+        const shouldInclude = isVisible && inViewport;
+        
+        if (!shouldInclude) {
+            console.log(`❌ Filtered out element: ${element.tagName} (visible: ${isVisible}, inViewport: ${inViewport})`);
         }
+        
+        return shouldInclude;
     });
 
-    // Sort elements with gamepad-index by their index value
-    withIndex.sort((a, b) => a.index - b.index);
-
-    // Return sorted elements with index first, then elements without index in original order
-    return [
-        ...withIndex.map(item => item.element),
-        ...withoutIndex
-    ];
+    console.log(`✅ Final result: ${filteredElements.length} navigable elements`);
+    
+    return filteredElements;
 }
 
 // Calculate grid dimensions for elements

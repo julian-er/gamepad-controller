@@ -57,32 +57,17 @@ export class GamepadNavigationContext {
   detectElements(): void {
     if (!this.options.autoDetectElements) return;
 
-    if (this.options.containerSelector) {
-      const container = document.querySelector(this.options.containerSelector);
-      if (!container) {
-        console.warn(
-          `Container not found for context ${this.id}: ${this.options.containerSelector}`
-        );
-        this.elements = [];
-        return;
-      }
-
-      // Get elements within the specific container
-      const elements = container.querySelectorAll(
-        "a, button, input, select, textarea, [tabindex], .nav-item, .item"
-      );
-      this.elements = Array.from(elements).filter(
-        (el) =>
-          (el instanceof HTMLElement ? el.offsetParent !== null : false) && // visible
-          (!(
-            el instanceof HTMLInputElement || el instanceof HTMLButtonElement
-          ) ||
-            !el.disabled) &&
-          (el instanceof HTMLElement ? !el.hasAttribute("disabled") : false)
-      );
-    } else {
-      this.elements = getFocusableElementsInViewport(null, this.options.useGamepadIndex ?? false);
-    }
+    // Always use getFocusableElementsInViewport for consistent gamepad-index filtering
+    console.log(`🔍 [${this.id}] Detecting elements with useGamepadIndex: ${this.options.useGamepadIndex ?? false}`);
+    this.elements = getFocusableElementsInViewport(this.options.containerSelector ?? null, this.options.useGamepadIndex ?? false);
+    console.log(`📊 [${this.id}] Found ${this.elements.length} elements in container: ${this.options.containerSelector ?? 'body'}`);
+    
+    // Log some element details for debugging
+    this.elements.slice(0, 5).forEach((el, index) => {
+      const hasGamepadIndex = el.hasAttribute('gamepad-index');
+      const gamepadIndexValue = el.getAttribute('gamepad-index');
+      console.log(`  ${index + 1}. ${el.tagName.toLowerCase()} - gamepad-index: ${hasGamepadIndex ? gamepadIndexValue : 'none'} - text: "${el.textContent?.slice(0, 30)}"`);
+    });
 
     // Ensure focused index is within bounds
     if (this.focusedElementIndex >= this.elements.length) {
@@ -229,11 +214,43 @@ export class GamepadNavigationContext {
     const currentElement = this.elements[this.focusedElementIndex];
     if (!currentElement) return false;
 
-    const nearestElement = findNearestInDirection(
+    // Try primary direction first
+    let nearestElement = findNearestInDirection(
       currentElement,
       this.elements,
       direction
     );
+    
+    // If no element found, try fallback strategies
+    if (!nearestElement && this.options.wrapNavigation) {
+      // For horizontal navigation, try wrapping
+      if (direction === 'left' || direction === 'right') {
+        if (direction === 'left') {
+          // Go to last element in same row or last element overall
+          nearestElement = this.elements[this.elements.length - 1];
+        } else if (direction === 'right') {
+          // Go to first element in same row or first element overall
+          nearestElement = this.elements[0];
+        }
+      }
+      // For vertical navigation, try edge elements
+      else if (direction === 'up' || direction === 'down') {
+        if (direction === 'up') {
+          // Try elements at the top of the screen
+          nearestElement = this.elements.find(el => {
+            const rect = el.getBoundingClientRect();
+            return rect.top < currentElement.getBoundingClientRect().top;
+          }) || this.elements[this.elements.length - 1];
+        } else if (direction === 'down') {
+          // Try elements at the bottom of the screen
+          nearestElement = this.elements.find(el => {
+            const rect = el.getBoundingClientRect();
+            return rect.top > currentElement.getBoundingClientRect().top;
+          }) || this.elements[0];
+        }
+      }
+    }
+    
     if (nearestElement) {
       const newIndex = this.elements.indexOf(nearestElement);
       if (newIndex !== -1) {
@@ -242,6 +259,7 @@ export class GamepadNavigationContext {
         return true;
       }
     }
+    
     return false;
   }
 

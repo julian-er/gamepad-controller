@@ -386,6 +386,68 @@ h1 {
     z-index: 100;
 }
 
+/* Visual distinction for focusable vs non-focusable elements */
+.focusable {
+    border: 2px solid var(--success-color) !important;
+    background: rgba(39, 174, 96, 0.1) !important;
+}
+
+.not-focusable {
+    border: 2px solid var(--border-color) !important;
+    background: rgba(108, 117, 125, 0.1) !important;
+    opacity: 0.7;
+}
+
+/* Button specific styles */
+.button-group button[gamepad-index="true"] {
+    border-color: var(--success-color);
+    background: rgba(39, 174, 96, 0.1);
+    color: var(--success-color);
+}
+
+.button-group button:not([gamepad-index]) {
+    border-color: #6c757d;
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    opacity: 0.7;
+}
+
+.button-group button[gamepad-index="true"]:hover {
+    background: var(--success-color);
+    color: white;
+}
+
+.button-group button:not([gamepad-index]):hover {
+    background: #6c757d;
+    color: white;
+}
+
+/* Form field styles */
+.form-demo input[gamepad-index="true"],
+.form-demo textarea[gamepad-index="true"] {
+    border-color: var(--success-color);
+    background: rgba(39, 174, 96, 0.05);
+}
+
+.form-demo input:not([gamepad-index]),
+.form-demo textarea:not([gamepad-index]) {
+    border-color: #6c757d;
+    background: rgba(108, 117, 125, 0.05);
+    opacity: 0.7;
+}
+
+/* Control buttons styles */
+.control-buttons button[gamepad-index="true"] {
+    border-color: var(--success-color);
+    color: var(--success-color);
+    background: rgba(39, 174, 96, 0.1);
+}
+
+.control-buttons button[gamepad-index="true"]:hover {
+    background: var(--success-color);
+    color: white;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .container {

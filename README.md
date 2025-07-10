@@ -131,7 +131,7 @@ interface GamepadServiceOptions {
     autoCreateStatusElement?: boolean;   // Auto-create status display
     autoAddStyles?: boolean;            // Auto-add default styles
     useDataAttributes?: boolean;        // Use data-* attributes
-    useGamepadIndex?: boolean;          // Enable gamepad-index attribute ordering
+    useGamepadIndex?: boolean;          // Enable gamepad-index attribute filtering
 }
 ```
 
@@ -223,9 +223,9 @@ addNavigationStyles();
 </button>
 ```
 
-### Custom Navigation Order
+### Custom Navigation Selection
 
-Use `gamepad-index` attributes to control navigation order (similar to `tabindex`):
+Use `gamepad-index="true"` to explicitly mark elements as focusable when the feature is enabled:
 
 ```html
 <!-- Enable gamepad-index in service options -->
@@ -235,22 +235,23 @@ const gamepad = initGamepadForPage({
 });
 </script>
 
-<!-- HTML with custom navigation order -->
+<!-- HTML with explicit focusable marking -->
 <div class="menu">
-    <button gamepad-index="1">First</button>
-    <button gamepad-index="3">Third</button>
-    <button gamepad-index="2">Second</button>
-    <!-- Elements without gamepad-index appear after indexed ones -->
-    <button>Fourth (no index)</button>
+    <button gamepad-index="true">Focusable Button</button>
+    <button>Not focusable (no gamepad-index)</button>
+    <button gamepad-index="true">Another Focusable Button</button>
+    <div>Regular div (not focusable)</div>
+    <input gamepad-index="true" type="text" placeholder="Focusable input" />
+    <input type="text" placeholder="Not focusable input" />
 </div>
 ```
 
-**Navigation Order Features:**
-- Elements with `gamepad-index` are navigated in numerical order
-- Elements without `gamepad-index` follow after indexed elements
-- Invalid index values are treated as unindexed
+**Navigation Selection Features:**
+- When `useGamepadIndex: false` → All normally focusable elements are included
+- When `useGamepadIndex: true` → Only elements with `gamepad-index="true"` are included
+- Provides precise control over which elements can receive gamepad focus
+- Perfect for complex layouts where you want to limit navigation scope
 - Works with both spatial and grid navigation modes
-- Supports negative values for prioritization
 
 ## 🎯 Navigation Controls
 
@@ -299,7 +300,7 @@ gamepad.onSelect = (element) => {
 };
 ```
 
-### Custom Navigation Order Example
+### Custom Element Filtering Example
 
 ```ts
 import { gamepadService } from 'gamepad-controller';
@@ -311,15 +312,17 @@ const gamepad = gamepadService('.form-container', {
 ```
 
 ```html
-<!-- Form with custom navigation order -->
+<!-- Form with explicit focusable element control -->
 <form class="form-container">
-    <input gamepad-index="1" type="text" placeholder="First Name" />
-    <input gamepad-index="2" type="text" placeholder="Last Name" />
-    <input gamepad-index="3" type="email" placeholder="Email" />
-    <button gamepad-index="5" type="submit">Submit</button>
-    <button gamepad-index="4" type="button">Cancel</button>
-    <!-- This input will be navigated last (no gamepad-index) -->
+    <input gamepad-index="true" type="text" placeholder="First Name" />
+    <input gamepad-index="true" type="text" placeholder="Last Name" />
+    <input gamepad-index="true" type="email" placeholder="Email" />
+    <button gamepad-index="true" type="submit">Submit</button>
+    <button gamepad-index="true" type="button">Cancel</button>
+    <!-- This input will NOT be focusable (no gamepad-index attribute) -->
     <input type="text" placeholder="Optional Notes" />
+    <!-- This div will NOT be focusable (no gamepad-index="true") -->
+    <div>Some decorative content</div>
 </form>
 ```
 

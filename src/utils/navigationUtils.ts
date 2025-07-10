@@ -47,7 +47,7 @@ export function getElementDistance(el1: Element, el2: Element): number {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 
-// Find nearest element in a specific direction
+// Find nearest element in a specific direction with improved spatial logic
 export function findNearestInDirection(currentElement: Element, allElements: Element[], direction: string): Element | null {
     const currentRect = currentElement.getBoundingClientRect();
     const currentX = currentRect.left + currentRect.width / 2;
@@ -55,47 +55,117 @@ export function findNearestInDirection(currentElement: Element, allElements: Ele
     
     let candidates = allElements.filter((el: Element) => el !== currentElement);
     
-    // Filter candidates based on direction
+    // Improved directional filtering with better spatial logic
     switch (direction) {
         case 'up':
             candidates = candidates.filter((el: Element) => {
                 const rect = el.getBoundingClientRect();
-                return rect.top + rect.height / 2 < currentY;
+                const elY = rect.top + rect.height / 2;
+                return elY < currentY; // Element is above current
+            });
+            // Sort by: closest vertically, then closest horizontally
+            candidates.sort((a, b) => {
+                const rectA = a.getBoundingClientRect();
+                const rectB = b.getBoundingClientRect();
+                const aY = rectA.top + rectA.height / 2;
+                const bY = rectB.top + rectB.height / 2;
+                const aX = rectA.left + rectA.width / 2;
+                const bX = rectB.left + rectB.width / 2;
+                
+                const aVertDistance = currentY - aY;
+                const bVertDistance = currentY - bY;
+                const aHorDistance = Math.abs(currentX - aX);
+                const bHorDistance = Math.abs(currentX - bX);
+                
+                // Prioritize smaller vertical distance, then horizontal
+                if (Math.abs(aVertDistance - bVertDistance) < 50) {
+                    return aHorDistance - bHorDistance;
+                }
+                return aVertDistance - bVertDistance;
             });
             break;
+            
         case 'down':
             candidates = candidates.filter((el: Element) => {
                 const rect = el.getBoundingClientRect();
-                return rect.top + rect.height / 2 > currentY;
+                const elY = rect.top + rect.height / 2;
+                return elY > currentY; // Element is below current
+            });
+            candidates.sort((a, b) => {
+                const rectA = a.getBoundingClientRect();
+                const rectB = b.getBoundingClientRect();
+                const aY = rectA.top + rectA.height / 2;
+                const bY = rectB.top + rectB.height / 2;
+                const aX = rectA.left + rectA.width / 2;
+                const bX = rectB.left + rectB.width / 2;
+                
+                const aVertDistance = aY - currentY;
+                const bVertDistance = bY - currentY;
+                const aHorDistance = Math.abs(currentX - aX);
+                const bHorDistance = Math.abs(currentX - bX);
+                
+                if (Math.abs(aVertDistance - bVertDistance) < 50) {
+                    return aHorDistance - bHorDistance;
+                }
+                return aVertDistance - bVertDistance;
             });
             break;
+            
         case 'left':
             candidates = candidates.filter((el: Element) => {
                 const rect = el.getBoundingClientRect();
-                return rect.left + rect.width / 2 < currentX;
+                const elX = rect.left + rect.width / 2;
+                return elX < currentX; // Element is to the left
+            });
+            candidates.sort((a, b) => {
+                const rectA = a.getBoundingClientRect();
+                const rectB = b.getBoundingClientRect();
+                const aX = rectA.left + rectA.width / 2;
+                const bX = rectB.left + rectB.width / 2;
+                const aY = rectA.top + rectA.height / 2;
+                const bY = rectB.top + rectB.height / 2;
+                
+                const aHorDistance = currentX - aX;
+                const bHorDistance = currentX - bX;
+                const aVertDistance = Math.abs(currentY - aY);
+                const bVertDistance = Math.abs(currentY - bY);
+                
+                // Prioritize same row, then closest horizontally
+                if (Math.abs(aVertDistance - bVertDistance) < 50) {
+                    return aHorDistance - bHorDistance;
+                }
+                return aVertDistance - bVertDistance;
             });
             break;
+            
         case 'right':
             candidates = candidates.filter((el: Element) => {
                 const rect = el.getBoundingClientRect();
-                return rect.left + rect.width / 2 > currentX;
+                const elX = rect.left + rect.width / 2;
+                return elX > currentX; // Element is to the right
+            });
+            candidates.sort((a, b) => {
+                const rectA = a.getBoundingClientRect();
+                const rectB = b.getBoundingClientRect();
+                const aX = rectA.left + rectA.width / 2;
+                const bX = rectB.left + rectB.width / 2;
+                const aY = rectA.top + rectA.height / 2;
+                const bY = rectB.top + rectB.height / 2;
+                
+                const aHorDistance = aX - currentX;
+                const bHorDistance = bX - currentX;
+                const aVertDistance = Math.abs(currentY - aY);
+                const bVertDistance = Math.abs(currentY - bY);
+                
+                // Prioritize same row, then closest horizontally
+                if (Math.abs(aVertDistance - bVertDistance) < 50) {
+                    return aHorDistance - bHorDistance;
+                }
+                return aVertDistance - bVertDistance;
             });
             break;
     }
     
-    if (candidates.length === 0) return null;
-    
-    // Find the closest candidate
-    let nearest = candidates[0];
-    let shortestDistance = getElementDistance(currentElement, nearest);
-    
-    for (let i = 1; i < candidates.length; i++) {
-        const distance = getElementDistance(currentElement, candidates[i]);
-        if (distance < shortestDistance) {
-            shortestDistance = distance;
-            nearest = candidates[i];
-        }
-    }
-    
-    return nearest;
+    // Return the best candidate (first after sorting)
+    return candidates.length > 0 ? candidates[0] : null;
 } 
