@@ -77,6 +77,126 @@ const gamepad = initDualContextGamepad({
 
 ## 📖 API Reference
 
+### TypeScript Types and Interfaces
+
+The library provides comprehensive TypeScript support with full type definitions:
+
+```ts
+// Import main service class
+import { GamepadService } from 'gamepad-controller';
+
+// Import helper functions
+import { gamepadService, initGamepadForPage, initDualContextGamepad } from 'gamepad-controller';
+
+// Import TypeScript interfaces and types
+import type { 
+    GamepadServiceOptions,
+    GamepadNavigationContextOptions,
+    NavigationState,
+    ControllerMappings,
+    GridDimensions,
+    GamepadContextManagerCallback
+} from 'gamepad-controller';
+```
+
+### Using Types in Your Project
+
+```ts
+// Type your configuration options
+const options: GamepadServiceOptions = {
+    navigationMode: 'spatial',
+    focusedClass: 'my-focused-class',
+    enableRightStickScroll: true,
+    scrollSpeed: 1.5
+};
+
+// Type your event handlers
+const handleFocus = (element: Element, index: number): void => {
+    console.log(`Element ${index} focused:`, element);
+};
+
+const handleControllerConnect = (gamepad: Gamepad): void => {
+    console.log('Controller connected:', gamepad.id);
+};
+
+// Type your service instance
+const gamepadInstance: GamepadService = gamepadService('.container', options);
+gamepadInstance.onFocus = handleFocus;
+gamepadInstance.onControllerConnect = handleControllerConnect;
+```
+
+### Available Interfaces
+
+| Interface | Description | Use Case |
+|-----------|-------------|----------|
+| `GamepadServiceOptions` | Main configuration options | Service initialization |
+| `GamepadNavigationContextOptions` | Context-specific options | Dual context setup |
+| `NavigationState` | Current navigation state | Internal state management |
+| `ControllerMappings` | Controller button mappings | Custom controller support |
+| `GridDimensions` | Grid layout dimensions | Grid navigation |
+| `GamepadContextManagerCallback` | Context switch callback | Dual context events |
+
+### Custom Controller Configuration
+
+```ts
+import type { ControllerMappings } from 'gamepad-controller';
+
+const customMapping: ControllerMappings = {
+    up: 12,
+    down: 13,
+    left: 14,
+    right: 15,
+    primary: 0,
+    secondary: 1
+};
+```
+
+### Extending Service Options
+
+```ts
+// Extend the interface for custom options
+interface CustomGamepadOptions extends GamepadServiceOptions {
+    customFeature?: boolean;
+    customHandler?: (data: any) => void;
+}
+
+const customOptions: CustomGamepadOptions = {
+    navigationMode: 'spatial',
+    focusedClass: 'custom-focus',
+    customFeature: true,
+    customHandler: (data) => console.log('Custom handler:', data)
+};
+```
+
+### Type Safety Benefits
+
+- **IntelliSense Support**: Full autocomplete and type checking in VS Code and other TypeScript-aware editors
+- **Compile-time Validation**: Catch configuration errors before runtime
+- **Better Documentation**: Type hints show available options and expected values
+- **Refactoring Safety**: Rename and refactor with confidence
+
+### Common Type Patterns
+
+```ts
+// Event handler typing
+type GamepadEventHandler = (element: Element, index: number) => void;
+type ControllerEventHandler = (gamepad: Gamepad) => void;
+
+// Configuration with strict typing
+const config: GamepadServiceOptions = {
+    navigationMode: 'spatial', // TypeScript ensures valid values
+    debounceTime: 100,         // Type-checked number
+    enableRightStickScroll: true // Type-checked boolean
+};
+
+// Service instance with full typing
+const service: GamepadService = gamepadService('.container', config);
+service.onFocus = (element, index) => {
+    // TypeScript knows element is Element and index is number
+    console.log(`Focused element ${index}:`, element.tagName);
+};
+```
+
 ### Main Functions
 
 #### `gamepadService(containerSelector?, options?)`
