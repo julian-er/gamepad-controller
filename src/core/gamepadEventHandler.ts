@@ -28,6 +28,11 @@ export interface GamepadEventState {
     onControllerDisconnect: ((gamepad: Gamepad) => void) | null;
     onNavigationMenuOpen: ((button: string) => void) | null;
     onBackButton: (() => void) | null;
+    // New: generic button event handlers
+    onButtonDown?: (buttonIndex: number, gamepad: Gamepad) => void;
+    onButtonUp?: (buttonIndex: number, gamepad: Gamepad) => void;
+    // Track last button states per gamepad
+    lastButtonStates?: { [gamepadIndex: number]: boolean[] };
 }
 
 // Setup event listeners for gamepad connection
@@ -140,6 +145,23 @@ export function gameLoop(
             if (gp && isValidGamepad(gp)) {
                 eventState.gamepads[gp.index] = gp;
                 
+                // --- Button event handling ---
+                if (!eventState.lastButtonStates) eventState.lastButtonStates = {};
+                if (!eventState.lastButtonStates[gp.index]) {
+                    eventState.lastButtonStates[gp.index] = gp.buttons.map(b => b.pressed);
+                }
+                const prevStates = eventState.lastButtonStates[gp.index];
+                for (let i = 0; i < gp.buttons.length; i++) {
+                    const prev = prevStates[i] || false;
+                    const curr = gp.buttons[i].pressed;
+                    if (curr && !prev && typeof eventState.onButtonDown === 'function') {
+                        eventState.onButtonDown(i, gp);
+                    }
+                    if (!curr && prev && typeof eventState.onButtonUp === 'function') {
+                        eventState.onButtonUp(i, gp);
+                    }
+                    prevStates[i] = curr;
+                }
                 // Update controller type if changed
                 const detectedType = detectControllerType(gp);
                 if (detectedType !== eventState.currentControllerType) {

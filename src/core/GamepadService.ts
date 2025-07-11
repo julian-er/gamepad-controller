@@ -92,7 +92,9 @@ export class GamepadService {
             onControllerConnect: null,
             onControllerDisconnect: null,
             onNavigationMenuOpen: null,
-            onBackButton: null
+            onBackButton: null,
+            onButtonDown: undefined,
+            onButtonUp: undefined
         };
 
         // Initialize navigation state
@@ -245,6 +247,8 @@ export class GamepadService {
         this.eventState.onControllerDisconnect = null;
         this.eventState.onNavigationMenuOpen = null;
         this.eventState.onBackButton = null;
+        this.eventState.onButtonDown = undefined;
+        this.eventState.onButtonUp = undefined;
         
         this.navState.onFocus = null;
         this.navState.onSelect = null;
@@ -467,6 +471,19 @@ export class GamepadService {
 
     get onBackButton() {
         return this.eventState.onBackButton;
+    }
+
+    set onButtonDown(callback: ((buttonIndex: number, gamepad: Gamepad) => void) | undefined) {
+        this.eventState.onButtonDown = callback;
+    }
+    get onButtonDown(): ((buttonIndex: number, gamepad: Gamepad) => void) | undefined {
+        return this.eventState.onButtonDown;
+    }
+    set onButtonUp(callback: ((buttonIndex: number, gamepad: Gamepad) => void) | undefined) {
+        this.eventState.onButtonUp = callback;
+    }
+    get onButtonUp(): ((buttonIndex: number, gamepad: Gamepad) => void) | undefined {
+        return this.eventState.onButtonUp;
     }
 
     set onContextSwitch(callback: ((newContext: any, oldContext: any) => void) | null) {
