@@ -2,7 +2,7 @@
 // Context manager for handling multiple independent navigation contexts
 
 import {
-  getFocusableElementsInViewport,
+  getFocusableElements,
   findNearestInDirection,
   addGamepadDataAttributes,
   removeGamepadDataAttributes,
@@ -36,6 +36,7 @@ export class GamepadNavigationContext {
       useDataAttributes: options.useDataAttributes ?? true,
       wrapNavigation: options.wrapNavigation ?? true,
       autoDetectElements: options.autoDetectElements ?? true,
+      onlyViewport: options.onlyViewport ?? false, // Include all elements by default
     };
 
     // Context state
@@ -57,9 +58,13 @@ export class GamepadNavigationContext {
   detectElements(): void {
     if (!this.options.autoDetectElements) return;
 
-    // Always use getFocusableElementsInViewport for consistent gamepad-index filtering
-    console.log(`🔍 [${this.id}] Detecting elements with useGamepadIndex: ${this.options.useGamepadIndex ?? false}`);
-    this.elements = getFocusableElementsInViewport(this.options.containerSelector ?? null, this.options.useGamepadIndex ?? false);
+    // Use getFocusableElements with viewport filtering based on options
+    console.log(`🔍 [${this.id}] Detecting elements with useGamepadIndex: ${this.options.useGamepadIndex ?? false}, onlyViewport: ${this.options.onlyViewport ?? false}`);
+    this.elements = getFocusableElements(
+      this.options.containerSelector ?? null, 
+      this.options.useGamepadIndex ?? false,
+      this.options.onlyViewport ?? false
+    );
     console.log(`📊 [${this.id}] Found ${this.elements.length} elements in container: ${this.options.containerSelector ?? 'body'}`);
     
     // Log some element details for debugging

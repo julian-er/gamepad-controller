@@ -132,6 +132,7 @@ interface GamepadServiceOptions {
     autoAddStyles?: boolean;            // Auto-add default styles
     useDataAttributes?: boolean;        // Use data-* attributes
     useGamepadIndex?: boolean;          // Enable gamepad-index attribute filtering
+    onlyViewport?: boolean;             // Only include elements visible in viewport (default: false)
 }
 ```
 
@@ -184,6 +185,46 @@ gamepadService.cleanup();
 const gamepad = initGamepadForPage();
 // ... use gamepad
 gamepad.destroy(); // Clean up this specific instance
+```
+
+## 🔍 Viewport Filtering
+
+### Element Detection Options
+
+The library can be configured to include all focusable elements or only those visible in the viewport:
+
+```ts
+// Include all elements (default behavior)
+const gamepad = gamepadService('.container', {
+    onlyViewport: false  // Include all focusable elements
+});
+
+// Only include elements visible in viewport
+const gamepad = gamepadService('.container', {
+    onlyViewport: true   // Only include viewport-visible elements
+});
+```
+
+### Use Cases
+
+- **`onlyViewport: false`** (default): Best for navigation menus, toolbars, or when you want to navigate to off-screen elements
+- **`onlyViewport: true`**: Best for content-heavy pages where you only want to navigate visible elements
+
+### Example: Dynamic Content
+
+```ts
+// Initialize with all elements
+const gamepad = gamepadService('.container', {
+    onlyViewport: false
+});
+
+// Add new elements dynamically
+const newElement = document.createElement('button');
+newElement.textContent = 'New Button';
+container.appendChild(newElement);
+
+// Refresh to include new elements
+gamepad.refresh();
 ```
 
 ## 🎨 Styling

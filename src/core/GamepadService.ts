@@ -3,7 +3,7 @@
 
 import { gameLoop as createGameLoop, setupEventListeners, removeEventListeners, startGameLoop, stopGameLoop, handleGamepadConnected as handleConnected, handleGamepadDisconnected as handleDisconnected, type GamepadEvent } from './gamepadEventHandler.js';
 import { navigateToIndex } from './gamepadNavigation.js';
-import { calculateGridDimensions, getFocusableElementsInViewport } from '../utils/domUtils.js';
+import { calculateGridDimensions, getFocusableElements } from '../utils/domUtils.js';
 import {
     addGamepadDataAttributes,
     removeGamepadDataAttributes,
@@ -67,6 +67,8 @@ export class GamepadService {
             // Style isolation options
             useDataAttributes: true, // Use data attributes instead of classes for better isolation
             gamepadContext: 'default', // Set context for styling hooks
+            // Viewport filtering options
+            onlyViewport: false, // Include all elements by default, not just viewport
             // Dual context options
             enableDualContext: false, // Enable dual context mode
             menuContextSelector: '.nav-menu, nav, .navigation',
@@ -165,6 +167,7 @@ export class GamepadService {
             selectedClass: this.options.selectedClass,
             useDataAttributes: this.options.useDataAttributes,
             useGamepadIndex: this.options.useGamepadIndex,
+            onlyViewport: this.options.onlyViewport,
             wrapNavigation: this.options.wrapNavigation,
             autoDetectElements: true
         });
@@ -177,6 +180,7 @@ export class GamepadService {
             selectedClass: this.options.selectedClass,
             useDataAttributes: this.options.useDataAttributes,
             useGamepadIndex: this.options.useGamepadIndex,
+            onlyViewport: this.options.onlyViewport,
             wrapNavigation: this.options.wrapNavigation,
             autoDetectElements: true
         });
@@ -259,9 +263,10 @@ export class GamepadService {
 
     // Detect elements for navigation
     detectElements() {
-        this.navState.elements = getFocusableElementsInViewport(
+        this.navState.elements = getFocusableElements(
             this.options.containerSelector,
-            this.options.useGamepadIndex ?? false
+            this.options.useGamepadIndex ?? false,
+            this.options.onlyViewport ?? false
         );
         
         // Filter out disabled elements

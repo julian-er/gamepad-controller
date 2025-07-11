@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         enableBackButton: true,
         enableShoulderNavigation: true,
         debounceTime: 150,
-        deadzone: 0.1
+        deadzone: 0.1,
     });
 
     gamepadService.onContextSwitch = (newContext: any, oldContext: any) => {

@@ -1,42 +1,58 @@
-import { gamepadService } from 'gamepad-controller';
-import * as gamepadUtils from 'gamepad-controller';
+// examplePage.ts
+// Example page demonstrating gamepad navigation
 
-document.addEventListener('DOMContentLoaded', () => {
-    const gamepad = gamepadService('.container', {
-        navigationMode: 'grid',
-        focusedClass: 'gamepad-focused',
-        selectedClass: 'gamepad-selected',
-        statusElementId: 'gamepad-status',
-        useDataAttributes: false
-    });
+import { GamepadService } from 'gamepad-controller';
 
-    gamepadUtils.addDefaultStyles();
-
-    document.querySelectorAll('.card').forEach(card => {
-        card.addEventListener('keydown', (e) => {
-            const event = e as KeyboardEvent;
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                (card as HTMLElement).click();
-            }
-        });
-    });
-
-    console.log('Gamepad navigation initialized for simple example');
+// Initialize gamepad service with different viewport options
+const gamepadService = new GamepadService({
+    containerSelector: '.gamepad-container',
+    focusedClass: 'gamepad-focused',
+    selectedClass: 'gamepad-selected',
+    useDataAttributes: true,
+    useGamepadIndex: false,
+    onlyViewport: false, // Set to true to only include elements visible in viewport
+    autoAddStyles: true,
+    statusElementId: 'gamepad-status'
 });
 
-function showMessage(item: string) {
-    const messages: Record<string, string> = {
-        'Card 1': '🎯 You selected Feature One! This could trigger any action.',
-        'Card 2': '🚀 You selected Feature Two! Perfect for launching new features.',
-        'Card 3': '⚡ You selected Feature Three! Lightning fast navigation.',
-        'Card 4': '🎨 You selected Feature Four! Beautiful visual feedback.',
-        'Card 5': '🔧 You selected Feature Five! Highly configurable system.',
-        'Card 6': '🌟 You selected Feature Six! Amazing user experience.',
-        'Action Button': '🎮 Action button pressed! This could save data, submit forms, etc.',
-        'Secondary Button': '🔄 Secondary action triggered! Perfect for cancel or reset actions.',
-        'Success Button': '✅ Success action completed! Great for confirmations.'
-    };
-    alert(messages[item] || `You selected: ${item}`);
-}
-(window as any).showMessage = showMessage; 
+// Set up event handlers
+gamepadService.onFocus = (element, index) => {
+    console.log(`Focused element ${index}:`, element);
+};
+
+gamepadService.onSelect = (element, index) => {
+    console.log(`Selected element ${index}:`, element);
+};
+
+gamepadService.onControllerConnect = (gamepad) => {
+    console.log('Controller connected:', gamepad.id);
+};
+
+gamepadService.onControllerDisconnect = (gamepad) => {
+    console.log('Controller disconnected:', gamepad.id);
+};
+
+// Initialize the service
+gamepadService.init();
+
+// Add some dynamic content to test viewport filtering
+setTimeout(() => {
+    const container = document.querySelector('.gamepad-container');
+    if (container) {
+        // Add elements outside viewport to test onlyViewport option
+        const offscreenDiv = document.createElement('div');
+        offscreenDiv.className = 'offscreen-element';
+        offscreenDiv.style.cssText = 'position: absolute; top: 2000px; left: 0; width: 200px; height: 50px; background: #ff6b6b; color: white; display: flex; align-items: center; justify-content: center;';
+        offscreenDiv.textContent = 'Off-screen Element (only visible if onlyViewport: false)';
+        offscreenDiv.setAttribute('tabindex', '0');
+        container.appendChild(offscreenDiv);
+
+        // Refresh to detect new elements
+        gamepadService.refresh();
+        
+        console.log('Added off-screen element. If onlyViewport is false, you should be able to navigate to it.');
+    }
+}, 2000);
+
+// Expose for debugging
+(window as any).gamepadService = gamepadService; 

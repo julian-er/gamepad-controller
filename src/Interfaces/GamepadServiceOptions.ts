@@ -18,6 +18,7 @@ export interface GamepadServiceOptions {
     autoAddStyles?: boolean;
     useDataAttributes?: boolean;
     useGamepadIndex?: boolean; // Enable gamepad-index attribute for custom navigation order
+    onlyViewport?: boolean; // Only include elements visible in viewport (default: false)
     gamepadContext?: string;
     enableDualContext?: boolean;
     menuContextSelector?: string;

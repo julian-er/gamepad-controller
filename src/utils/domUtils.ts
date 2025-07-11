@@ -9,23 +9,35 @@ export function isElementInViewport(element: Element, rootMargin: number = 0): b
     const windowHeight = window.innerHeight || document.documentElement.clientHeight;
     const windowWidth = window.innerWidth || document.documentElement.clientWidth;
     
-    return (
-        rect.top >= -rootMargin &&
-        rect.left >= -rootMargin &&
-        rect.bottom <= windowHeight + rootMargin &&
-        rect.right <= windowWidth + rootMargin
+    // Check if element has any visible area in viewport
+    const hasVisibleArea = rect.width > 0 && rect.height > 0;
+    const isInViewport = (
+        rect.top < windowHeight + rootMargin &&
+        rect.bottom > -rootMargin &&
+        rect.left < windowWidth + rootMargin &&
+        rect.right > -rootMargin &&
+        hasVisibleArea
     );
+    
+    console.log(`🔍 isElementInViewport check for ${element.tagName}:`);
+    console.log(`   rect: top=${Math.round(rect.top)}, bottom=${Math.round(rect.bottom)}, left=${Math.round(rect.left)}, right=${Math.round(rect.right)}`);
+    console.log(`   window: height=${windowHeight}, width=${windowWidth}`);
+    console.log(`   hasVisibleArea: ${hasVisibleArea}`);
+    console.log(`   isInViewport: ${isInViewport}`);
+    
+    return isInViewport;
 }
 
-// Get all focusable elements in the viewport with optional gamepad-index filtering
-export function getFocusableElementsInViewport(
+// Get all focusable elements with optional viewport filtering
+export function getFocusableElements(
     containerSelector: string | null = null, 
-    useGamepadIndex: boolean = false
+    useGamepadIndex: boolean = false,
+    onlyViewport: boolean = false
 ): Element[] {
     const container = containerSelector ? document.querySelector(containerSelector) : document.body;
     
     if (!container) {
-        console.warn('getFocusableElementsInViewport: Container not found', containerSelector);
+        console.warn('getFocusableElements: Container not found', containerSelector);
         return [];
     }
 
@@ -57,26 +69,49 @@ export function getFocusableElementsInViewport(
         console.log(`🔍 Found ${elements.length} normally focusable elements`);
     }
     
+    console.log(`🔧 onlyViewport setting: ${onlyViewport}`);
+    
     const filteredElements = Array.from(elements).filter(element => {
-        // Check if element is visible and in viewport
+        // Check if element is visible
         const style = window.getComputedStyle(element);
         const isVisible = style.display !== 'none' && 
                          style.visibility !== 'hidden' && 
                          style.opacity !== '0';
         
-        const inViewport = isElementInViewport(element);
+        // Only check viewport if onlyViewport is true
+        const inViewport = onlyViewport ? isElementInViewport(element) : true;
         const shouldInclude = isVisible && inViewport;
         
+        // Detailed logging for debugging
+        const rect = element.getBoundingClientRect();
+        const elementTitle = element.querySelector('h3')?.textContent || element.tagName;
+        
+        console.log(`🔍 Element: ${elementTitle}`);
+        console.log(`   Visible: ${isVisible}`);
+        console.log(`   Position: top=${Math.round(rect.top)}px, bottom=${Math.round(rect.bottom)}px`);
+        console.log(`   Viewport check: ${onlyViewport ? `inViewport=${inViewport}` : 'skipped'}`);
+        console.log(`   Should include: ${shouldInclude}`);
+        
         if (!shouldInclude) {
-            console.log(`❌ Filtered out element: ${element.tagName} (visible: ${isVisible}, inViewport: ${inViewport})`);
+            const reason = !isVisible ? 'not visible' : 'not in viewport';
+            console.log(`❌ Filtered out element: ${elementTitle} (${reason})`);
         }
         
         return shouldInclude;
     });
 
-    console.log(`✅ Final result: ${filteredElements.length} navigable elements`);
+    const viewportStatus = onlyViewport ? 'viewport-only' : 'all elements';
+    console.log(`✅ Final result: ${filteredElements.length} navigable elements (${viewportStatus})`);
     
     return filteredElements;
+}
+
+// Legacy function for backward compatibility
+export function getFocusableElementsInViewport(
+    containerSelector: string | null = null, 
+    useGamepadIndex: boolean = false
+): Element[] {
+    return getFocusableElements(containerSelector, useGamepadIndex, true);
 }
 
 // Calculate grid dimensions for elements
