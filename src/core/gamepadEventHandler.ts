@@ -146,7 +146,7 @@ export function handleNavigation(
         // In dual context mode, use context manager for stick navigation
         contextManager.handleStickNavigation(direction);
     } else {
-        // Legacy mode
+        // Single context mode
         if (navState.options.navigationMode === 'spatial') {
             navigateSpatial(navState, direction, updateFocusCallback || (() => {}));
         } else {

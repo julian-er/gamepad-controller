@@ -113,7 +113,7 @@ interface GamepadServiceOptions {
     statusElementId?: string | null;    // Status display element ID
     
     // Navigation Behavior
-    navigationMode?: 'grid' | 'spatial'; // Navigation algorithm
+    navigationMode?: 'grid' | 'spatial' | 'horizontal'; // Navigation algorithm
     wrapNavigation?: boolean;            // Wrap around edges
     autoDetectElements?: boolean;        // Auto-find navigable elements
     
@@ -121,6 +121,11 @@ interface GamepadServiceOptions {
     enableNavigation?: boolean;          // Enable D-pad navigation
     enableBackButton?: boolean;          // Enable back button
     enableShoulderNavigation?: boolean;  // Enable R1/L1 navigation
+    
+    // Right Stick Scrolling
+    enableRightStickScroll?: boolean;    // Enable right stick for window scrolling (default: true)
+    scrollSpeed?: number;                // Multiplier for scroll speed (default: 1)
+    scrollDebounceTime?: number;         // Debounce time for scrolling (default: 50ms)
     
     // Dual Context
     enableDualContext?: boolean;         // Enable dual context mode
@@ -294,40 +299,170 @@ const gamepad = initGamepadForPage({
 - Perfect for complex layouts where you want to limit navigation scope
 - Works with both spatial and grid navigation modes
 
+## 🧭 Navigation Modes
+
+The gamepad controller supports different navigation algorithms optimized for different UI patterns:
+
+### Spatial Navigation (Default)
+**Best for:** Most web layouts, menus, forms, irregular layouts
+- Finds the nearest element in the direction of movement
+- Works naturally with any layout regardless of structure
+- Intelligent direction detection based on element positions
+- Handles complex layouts with mixed element sizes
+
+```ts
+const gamepad = gamepadService('.container', {
+    navigationMode: 'spatial' // Default mode
+});
+```
+
+### Grid Navigation
+**Best for:** Card grids, image galleries, uniform layouts
+- Assumes elements are arranged in a regular grid pattern
+- Moves in predictable rows and columns
+- Calculates grid dimensions automatically
+- More predictable movement in structured layouts
+
+```ts
+const gamepad = gamepadService('.grid-container', {
+    navigationMode: 'grid',
+    wrapNavigation: true // Wrap to opposite side when reaching edge
+});
+```
+
+### Horizontal Navigation
+**Best for:** Menu bars, tab lists, horizontal toolbars
+- Optimized for single-row horizontal navigation
+- **Available only in dual context mode** (used automatically for menu areas)
+- Supports wrapping from last to first element
+- Only responds to left/right navigation, ignores up/down
+
+```ts
+// Used automatically in dual context mode
+const gamepad = initDualContextGamepad({
+    menuContextSelector: '.nav-menu', // Uses horizontal navigation
+    contentContextSelector: '.content' // Uses spatial navigation
+});
+
+// NOT available in single context mode - will fallback to spatial
+const gamepad = gamepadService('.menu', {
+    navigationMode: 'horizontal' // ⚠️ Only available in dual context mode
+});
+```
+
+### Navigation Mode Comparison
+
+| Mode | Use Case | Movement | Wrapping | Structure | Availability |
+|------|----------|----------|----------|-----------|--------------|
+| **Spatial** | General layouts, menus, forms | Nearest element | Smart wrapping | Any layout | All modes |
+| **Grid** | Card grids, galleries | Row/column based | Edge wrapping | Regular grid | Single context only |
+| **Horizontal** | Menu bars, tabs | Left/right only | First ↔ last | Single row | Dual context only |
+
+### Mode Availability
+
+- **Single Context Mode** (`gamepadService`): Supports `'spatial'` and `'grid'` navigation
+- **Dual Context Mode** (`initDualContextGamepad`): Supports `'spatial'` and `'horizontal'` navigation
+- **Context Manager**: Supports `'spatial'` and `'horizontal'` navigation
+
+### Choosing the Right Mode
+
+```ts
+// Complex layouts with mixed elements
+const gamepad = gamepadService('.page', {
+    navigationMode: 'spatial' // Handles any layout
+});
+
+// Uniform card grid
+const gamepad = gamepadService('.card-grid', {
+    navigationMode: 'grid' // Predictable grid movement
+});
+
+// Navigation menu
+const gamepad = gamepadService('.nav-menu', {
+    navigationMode: 'spatial' // Works well for menus
+});
+```
+
 ## 🎯 Navigation Controls
 
-| Controller | Navigate | Select | Back | Menu Navigation |
-|------------|----------|--------|------|-----------------|
-| Xbox | D-pad / Left Stick | A | B | RB / LB |
-| PlayStation | D-pad / Left Stick | X | Circle | R1 / L1 |
-| Nintendo | D-pad / Left Stick | B | A | R / L |
+| Controller | Navigate | Select | Back | Menu Navigation | Scroll |
+|------------|----------|--------|------|-----------------|---------|
+| Xbox | D-pad / Left Stick | A | B | RB / LB | Right Stick |
+| PlayStation | D-pad / Left Stick | X | Circle | R1 / L1 | Right Stick |
+| Nintendo | D-pad / Left Stick | B | A | R / L | Right Stick |
 
 ## 📋 Usage Examples
 
 ### Grid Navigation Example
 
+Perfect for card layouts, image galleries, and uniform grids:
+
 ```ts
 import { gamepadService } from 'gamepad-controller';
 
 const gamepad = gamepadService('.grid-container', {
-    navigationMode: 'grid',
+    navigationMode: 'grid',        // Grid-based movement
     focusedClass: 'focused',
     selectedClass: 'selected',
-    wrapNavigation: true
+    wrapNavigation: true           // Wrap around edges
 });
 
 // Add styling
 gamepad.addNavigationStyles();
 ```
 
-### Menu Navigation Example
+```html
+<!-- HTML Structure -->
+<div class="grid-container">
+    <div class="card">Card 1</div>
+    <div class="card">Card 2</div>
+    <div class="card">Card 3</div>
+    <div class="card">Card 4</div>
+    <!-- Grid navigation moves in predictable rows/columns -->
+</div>
+```
+
+### Spatial Navigation Example
+
+Ideal for complex layouts, forms, and irregular element arrangements:
+
+```ts
+import { gamepadService } from 'gamepad-controller';
+
+const gamepad = gamepadService('.content-area', {
+    navigationMode: 'spatial',     // Finds nearest element in direction
+    focusedClass: 'focused',
+    selectedClass: 'selected',
+    wrapNavigation: false          // Don't wrap for complex layouts
+});
+```
+
+```html
+<!-- HTML Structure -->
+<div class="content-area">
+    <h1>Page Title</h1>
+    <button class="action-btn">Primary Action</button>
+    <div class="sidebar">
+        <button>Settings</button>
+        <button>Help</button>
+    </div>
+    <main>
+        <p>Content with <a href="#">links</a> and <button>buttons</button></p>
+    </main>
+    <!-- Spatial navigation finds nearest element regardless of structure -->
+</div>
+```
+
+### Dual Context Navigation Example
+
+Separate navigation contexts for menu and content areas:
 
 ```ts
 import { initDualContextGamepad } from 'gamepad-controller';
 
 const gamepad = initDualContextGamepad({
-    menuContextSelector: '.main-nav',
-    contentContextSelector: '.content-area',
+    menuContextSelector: '.main-nav',    // Horizontal navigation (R1/L1)
+    contentContextSelector: '.content-area', // Spatial navigation (left stick)
     enableShoulderNavigation: true
 });
 
@@ -339,6 +474,26 @@ gamepad.onSelect = (element) => {
         if (href) window.location.href = href;
     }
 };
+```
+
+```html
+<!-- HTML Structure -->
+<nav class="main-nav">
+    <!-- R1/L1 navigates horizontally through menu -->
+    <a href="/" class="nav-item">Home</a>
+    <a href="/about" class="nav-item">About</a>
+    <a href="/contact" class="nav-item">Contact</a>
+</nav>
+<div class="content-area">
+    <!-- Left stick navigates spatially through content -->
+    <h1>Page Content</h1>
+    <button>Action 1</button>
+    <button>Action 2</button>
+    <form>
+        <input type="text" placeholder="Search...">
+        <button type="submit">Search</button>
+    </form>
+</div>
 ```
 
 ### Custom Element Filtering Example

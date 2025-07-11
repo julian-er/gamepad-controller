@@ -23,7 +23,7 @@ import type { NavigationState } from '../Interfaces/NavigationState';
 export class GamepadService {
     options: GamepadServiceOptions;
     contextManager: GamepadContextManager;
-    legacyMode: boolean;
+    singleContextMode: boolean;
 
     // Private properties
     private eventState: GamepadEventState;
@@ -106,7 +106,7 @@ export class GamepadService {
 
         // Context manager for dual context mode
         this.contextManager = new GamepadContextManager();
-        this.legacyMode = !this.options.enableDualContext;
+        this.singleContextMode = !this.options.enableDualContext;
 
         // Bind methods to ensure proper 'this' context and enable cleanup
         this.gameLoopFn = createGameLoop(this.eventState, this.navState, this.contextManager, this.updateFocus.bind(this));
@@ -160,7 +160,7 @@ export class GamepadService {
         
         startGameLoop(this.eventState, this.gameLoopFn);
         
-        console.log(`GamepadService initialized with ${this.options.enableDualContext ? 'dual context' : 'legacy'} navigation support`);
+        console.log(`GamepadService initialized with ${this.options.enableDualContext ? 'dual context' : 'single context'} navigation support`);
     }
 
     // Setup dual context mode

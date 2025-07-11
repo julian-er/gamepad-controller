@@ -1,7 +1,7 @@
 // Options for GamepadNavigationContext
 
 export interface GamepadNavigationContextOptions {
-    navigationMode: 'spatial' | 'horizontal';
+    navigationMode: 'spatial' | 'horizontal' | 'grid';
     containerSelector: string | null;
     focusedClass?: string;
     selectedClass?: string;

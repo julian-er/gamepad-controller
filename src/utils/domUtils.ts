@@ -93,7 +93,7 @@ export function getFocusableElements(
     return filteredElements;
 }
 
-// Legacy function for backward compatibility
+// Convenience function for viewport-only element detection
 export function getFocusableElementsInViewport(
     containerSelector: string | null = null, 
     useGamepadIndex: boolean = false

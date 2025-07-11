@@ -9,7 +9,7 @@ export interface GamepadServiceOptions {
     autoCreateStatusElement?: boolean; // Create a default status element automatically
     focusedClass?: string;
     selectedClass?: string;
-    navigationMode?: 'grid' | 'spatial';
+    navigationMode?: 'grid' | 'spatial' | 'horizontal';
     wrapNavigation?: boolean;
     autoDetectElements?: boolean;
     enableNavigation?: boolean;

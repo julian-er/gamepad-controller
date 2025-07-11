@@ -94,7 +94,7 @@ export function handleSelection(state: NavigationState, contextManager?: any) {
         // In dual context mode, use context manager
         contextManager.handleSelection();
     } else {
-        // Legacy mode
+        // Single context mode
         const focusedElement = state.elements[state.focusedElementIndex];
         if (!focusedElement) return;
 
@@ -152,7 +152,7 @@ export function handleShoulderNavigation(
         // In dual context mode, use context manager
         contextManager.handleShoulderNavigation(button);
     } else {
-        // Legacy mode - navigate between pages
+        // Single context mode - navigate between pages
         if (button === 'R1') {
             console.log('⏭️ R1 pressed - next section');
             
