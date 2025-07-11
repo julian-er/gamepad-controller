@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedClass: 'gamepad-selected',
         useDataAttributes: false,
         statusElementId: 'gamepad-status',
-        autoCreateStatusElement: true,
         enableNavigation: true,
         enableBackButton: true,
         enableShoulderNavigation: true,
@@ -27,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.remove('menu-context-active');
         }
     };
+
 
     console.log('🎮 Dual context gamepad navigation ready!');
     console.log('📖 Controls:');

@@ -148,15 +148,26 @@ export function calculateGridDimensions(elements: Element[], container: Element)
 // Ensure a status element exists for gamepad feedback
 export function ensureStatusElement(statusElementId: string): HTMLElement {
     let statusElement = document.getElementById(statusElementId);
+    let isNewElement = false;
     
     if (!statusElement) {
         statusElement = document.createElement('div');
         statusElement.id = statusElementId;
+        document.body.appendChild(statusElement);
+        isNewElement = true;
+    }
+    
+    // Only apply default styles if we created a new element
+    // If the element already exists, respect the user's custom styles
+    if (isNewElement) {
+        // Mark this element as auto-created by the library
+        statusElement.setAttribute('data-gamepad-auto-created', 'true');
+        
         statusElement.style.cssText = `
             position: fixed;
             top: 10px;
             right: 10px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(255, 165, 0, 0.8);
             color: white;
             padding: 8px 12px;
             border-radius: 4px;
@@ -165,8 +176,9 @@ export function ensureStatusElement(statusElementId: string): HTMLElement {
             z-index: 10000;
             pointer-events: none;
         `;
+        
+        // Set initial text only for new elements
         statusElement.textContent = '🎮 Waiting for gamepad connection...';
-        document.body.appendChild(statusElement);
     }
     
     return statusElement;
@@ -175,15 +187,27 @@ export function ensureStatusElement(statusElementId: string): HTMLElement {
 // Update status element with controller information
 export function updateStatusElement(statusElementId: string, controllerType: string, isConnected: boolean): void {
     const statusElement = document.getElementById(statusElementId);
-    if (!statusElement) return;
+    if (!statusElement) {
+        // Element doesn't exist, which is fine if the user didn't want a status element
+        return;
+    }
 
+    // Always update the content
     if (isConnected) {
         statusElement.textContent = `🎮 ${controllerType} controller connected`;
-        statusElement.style.background = 'rgba(0, 128, 0, 0.8)';
     } else {
         statusElement.textContent = '🎮 Waiting for gamepad connection...';
-        statusElement.style.background = 'rgba(255, 165, 0, 0.8)';
     }
+    
+    // Only apply styles to elements that were auto-created by the library
+    const isAutoCreated = statusElement.hasAttribute('data-gamepad-auto-created');
+    if (isAutoCreated) {
+        // Update background color for auto-created elements
+        statusElement.style.background = isConnected ? 'rgba(0, 128, 0, 0.8)' : 'rgba(255, 165, 0, 0.8)';
+    }
+    
+    // For custom elements, respect user's styling completely
+    // Users can handle their own styling via CSS classes or their own update functions
 }
 
 // Add data attributes for styling hooks (instead of CSS classes)

@@ -1,10 +1,12 @@
 // gamepadEventHandler.ts
-// Event handling and game loop for gamepad input
+// Enhanced gamepad event handling with proper cleanup and memory management
 
-import { NavigationState, handleSelection, handleBackButton, handleShoulderNavigation, navigateGrid, navigateSpatial, updateStatus } from './gamepadNavigation.js';
+import { navigateGrid, navigateSpatial, handleSelection, handleBackButton, handleShoulderNavigation, updateStatus } from './gamepadNavigation.js';
 import { isValidGamepad, detectControllerType, applyDeadzone } from '../utils/controllerUtils.js';
 import { getPrimaryActionButtonIndex, getDpadIndices } from '../controllerMappings.js';
+import { updateStatusElement } from '../utils/domUtils.js';
 import type { ControllerType } from '../Interfaces/ControllerMappings.js';
+import type { NavigationState } from '../Interfaces/NavigationState.js';
 
 // GamepadEvent interface for typed gamepad events
 export interface GamepadEvent extends Event {
@@ -24,6 +26,8 @@ export interface GamepadEventState {
     lastShoulderTime: number;
     // Add animation frame ID for proper cleanup
     animationFrameId: number | null;
+    // Add statusElementId for UI updates
+    statusElementId: string | null;
     onControllerConnect: ((gamepad: Gamepad) => void) | null;
     onControllerDisconnect: ((gamepad: Gamepad) => void) | null;
     onNavigationMenuOpen: ((button: string) => void) | null;
@@ -43,6 +47,39 @@ export function setupEventListeners(
 ) {
     window.addEventListener('gamepadconnected', handleGamepadConnected);
     window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+    
+    // Check for already connected gamepads
+    detectExistingGamepads(state);
+}
+
+// Detect gamepads that are already connected when the page loads
+export function detectExistingGamepads(state: GamepadEventState) {
+    const gamepads = navigator.getGamepads();
+    for (let i = 0; i < gamepads.length; i++) {
+        const gamepad = gamepads[i];
+        if (gamepad && isValidGamepad(gamepad)) {
+            console.log(`Detected already connected gamepad: ${gamepad.id}`);
+            
+            // Add to state
+            state.gamepads[gamepad.index] = gamepad;
+            
+            // Update controller type
+            const detectedType = detectControllerType(gamepad);
+            state.currentControllerType = detectedType;
+            
+            // Update status element if it exists
+            if (state.statusElementId) {
+                updateStatusElement(state.statusElementId, state.currentControllerType, true);
+            }
+            
+            // Call connect callback
+            if (state.onControllerConnect) {
+                state.onControllerConnect(gamepad);
+            }
+            
+            break; // Just handle the first one for now
+        }
+    }
 }
 
 // Remove event listeners and cancel animation frame
@@ -66,6 +103,11 @@ export function handleGamepadConnected(state: GamepadEventState, event: GamepadE
         
         console.log(`Gamepad connected: ${gamepad.id} (${state.currentControllerType})`);
         
+        // Update status element immediately if it exists
+        if (state.statusElementId) {
+            updateStatusElement(state.statusElementId, state.currentControllerType, true);
+        }
+        
         if (state.onControllerConnect) {
             state.onControllerConnect(gamepad);
         }
@@ -79,6 +121,11 @@ export function handleGamepadDisconnected(state: GamepadEventState, event: Gamep
     if (state.gamepads[gamepad.index]) {
         delete state.gamepads[gamepad.index];
         console.log(`Gamepad disconnected: ${event.gamepad.id}`);
+        
+        // Update status element to show disconnected state if it exists
+        if (state.statusElementId) {
+            updateStatusElement(state.statusElementId, 'unknown', false);
+        }
         
         if (state.onControllerDisconnect) {
             state.onControllerDisconnect(gamepad);

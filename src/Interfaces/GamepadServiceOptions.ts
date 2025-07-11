@@ -4,7 +4,9 @@ export interface GamepadServiceOptions {
     debounceTime?: number;
     deadzone?: number;
     containerSelector?: string | null;
-    statusElementId?: string | null;
+    // Status element options - both are optional
+    statusElementId?: string | null; // Provide a specific element ID to show gamepad status
+    autoCreateStatusElement?: boolean; // Create a default status element automatically
     focusedClass?: string;
     selectedClass?: string;
     navigationMode?: 'grid' | 'spatial';
@@ -14,7 +16,6 @@ export interface GamepadServiceOptions {
     enableBackButton?: boolean;
     enableShoulderNavigation?: boolean;
     navigationMenuSelector?: string;
-    autoCreateStatusElement?: boolean;
     autoAddStyles?: boolean;
     useDataAttributes?: boolean;
     useGamepadIndex?: boolean; // Enable gamepad-index attribute for custom navigation order

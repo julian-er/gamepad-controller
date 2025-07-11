@@ -434,6 +434,68 @@ gamepadService.init();
 
 You can use this to implement custom actions for any button, including X/A, O/B, triggers, shoulders, etc.
 
+## Status Element Options
+
+The gamepad controller now provides flexible options for showing connection status:
+
+### Option 1: No Status Element (Default)
+```javascript
+const gamepadService = new GamepadService({
+    // No status element will be created (autoCreateStatusElement is false by default)
+});
+```
+
+### Option 2: Provide Your Own Status Element
+```javascript
+const gamepadService = new GamepadService({
+    statusElementId: 'my-custom-status', // Element must exist in your HTML
+});
+```
+
+### Option 3: Auto-Create Status Element
+```javascript
+const gamepadService = new GamepadService({
+    autoCreateStatusElement: true, // Creates a default status element
+});
+```
+
+### Option 4: Both Options Combined
+```javascript
+const gamepadService = new GamepadService({
+    statusElementId: 'custom-status',
+    autoCreateStatusElement: true, // Fallback if custom element doesn't exist
+});
+```
+
+### Option 5: Bypass Status System (Advanced)
+```javascript
+const gamepadService = new GamepadService({
+    statusElementId: null,           // No GamepadService status integration
+    autoCreateStatusElement: false,  // No auto-creation
+    // ... other options
+});
+
+// Handle status updates manually with your own function
+const updateStatus = (id, message, type = '') => {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = message;
+        element.className = `status ${type}`;
+    }
+};
+
+// Use your own status update logic
+gamepadService.onControllerConnect = (gamepad) => {
+    updateStatus('my-status', `🎮 Controller connected: ${gamepad.id}`, 'success');
+};
+
+gamepadService.onControllerDisconnect = (gamepad) => {
+    updateStatus('my-status', '🎮 Controller disconnected', 'warning');
+};
+```
+
+> **💡 Pro Tip**: Use the bypass approach when you need complete control over styling and status updates, or when integrating with existing UI frameworks that manage their own status elements.
+
 ## 🛠️ Development
 
 ### Project Structure

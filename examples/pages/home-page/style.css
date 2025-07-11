@@ -247,20 +247,22 @@ body.controller-nintendo .gamepad-focused {
 }
 
 .instructions::after {
-    content: '';
+    content: '🎮 Content Context Active - Use left stick to navigate content';
     display: block;
     margin-top: 10px;
     padding: 10px;
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border-left: 4px solid #3b82f6;
+    border-right: 4px solid #3b82f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
     border-radius: 8px;
-    border-left: 4px solid #6b7280;
     font-size: 0.75rem;
-    color: #374151;
+    color: #1e40af
 }
 
 .menu-context-active .instructions::after {
     content: '🎮 Menu Context Active - Use R1/L1 to navigate menu items';
     border-left-color: #10b981;
+    border-right-color: #10b981;
     background: linear-gradient(135deg, #ecfdf5 0%, #dcfce7 100%);
     color: #065f46;
 }
@@ -268,6 +270,7 @@ body.controller-nintendo .gamepad-focused {
 .content-context-active .instructions::after {
     content: '🎮 Content Context Active - Use left stick to navigate content';
     border-left-color: #3b82f6;
+    border-right-color: #3b82f6;
     background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
     color: #1e40af;
 }

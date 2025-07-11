@@ -53,7 +53,7 @@ export class GamepadService {
             enableBackButton: true,
             enableShoulderNavigation: true,
             navigationMenuSelector: '.nav-menu, nav, .navigation',
-            autoCreateStatusElement: true,
+            autoCreateStatusElement: false, // False by default - user must explicitly enable
             autoAddStyles: false, // Changed default to false - styles are now opt-in
             // Style isolation options
             useDataAttributes: true, // Use data attributes instead of classes for better isolation
@@ -80,6 +80,7 @@ export class GamepadService {
             lastL1State: false,
             lastShoulderTime: 0,
             animationFrameId: null, // Add animation frame ID for cleanup
+            statusElementId: this.options.statusElementId ?? null, // Add statusElementId for UI updates
             onControllerConnect: null,
             onControllerDisconnect: null,
             onNavigationMenuOpen: null,
@@ -137,9 +138,16 @@ export class GamepadService {
             addNavigationStyles();
         }
         
-        // Auto-create status element if needed
-        if (this.options.autoCreateStatusElement && (this.options.statusElementId !== null && this.options.statusElementId !== undefined)) {
-            ensureStatusElement(this.options.statusElementId ?? '');
+        // Auto-create status element only if explicitly requested
+        if (this.options.statusElementId) {
+            // User provided a statusElementId, so they want the status element
+            ensureStatusElement(this.options.statusElementId);
+        } else if (this.options.autoCreateStatusElement) {
+            // User wants auto status element with default ID
+            const defaultStatusId = 'gamepad-status';
+            this.options.statusElementId = defaultStatusId;
+            this.eventState.statusElementId = defaultStatusId;
+            ensureStatusElement(defaultStatusId);
         }
         
         // Set gamepad context for styling hooks
