@@ -367,6 +367,73 @@ const gamepad = gamepadService('.form-container', {
 </form>
 ```
 
+## 🎮 Custom Button Callbacks
+
+You can override the behavior of **any button** on the gamepad using the `onButtonDown` and `onButtonUp` callbacks in `GamepadService`.
+
+### Common Button Index Mapping
+
+| Index | Xbox         | PlayStation   | Nintendo      | Description         |
+|-------|--------------|--------------|--------------|---------------------|
+| 0     | A            | Cross (X)    | B            | Primary/Select      |
+| 1     | B            | Circle (O)   | A            | Back/Cancel         |
+| 2     | X            | Square (☐)   | Y            | Secondary           |
+| 3     | Y            | Triangle (△) | X            | Tertiary            |
+| 4     | LB           | L1           | L             | Left Shoulder       |
+| 5     | RB           | R1           | R             | Right Shoulder      |
+| 6     | LT           | L2           | ZL            | Left Trigger        |
+| 7     | RT           | R2           | ZR            | Right Trigger       |
+| 8     | View         | Share        | -             | Select/Share/Menu   |
+| 9     | Menu         | Options      | +             | Start/Pause         |
+| 10    | LS           | L3           | L3            | Left Stick Press    |
+| 11    | RS           | R3           | R3            | Right Stick Press   |
+| 12    | D-pad Up     | D-pad Up     | D-pad Up      | D-pad Up            |
+| 13    | D-pad Down   | D-pad Down   | D-pad Down    | D-pad Down          |
+| 14    | D-pad Left   | D-pad Left   | D-pad Left    | D-pad Left          |
+| 15    | D-pad Right  | D-pad Right  | D-pad Right   | D-pad Right         |
+| 16    | Xbox         | PS           | Home          | System/Home         |
+
+> **Note:** Button indices may vary for some controllers. Always test with your target device.
+
+### Usage Example
+
+```ts
+import { GamepadService } from 'gamepad-controller';
+
+const gamepadService = new GamepadService({
+  // ...options
+});
+
+gamepadService.onButtonDown = (buttonIndex, gamepad) => {
+  if (buttonIndex === 0) {
+    // X/A/Cross pressed
+    alert('Primary button pressed!');
+  } else if (buttonIndex === 1) {
+    // O/B/Circle pressed
+    alert('Back button pressed!');
+  } else {
+    console.log('Button', buttonIndex, 'pressed');
+  }
+};
+
+gamepadService.onButtonUp = (buttonIndex, gamepad) => {
+  if (buttonIndex === 0) {
+    console.log('Primary button released!');
+  } else if (buttonIndex === 1) {
+    console.log('Back button released!');
+  } else {
+    console.log('Button', buttonIndex, 'released');
+  }
+};
+
+gamepadService.init();
+```
+
+- `buttonIndex` is the index of the button (see your controller mapping for details).
+- `gamepad` is the Gamepad object from the browser API.
+
+You can use this to implement custom actions for any button, including X/A, O/B, triggers, shoulders, etc.
+
 ## 🛠️ Development
 
 ### Project Structure
