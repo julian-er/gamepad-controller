@@ -15,16 +15,7 @@ import { debounce } from '../utils/navigationUtils.js';
 import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
 import type { GamepadEventState } from './gamepadEventHandler.js';
 import { GamepadContextManager } from '../gamepadContextManager.js';
-
-// Navigation state interface
-export interface NavigationState {
-    focusedElementIndex: number;
-    elements: Element[];
-    gridDimensions: { rows: number; cols: number };
-    options: GamepadServiceOptions;
-    onFocus: ((element: Element, index: number) => void) | null;
-    onSelect: ((element: Element, index: number) => void) | null;
-}
+import type { NavigationState } from '../Interfaces/NavigationState';
 
 /**
  * GamepadService - Enhanced gamepad navigation with dual context support

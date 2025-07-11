@@ -5,15 +5,9 @@ import { findNearestInDirection } from '../utils/navigationUtils.js';
 import { addGamepadDataAttributes, removeGamepadDataAttributes, updateStatusElement } from '../utils/domUtils.js';
 import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
 import type { GridDimensions } from '../Interfaces/GridDimensions.js';
+import type { NavigationState } from '../Interfaces/NavigationState';
 
-export interface NavigationState {
-    focusedElementIndex: number;
-    elements: Element[];
-    gridDimensions: GridDimensions;
-    options: GamepadServiceOptions;
-    onFocus: ((element: Element, index: number) => void) | null;
-    onSelect: ((element: Element, index: number) => void) | null;
-}
+
 
 // Update status display
 export function updateStatus(state: NavigationState, gamepads: { [key: string]: Gamepad }, currentControllerType: string) {
