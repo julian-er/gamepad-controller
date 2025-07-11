@@ -8,24 +8,12 @@ export function isElementInViewport(element: Element, rootMargin: number = 0): b
     const rect = element.getBoundingClientRect();
     const windowHeight = window.innerHeight || document.documentElement.clientHeight;
     const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-    
-    // Check if element has any visible area in viewport
-    const hasVisibleArea = rect.width > 0 && rect.height > 0;
-    const isInViewport = (
+    return (
+        rect.bottom > 0 - rootMargin &&
+        rect.right > 0 - rootMargin &&
         rect.top < windowHeight + rootMargin &&
-        rect.bottom > -rootMargin &&
-        rect.left < windowWidth + rootMargin &&
-        rect.right > -rootMargin &&
-        hasVisibleArea
+        rect.left < windowWidth + rootMargin
     );
-    
-    console.log(`🔍 isElementInViewport check for ${element.tagName}:`);
-    console.log(`   rect: top=${Math.round(rect.top)}, bottom=${Math.round(rect.bottom)}, left=${Math.round(rect.left)}, right=${Math.round(rect.right)}`);
-    console.log(`   window: height=${windowHeight}, width=${windowWidth}`);
-    console.log(`   hasVisibleArea: ${hasVisibleArea}`);
-    console.log(`   isInViewport: ${isInViewport}`);
-    
-    return isInViewport;
 }
 
 // Get all focusable elements with optional viewport filtering
@@ -62,7 +50,6 @@ export function getFocusableElements(
     if (useGamepadIndex) {
         console.log('🎯 Gamepad-Index filtering ENABLED - Looking for elements with gamepad-index="true"');
         elements = container.querySelectorAll('[gamepad-index="true"]');
-        console.log(`🔍 Found ${elements.length} elements with gamepad-index="true"`);
     } else {
         console.log('❌ Gamepad-Index filtering DISABLED - Using all focusable elements');
         elements = container.querySelectorAll(focusableSelectors.join(', '));
@@ -77,7 +64,7 @@ export function getFocusableElements(
         const isVisible = style.display !== 'none' && 
                          style.visibility !== 'hidden' && 
                          style.opacity !== '0';
-        
+
         // Only check viewport if onlyViewport is true
         const inViewport = onlyViewport ? isElementInViewport(element) : true;
         const shouldInclude = isVisible && inViewport;

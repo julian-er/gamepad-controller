@@ -23,7 +23,7 @@
     "build:types": "tsc --emitDeclarationOnly",
     "serve": "npx http-server . -c-1 -o pages/home-page",
     "start": "npm i && npm run build && npm run serve",
-    "example-test": "npm i && npm run build && npm pack && cd examples && npm i && npm run dev"
+    "example-test": "rm -rf dist && npm i && npm run build && npm pack && cd examples && npm i && npm run dev"
   },
   "devDependencies": {
     "http-server": "^14.1.1",

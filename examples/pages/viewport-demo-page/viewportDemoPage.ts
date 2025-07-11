@@ -6,7 +6,7 @@ import { GamepadService } from 'gamepad-controller';
 let gamepadService: GamepadService;
 
 // Initialize gamepad service
-function initGamepadService(onlyViewport: boolean = false) {
+function initGamepadService(onlyViewport: boolean = true) {
     // Destroy existing service if any
     if (gamepadService) {
         gamepadService.destroy();
