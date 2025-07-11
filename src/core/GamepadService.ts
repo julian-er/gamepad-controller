@@ -52,6 +52,10 @@ export class GamepadService {
             enableNavigation: true,
             enableBackButton: true,
             enableShoulderNavigation: true,
+            // Scrolling options
+            enableRightStickScroll: true, // Enable by default
+            scrollSpeed: 1,
+            scrollDebounceTime: 50, // Faster debounce for smooth scrolling
             navigationMenuSelector: '.nav-menu, nav, .navigation',
             autoCreateStatusElement: false, // False by default - user must explicitly enable
             autoAddStyles: false, // Changed default to false - styles are now opt-in
@@ -79,6 +83,7 @@ export class GamepadService {
             lastR1State: false,
             lastL1State: false,
             lastShoulderTime: 0,
+            lastScrollTime: 0, // Initialize scroll timing
             animationFrameId: null, // Add animation frame ID for cleanup
             statusElementId: this.options.statusElementId ?? null, // Add statusElementId for UI updates
             onControllerConnect: null,

@@ -434,6 +434,56 @@ gamepadService.init();
 
 You can use this to implement custom actions for any button, including X/A, O/B, triggers, shoulders, etc.
 
+## 📜 Right Stick Scrolling
+
+The gamepad controller includes built-in window scrolling support using the right analog stick, similar to how X/A is used for actions and Circle/B for back navigation.
+
+### Basic Usage
+```javascript
+const gamepadService = new GamepadService({
+    enableRightStickScroll: true, // Enabled by default
+    scrollSpeed: 1, // Scroll speed multiplier (default: 1)
+    scrollDebounceTime: 50, // Debounce time for smooth scrolling (default: 50ms)
+});
+```
+
+### Configuration Options
+- **`enableRightStickScroll`**: Enable/disable right stick scrolling (default: `true`)
+- **`scrollSpeed`**: Multiplier for scroll speed - higher values = faster scrolling (default: `1`)
+- **`scrollDebounceTime`**: Debounce time in milliseconds for smooth scrolling (default: `50ms`)
+
+### Examples
+
+**Faster Scrolling:**
+```javascript
+const gamepadService = new GamepadService({
+    scrollSpeed: 2, // 2x faster scrolling
+});
+```
+
+**Disable Scrolling:**
+```javascript
+const gamepadService = new GamepadService({
+    enableRightStickScroll: false, // Disable right stick scrolling
+});
+```
+
+**Custom Scroll Settings:**
+```javascript
+const gamepadService = new GamepadService({
+    enableRightStickScroll: true,
+    scrollSpeed: 1.5, // 1.5x speed
+    scrollDebounceTime: 25, // Faster response (more sensitive)
+});
+```
+
+> **🎮 Controls**: 
+> - **Left Stick/D-Pad**: Navigate between elements
+> - **Right Stick**: Scroll the window/page
+> - **X/A**: Select/Click elements
+> - **Circle/B**: Go back
+> - **R1/L1**: Navigate between sections
+
 ## Status Element Options
 
 The gamepad controller now provides flexible options for showing connection status:

@@ -15,6 +15,10 @@ export interface GamepadServiceOptions {
     enableNavigation?: boolean;
     enableBackButton?: boolean;
     enableShoulderNavigation?: boolean;
+    // Scrolling options
+    enableRightStickScroll?: boolean; // Enable right stick for window scrolling
+    scrollSpeed?: number; // Multiplier for scroll speed (default: 1)
+    scrollDebounceTime?: number; // Debounce time for scrolling (default: 50ms)
     navigationMenuSelector?: string;
     autoAddStyles?: boolean;
     useDataAttributes?: boolean;

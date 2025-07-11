@@ -193,4 +193,21 @@ export function handleShoulderNavigation(
     if (onNavigationMenuOpen) {
         onNavigationMenuOpen(button);
     }
+}
+
+// Handle window scrolling with right stick
+export function handleScrolling(rightStickX: number, rightStickY: number, scrollSpeed: number = 1) {
+    const scrollMultiplier = 10 * scrollSpeed; // Base scroll speed
+    
+    // Calculate scroll amounts
+    const scrollX = rightStickX * scrollMultiplier;
+    const scrollY = rightStickY * scrollMultiplier;
+    
+    // Perform the scroll
+    window.scrollBy(scrollX, scrollY);
+    
+    // Log for debugging (can be removed in production)
+    if (Math.abs(scrollX) > 1 || Math.abs(scrollY) > 1) {
+        console.log(`🔄 Scrolling: X=${scrollX.toFixed(1)}, Y=${scrollY.toFixed(1)}`);
+    }
 } 

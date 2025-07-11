@@ -1,7 +1,7 @@
 // gamepadEventHandler.ts
 // Enhanced gamepad event handling with proper cleanup and memory management
 
-import { navigateGrid, navigateSpatial, handleSelection, handleBackButton, handleShoulderNavigation, updateStatus } from './gamepadNavigation.js';
+import { navigateGrid, navigateSpatial, handleSelection, handleBackButton, handleShoulderNavigation, updateStatus, handleScrolling } from './gamepadNavigation.js';
 import { isValidGamepad, detectControllerType, applyDeadzone } from '../utils/controllerUtils.js';
 import { getPrimaryActionButtonIndex, getDpadIndices } from '../controllerMappings.js';
 import { updateStatusElement } from '../utils/domUtils.js';
@@ -24,6 +24,8 @@ export interface GamepadEventState {
     lastR1State: boolean;
     lastL1State: boolean;
     lastShoulderTime: number;
+    // Scrolling state tracking
+    lastScrollTime: number;
     // Add animation frame ID for proper cleanup
     animationFrameId: number | null;
     // Add statusElementId for UI updates
@@ -276,6 +278,23 @@ export function gameLoop(
                         }
                         moved = true;
                         eventState.lastAxisMove = currentTimestamp;
+                    }
+                }
+
+                // Right stick scrolling
+                if (navState.options.enableRightStickScroll) {
+                    const rightStickX = applyDeadzone(gp.axes[2] || 0, navState.options.deadzone);
+                    const rightStickY = applyDeadzone(gp.axes[3] || 0, navState.options.deadzone);
+
+                    if (Math.abs(rightStickX) > 0 || Math.abs(rightStickY) > 0) {
+                        if (currentTimestamp - eventState.lastScrollTime > (navState.options.scrollDebounceTime ?? 50)) {
+                            const scrollSpeed = navState.options.scrollSpeed ?? 1;
+                            
+                            // Use the dedicated scrolling function
+                            handleScrolling(rightStickX, rightStickY, scrollSpeed);
+                            
+                            eventState.lastScrollTime = currentTimestamp;
+                        }
                     }
                 }
 
