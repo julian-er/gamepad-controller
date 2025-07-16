@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>onSelect Method Demo - Gamepad Controller</title>
+    <link rel="stylesheet" href="onSelectDemo.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 onSelect Method Customization Demo</h1>
+        
+        <div class="info-section">
+            <h2>📋 How to Customize onSelect Behavior</h2>
+            <p>The <code>onSelect</code> method allows you to define custom behavior when an element is selected with the gamepad. Here are several examples:</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>🔧 Demo Controls</h3>
+            <div class="control-buttons">
+                <button id="basic-behavior" gamepad-index="true" class="demo-button">Set Basic Behavior</button>
+                <button id="advanced-behavior" gamepad-index="true" class="demo-button">Set Advanced Behavior</button>
+                <button id="custom-behavior" gamepad-index="true" class="demo-button">Set Custom Behavior</button>
+                <button id="clear-behavior" gamepad-index="true" class="demo-button">Clear Behavior</button>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>🎯 Interactive Elements</h3>
+            <div class="interactive-grid">
+                <div class="interactive-card" data-type="button" data-action="primary" gamepad-index="true">
+                    <h4>Primary Action</h4>
+                    <p>This button demonstrates basic selection behavior</p>
+                </div>
+                
+                <div class="interactive-card" data-type="link" data-action="navigate" gamepad-index="true">
+                    <h4>Navigation Link</h4>
+                    <p>This link shows custom navigation behavior</p>
+                </div>
+                
+                <div class="interactive-card" data-type="toggle" data-action="toggle" gamepad-index="true">
+                    <h4>Toggle Switch</h4>
+                    <p>This demonstrates toggle behavior</p>
+                    <div class="toggle-indicator">OFF</div>
+                </div>
+                
+                <div class="interactive-card" data-type="counter" data-action="increment" gamepad-index="true">
+                    <h4>Counter</h4>
+                    <p>This shows stateful behavior</p>
+                    <div class="counter-display">0</div>
+                </div>
+                
+                <div class="interactive-card" data-type="input" data-action="focus" gamepad-index="true">
+                    <h4>Input Field</h4>
+                    <input type="text" placeholder="Type something..." class="demo-input">
+                </div>
+                
+                <div class="interactive-card" data-type="modal" data-action="modal" gamepad-index="true">
+                    <h4>Modal Trigger</h4>
+                    <p>This opens a modal dialog</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>📝 Activity Log</h3>
+            <div id="activity-log" class="activity-log">
+                <div class="log-entry">Ready! Use your gamepad to navigate and select elements.</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>📊 Selection Analytics</h3>
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h4>Total Selections</h4>
+                    <div id="total-selections" class="analytics-number">0</div>
+                </div>
+                <div class="analytics-card">
+                    <h4>Last Selected</h4>
+                    <div id="last-selected" class="analytics-text">None</div>
+                </div>
+                <div class="analytics-card">
+                    <h4>Most Selected</h4>
+                    <div id="most-selected" class="analytics-text">None</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="gamepad-status" class="gamepad-status"></div>
+    </div>
+
+    <!-- Modal for demonstration -->
+    <div id="demo-modal" class="modal">
+        <div class="modal-content">
+            <h3>🎉 Modal Opened!</h3>
+            <p>This modal was opened using the onSelect callback.</p>
+            <button id="close-modal" class="modal-button">Close</button>
+        </div>
+    </div>
+
+    <script type="module" src="onSelectDemo.ts"></script>
+</body>
+</html> 

@@ -503,6 +503,106 @@ const gamepad = gamepadService('.nav-menu', {
 });
 ```
 
+## 🎮 Analog Stick Deadzone Configuration
+
+### What is Deadzone?
+
+The **deadzone** is a threshold value that determines how much an analog stick must be moved before it registers as input. This prevents unwanted navigation from:
+- **Controller drift** - When sticks don't return to perfect center position
+- **Accidental touches** - Light pressure that shouldn't trigger navigation
+- **Worn controllers** - Older controllers with loose sticks
+
+### Default Deadzone Value
+
+The library uses a default deadzone of **0.1** (10% of full stick range), which works well for most controllers and users.
+
+### How Deadzone Works
+
+```ts
+// Analog stick values range from -1.0 to 1.0
+// With deadzone = 0.1:
+// - Stick values between -0.1 and 0.1 are ignored
+// - Only values outside this range trigger navigation
+// - Prevents accidental movement from slight stick positions
+
+const gamepad = gamepadService('.container', {
+    deadzone: 0.1 // 10% deadzone (default)
+});
+```
+
+### Adjusting Deadzone
+
+#### For Sensitive Controllers (New/Precise)
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0.05 // 5% - More sensitive, responds to smaller movements
+});
+```
+
+#### For Worn/Drifting Controllers
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0.2 // 20% - Less sensitive, requires more stick movement
+});
+```
+
+#### Disable Deadzone (Not Recommended)
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0 // No deadzone - responds to any stick movement
+});
+```
+
+### Visual Deadzone Explanation
+
+```
+Analog Stick Range: -1.0 ←→ 1.0
+                        ┌─────────────────────┐
+Deadzone (0.1):    -0.1 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 0.1
+                        ╚═════════════════════╝
+                           Ignored Range
+                        
+← Active Range →      ← Ignored →      ← Active Range →
+```
+
+### Common Deadzone Values
+
+| Value | Sensitivity | Best For |
+|-------|-------------|----------|
+| `0.05` | Very High | New controllers, precise users |
+| `0.1` | High | Default - works for most users |
+| `0.15` | Medium | General use, slightly worn controllers |
+| `0.2` | Low | Worn controllers, accessibility needs |
+| `0.25` | Very Low | Heavily worn/drifting controllers |
+
+### Deadzone and Scrolling
+
+The deadzone also affects right stick scrolling:
+
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0.1,              // Navigation deadzone
+    enableRightStickScroll: true,
+    scrollSpeed: 1.0            // Scrolling uses same deadzone value
+});
+```
+
+### Testing Your Deadzone
+
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0.1
+});
+
+// Test navigation responsiveness
+gamepad.onFocus = (element, index) => {
+    console.log(`Focused element ${index}: ${element.tagName}`);
+};
+
+// If navigation is too sensitive: increase deadzone
+// If navigation is unresponsive: decrease deadzone
+```
+
 ## 🎯 Navigation Controls
 
 | Controller | Navigate | Select | Back | Menu Navigation | Scroll |
