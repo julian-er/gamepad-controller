@@ -228,7 +228,7 @@ export class GamepadService {
 
         // Set up context switching callback
         (this.contextManager as any).onContextSwitch = (newContext: any, oldContext: any) => {
-            console.log(`[🎮 🕹️ Gamepad Controller] - Context switched from ${oldContext?.id || 'none'} to ${newContext.id}`);
+            console.info(`[🎮 🕹️ Gamepad Controller] - Context switched from ${oldContext?.id || 'none'} to ${newContext.id}`);
             if (this.onContextSwitch) {
                 this.onContextSwitch(newContext, oldContext);
             }
@@ -328,7 +328,7 @@ export class GamepadService {
             this.navState.focusedElementIndex = Math.max(0, this.navState.elements.length - 1);
         }
 
-        console.log(`Detected ${this.navState.elements.length} navigable elements (${this.navState.gridDimensions.rows}x${this.navState.gridDimensions.cols})`);
+        console.info(`[🎮 🕹️ Gamepad Controller] - Detected ${this.navState.elements.length} navigable elements (${this.navState.gridDimensions.rows}x${this.navState.gridDimensions.cols})`);
     }
 
     // Set elements manually

@@ -144,7 +144,7 @@ export function handleSelection(state: NavigationState, contextManager?: any) {
 
         // Handle navigation menu links specially
         if (focusedElement.classList.contains('nav-item') && (focusedElement as HTMLAnchorElement).href) {
-            console.log(`🔗 Navigating to: ${(focusedElement as HTMLAnchorElement).href}`);
+            console.debug(`[🎮 🕹️ Gamepad Controller] - 🔗 Navigating to: ${(focusedElement as HTMLAnchorElement).href}`);
             window.location.href = (focusedElement as HTMLAnchorElement).href;
             return;
         }
@@ -161,7 +161,7 @@ export function handleSelection(state: NavigationState, contextManager?: any) {
  * @param onBackButton - Callback function to handle back button press
  */
 export function handleBackButton(onBackButton: (() => void) | null) {
-    console.log('🔙 Back button pressed - going back in history');
+    console.debug('[🎮 🕹️ Gamepad Controller] - 🔙 Back button pressed - going back in history');
     
     if (onBackButton) {
         onBackButton();
@@ -248,6 +248,6 @@ export function handleScrolling(rightStickX: number, rightStickY: number, scroll
     
     // Log for debugging (can be removed in production)
     if (Math.abs(scrollX) > 1 || Math.abs(scrollY) > 1) {
-        console.log(`🔄 Scrolling: X=${scrollX.toFixed(1)}, Y=${scrollY.toFixed(1)}`);
+        console.debug(`[🎮 🕹️ Gamepad Controller] - 🔄 Scrolling: X=${scrollX.toFixed(1)}, Y=${scrollY.toFixed(1)}`);
     }
 } 

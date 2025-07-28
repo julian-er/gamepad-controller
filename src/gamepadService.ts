@@ -375,7 +375,7 @@ export const gamepadUtils = {
  */
 export function cleanupGamepadService(): void {
     if (gamepadInstance) {
-        console.log('[🎮 🕹️ Gamepad Controller] - 🧹 Cleaning up global gamepad instance...');
+        console.info('[🎮 🕹️ Gamepad Controller] - 🧹 Cleaning up global gamepad instance...');
         gamepadInstance.destroy();
         gamepadInstance = null;
     }

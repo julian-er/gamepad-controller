@@ -183,7 +183,7 @@ export function createNavigationCSSFile(filename = 'gamepad-navigation.css', opt
     link.click();
     
     URL.revokeObjectURL(url);
-    console.log(`🎨 Downloaded ${filename} with gamepad navigation styles`);
+    console.info(`🎨 Downloaded ${filename} with gamepad navigation styles`);
 }
 
 // Get example CSS for different contexts
@@ -242,10 +242,10 @@ export function getExampleCSS() {
 
 // Print CSS examples to console for easy copying
 export function printCSSExamples() {
-    console.log('🎨 CSS Examples for Gamepad Navigation:');
-    console.log('=====================================');
-    console.log(getExampleCSS());
-    console.log('Copy and paste this CSS into your stylesheet and customize as needed!');
+    console.info('[🎮 🕹️ Gamepad Controller] - 🎨 CSS Examples for Gamepad Navigation:');
+    console.info('[🎮 🕹️ Gamepad Controller] - =====================================');
+    console.info(getExampleCSS());
+    console.info('[🎮 🕹️ Gamepad Controller] - Copy and paste this CSS into your stylesheet and customize as needed!');
 } 
 
 // Stubs for compatibility with exampleMenuPage

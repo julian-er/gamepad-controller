@@ -1,9 +1,12 @@
-// domUtils.ts
-// DOM manipulation and element handling utilities
-
 import type { GridDimensions } from '../Interfaces/GridDimensions.js';
 
 // Check if element is in viewport
+/**
+ * Checks if an element is within the viewport, with optional margin
+ * @param element - The DOM element to check
+ * @param rootMargin - Optional margin to expand/contract the viewport bounds (default: 0)
+ * @returns boolean indicating if element is in viewport
+ */
 export function isElementInViewport(element: Element, rootMargin: number = 0): boolean {
     const rect = element.getBoundingClientRect();
     const windowHeight = window.innerHeight || document.documentElement.clientHeight;
@@ -16,7 +19,13 @@ export function isElementInViewport(element: Element, rootMargin: number = 0): b
     );
 }
 
-// Get all focusable elements with optional viewport filtering
+/**
+ * Gets all focusable elements within a container, with optional viewport filtering
+ * @param containerSelector - The selector for the container element (default: document.body)
+ * @param useGamepadIndex - Whether to filter elements based on gamepad-index attribute (default: false)
+ * @param onlyViewport - Whether to filter elements based on viewport visibility (default: false)
+ * @returns Array of focusable elements
+ */
 export function getFocusableElements(
     containerSelector: string | null = null, 
     useGamepadIndex: boolean = false,
@@ -48,15 +57,15 @@ export function getFocusableElements(
     
     // If gamepad-index is enabled, only look for elements with gamepad-index="true"
     if (useGamepadIndex) {
-        console.log('🎯 Gamepad-Index filtering ENABLED - Looking for elements with gamepad-index="true"');
+        console.debug('[� 🕹️ Gamepad Controller] - 🎯 Gamepad-Index filtering ENABLED - Looking for elements with gamepad-index="true"');
         elements = container.querySelectorAll('[gamepad-index="true"]');
     } else {
-        console.log('❌ Gamepad-Index filtering DISABLED - Using all focusable elements');
+        console.debug('[🎮 🕹️ Gamepad Controller] - ❌ Gamepad-Index filtering DISABLED - Using all focusable elements');
         elements = container.querySelectorAll(focusableSelectors.join(', '));
-        console.log(`🔍 Found ${elements.length} normally focusable elements`);
+        console.debug(`[🎮 🕹️ Gamepad Controller] - 🔍 Found ${elements.length} normally focusable elements`);
     }
     
-    console.log(`🔧 onlyViewport setting: ${onlyViewport}`);
+    console.debug(`[🎮 🕹️ Gamepad Controller] - 🔧 onlyViewport setting: ${onlyViewport}`);
     
     const filteredElements = Array.from(elements).filter(element => {
         // Check if element is visible
@@ -73,27 +82,32 @@ export function getFocusableElements(
         const rect = element.getBoundingClientRect();
         const elementTitle = element.querySelector('h3')?.textContent || element.tagName;
         
-        console.log(`🔍 Element: ${elementTitle}`);
-        console.log(`   Visible: ${isVisible}`);
-        console.log(`   Position: top=${Math.round(rect.top)}px, bottom=${Math.round(rect.bottom)}px`);
-        console.log(`   Viewport check: ${onlyViewport ? `inViewport=${inViewport}` : 'skipped'}`);
-        console.log(`   Should include: ${shouldInclude}`);
+        console.debug(`[🎮 🕹️ Gamepad Controller] - 🔍 Element: ${elementTitle}`);
+        console.debug(`[🎮 🕹️ Gamepad Controller] -    Visible: ${isVisible}`);
+        console.debug(`[🎮 🕹️ Gamepad Controller] -    Position: top=${Math.round(rect.top)}px, bottom=${Math.round(rect.bottom)}px`);
+        console.debug(`[🎮 🕹️ Gamepad Controller] -    Viewport check: ${onlyViewport ? `inViewport=${inViewport}` : 'skipped'}`);
+        console.debug(`[🎮 🕹️ Gamepad Controller] -    Should include: ${shouldInclude}`);
         
         if (!shouldInclude) {
             const reason = !isVisible ? 'not visible' : 'not in viewport';
-            console.log(`❌ Filtered out element: ${elementTitle} (${reason})`);
+            console.debug(`[🎮 🕹️ Gamepad Controller] -   ❌ Filtered out element: ${elementTitle} (${reason})`);
         }
         
         return shouldInclude;
     });
 
     const viewportStatus = onlyViewport ? 'viewport-only' : 'all elements';
-    console.log(`✅ Final result: ${filteredElements.length} navigable elements (${viewportStatus})`);
+    console.debug(`[🎮 🕹️ Gamepad Controller] - ✅ Final result: ${filteredElements.length} navigable elements (${viewportStatus})`);
     
     return filteredElements;
 }
 
-// Convenience function for viewport-only element detection
+/**
+ * Convenience function for viewport-only element detection
+ * @param containerSelector - The selector for the container element (default: document.body)
+ * @param useGamepadIndex - Whether to filter elements based on gamepad-index attribute (default: false)
+ * @returns Array of focusable elements in viewport
+ */
 export function getFocusableElementsInViewport(
     containerSelector: string | null = null, 
     useGamepadIndex: boolean = false
@@ -101,7 +115,12 @@ export function getFocusableElementsInViewport(
     return getFocusableElements(containerSelector, useGamepadIndex, true);
 }
 
-// Calculate grid dimensions for elements
+/**
+ * Calculates grid dimensions for elements in a container
+ * @param elements - Array of DOM elements to calculate dimensions for
+ * @param container - The container element to use for calculations
+ * @returns GridDimensions object with rows and columns
+ */
 export function calculateGridDimensions(elements: Element[], container: Element): GridDimensions {
     if (!elements.length || !container) return { rows: 0, cols: 0 };
 

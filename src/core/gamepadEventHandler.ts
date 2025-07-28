@@ -35,7 +35,7 @@ export function detectExistingGamepads(state: GamepadEventState) {
     for (let i = 0; i < gamepads.length; i++) {
         const gamepad = gamepads[i];
         if (gamepad && isValidGamepad(gamepad)) {
-            console.log(`Detected already connected gamepad: ${gamepad.id}`);
+            console.info(`[🎮 🕹️ Gamepad Controller] - Detected already connected gamepad: ${gamepad.id}`);
 
             // Add to state
             state.gamepads[gamepad.index] = gamepad;
