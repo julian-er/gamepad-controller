@@ -1,7 +1,4 @@
-// controllerMappings.ts
-// Controller mappings for different gamepad types
-
-import type { ControllerType, ControllerValidation, ControllerMapping, ControllerMappings } from './Interfaces/ControllerMappings.js';
+import type { ControllerType, ControllerMappings } from './Interfaces/ControllerMappings.js';
 
 export const CONTROLLER_MAPPINGS: ControllerMappings = {
     xbox: {
@@ -80,7 +77,11 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = {
     }
 };
 
-// Helper function to get the primary action button index based on controller type
+/**
+ * Gets the primary action button index based on controller type
+ * @param controllerType - The type of controller ('xbox', 'playstation', 'nintendo', or 'unknown')
+ * @returns The index of the primary action button
+ */
 export function getPrimaryActionButtonIndex(controllerType: ControllerType): number {
     switch (controllerType) {
         case 'xbox':
@@ -94,7 +95,11 @@ export function getPrimaryActionButtonIndex(controllerType: ControllerType): num
     }
 }
 
-// Helper function to get D-pad button indices based on controller type
+/**
+ * Gets the D-pad button indices based on controller type
+ * @param controllerType - The type of controller ('xbox', 'playstation', 'nintendo', or 'unknown')
+ * @returns An object containing the indices for the D-pad buttons
+ */
 export function getDpadIndices(controllerType: ControllerType): { up: number; down: number; left: number; right: number } {
     // Most controllers have D-pad at indices 12-15
     return {
@@ -105,14 +110,24 @@ export function getDpadIndices(controllerType: ControllerType): { up: number; do
     };
 }
 
-// Get button name for a specific controller type
+/**
+ * Gets the name of a button based on its index and controller type
+ * @param index - The index of the button
+ * @param controllerType - The type of controller ('xbox', 'playstation', 'nintendo', or 'unknown')
+ * @returns The name of the button
+ */
 export function getButtonName(index: number, controllerType: ControllerType): string {
     const mapping = CONTROLLER_MAPPINGS[controllerType];
     return mapping.buttons[index] || `Button ${index}`;
 }
 
-// Get axis name for a specific controller type
+/**
+ * Gets the name of an axis based on its index and controller type
+ * @param index - The index of the axis
+ * @param controllerType - The type of controller ('xbox', 'playstation', 'nintendo', or 'unknown')
+ * @returns The name of the axis
+ */
 export function getAxisName(index: number, controllerType: ControllerType): string {
     const mapping = CONTROLLER_MAPPINGS[controllerType];
     return mapping.axes[index] || `Axis ${index}`;
-} 
+}

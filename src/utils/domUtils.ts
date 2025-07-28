@@ -23,7 +23,7 @@ export function getFocusableElements(
     onlyViewport: boolean = false
 ): Element[] {
     const container = containerSelector ? document.querySelector(containerSelector) : document.body;
-    
+
     if (!container) {
         console.warn('getFocusableElements: Container not found', containerSelector);
         return [];
@@ -145,7 +145,14 @@ export function calculateGridDimensions(elements: Element[], container: Element)
     return { rows: rows.length, cols: maxCols };
 }
 
-// Ensure a status element exists for gamepad feedback
+/**
+ * Ensures a status element exists in the DOM for displaying gamepad feedback.
+ * If an element with the given ID already exists, returns that element.
+ * Otherwise creates a new div element with default styles and appends it to the body.
+ * 
+ * @param statusElementId - The ID to use for the status element
+ * @returns The existing or newly created status element
+ */
 export function ensureStatusElement(statusElementId: string): HTMLElement {
     let statusElement = document.getElementById(statusElementId);
     let isNewElement = false;
@@ -184,7 +191,12 @@ export function ensureStatusElement(statusElementId: string): HTMLElement {
     return statusElement;
 }
 
-// Update status element with controller information
+/**
+ * Updates the status element with controller connection information
+ * @param statusElementId - The ID of the status element to update
+ * @param controllerType - The type of controller that is connected ('xbox', 'playstation', 'nintendo', or 'unknown')
+ * @param isConnected - Boolean indicating if a controller is currently connected
+ */
 export function updateStatusElement(statusElementId: string, controllerType: string, isConnected: boolean): void {
     const statusElement = document.getElementById(statusElementId);
     if (!statusElement) {
@@ -198,16 +210,14 @@ export function updateStatusElement(statusElementId: string, controllerType: str
     } else {
         statusElement.textContent = '🎮 Waiting for gamepad connection...';
     }
-    
+
     // Only apply styles to elements that were auto-created by the library
     const isAutoCreated = statusElement.hasAttribute('data-gamepad-auto-created');
     if (isAutoCreated) {
         // Update background color for auto-created elements
         statusElement.style.background = isConnected ? 'rgba(0, 128, 0, 0.8)' : 'rgba(255, 165, 0, 0.8)';
     }
-    
-    // For custom elements, respect user's styling completely
-    // Users can handle their own styling via CSS classes or their own update functions
+
 }
 
 // Add data attributes for styling hooks (instead of CSS classes)
@@ -226,7 +236,10 @@ export function addGamepadDataAttributes(element: Element, state: string): void 
     }
 }
 
-// Remove all gamepad data attributes
+/**
+ * Removes all gamepad-related data attributes from an element
+ * @param element - The DOM element to remove gamepad data attributes from
+ */
 export function removeGamepadDataAttributes(element: Element): void {
     if (!element) return;
     
@@ -234,7 +247,11 @@ export function removeGamepadDataAttributes(element: Element): void {
     element.removeAttribute('data-gamepad-selected');
 }
 
-// Set gamepad context for better styling hooks
+/**
+ * Sets a data attribute on the document body to indicate the current gamepad navigation context.
+ * This allows for context-specific styling using CSS selectors.
+ * @param context - The navigation context to set (e.g. 'grid', 'menu', 'default')
+ */
 export function setGamepadContext(context = 'default') {
     document.body.setAttribute('data-gamepad-context', context);
-} 
+}

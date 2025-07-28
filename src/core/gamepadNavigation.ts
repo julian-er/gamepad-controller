@@ -10,6 +10,12 @@ import type { NavigationState } from '../Interfaces/NavigationState';
 
 
 // Update status display
+/**
+ * Updates the status display element with current gamepad connection information
+ * @param state - The current navigation state object
+ * @param gamepads - Object containing connected gamepads indexed by id
+ * @param currentControllerType - The type of controller currently connected ('xbox', 'playstation', 'nintendo', or 'unknown')
+ */
 export function updateStatus(state: NavigationState, gamepads: { [key: string]: Gamepad }, currentControllerType: string) {
     if (!state.options.statusElementId) return;
     
@@ -17,7 +23,13 @@ export function updateStatus(state: NavigationState, gamepads: { [key: string]: 
     updateStatusElement((state.options.statusElementId ?? ''), currentControllerType, isConnected);
 }
 
-// Navigate to specific index
+/**
+ * Navigates to a specific index in the navigation elements array
+ * @param state - The current navigation state object
+ * @param index - The index to navigate to
+ * @param updateFocusCallback - Callback function to update the focused element
+ * @returns boolean indicating if navigation was successful
+ */
 export function navigateToIndex(state: NavigationState, index: number, updateFocusCallback: () => void): boolean {
     if (index >= 0 && index < state.elements.length) {
         state.focusedElementIndex = index;
@@ -27,7 +39,12 @@ export function navigateToIndex(state: NavigationState, index: number, updateFoc
     return false;
 }
 
-// Navigate in grid mode
+/**
+ * Navigates in grid mode based on the specified direction
+ * @param state - The current navigation state object
+ * @param direction - The direction to navigate ('up', 'down', 'left', 'right')
+ * @param updateFocusCallback - Callback function to update the focused element
+ */
 export function navigateGrid(state: NavigationState, direction: string, updateFocusCallback: () => void) {
     const { rows, cols } = state.gridDimensions;
     const currentRow = Math.floor(state.focusedElementIndex / cols);
@@ -73,7 +90,12 @@ export function navigateGrid(state: NavigationState, direction: string, updateFo
     }
 }
 
-// Navigate in spatial mode
+/**
+ * Navigates in spatial mode based on the specified direction
+ * @param state - The current navigation state object
+ * @param direction - The direction to navigate ('up', 'down', 'left', 'right')
+ * @param updateFocusCallback - Callback function to update the focused element
+ */
 export function navigateSpatial(state: NavigationState, direction: string, updateFocusCallback: () => void) {
     const currentElement = state.elements[state.focusedElementIndex];
     if (!currentElement) return;
@@ -88,7 +110,11 @@ export function navigateSpatial(state: NavigationState, direction: string, updat
     }
 }
 
-// Handle selection with enhanced navigation menu support
+/**
+ * Handles selection of a focused element with enhanced navigation menu support
+ * @param state - The current navigation state object
+ * @param contextManager - Optional context manager for dual context navigation mode
+ */
 export function handleSelection(state: NavigationState, contextManager?: any) {
     if (state.options.enableDualContext && contextManager) {
         // In dual context mode, use context manager
@@ -130,7 +156,10 @@ export function handleSelection(state: NavigationState, contextManager?: any) {
     }
 }
 
-// Handle back button functionality
+/**
+ * Handles the back button functionality
+ * @param onBackButton - Callback function to handle back button press
+ */
 export function handleBackButton(onBackButton: (() => void) | null) {
     console.log('🔙 Back button pressed - going back in history');
     
@@ -141,7 +170,13 @@ export function handleBackButton(onBackButton: (() => void) | null) {
     }
 }
 
-// Handle shoulder button navigation (R1/L1)
+/**
+ * Handles shoulder button navigation (R1/L1)
+ * @param state - The current navigation state object
+ * @param button - The button pressed ('R1' or 'L1')
+ * @param contextManager - Optional context manager for dual context navigation mode
+ * @param onNavigationMenuOpen - Optional callback function to handle navigation menu open
+ */
 export function handleShoulderNavigation(
     state: NavigationState, 
     button: string, 
@@ -154,7 +189,7 @@ export function handleShoulderNavigation(
     } else {
         // Single context mode - navigate between pages
         if (button === 'R1') {
-            console.log('⏭️ R1 pressed - next section');
+            console.info('[🎮 🕹️ Gamepad Controller] - Shoulder Navigation - ⏭️ R1 pressed - next section');
             
             const navItems = document.querySelectorAll(`${state.options.navigationMenuSelector || ""} .nav-item, ${state.options.navigationMenuSelector || ""} a`);
             const currentNavItem = state.elements[state.focusedElementIndex];
@@ -171,7 +206,7 @@ export function handleShoulderNavigation(
                 }
             }
         } else if (button === 'L1') {
-            console.log('⏮️ L1 pressed - previous section');
+            console.info('[🎮 🕹️ Gamepad Controller] - Shoulder Navigation - ⏮️ L1 pressed - previous section');
             
             const navItems = document.querySelectorAll(`${state.options.navigationMenuSelector || ""} .nav-item, ${state.options.navigationMenuSelector || ""} a`);
             const currentNavItem = state.elements[state.focusedElementIndex];
@@ -195,7 +230,12 @@ export function handleShoulderNavigation(
     }
 }
 
-// Handle window scrolling with right stick
+/**
+ * Handles window scrolling with right stick
+ * @param rightStickX - The x-axis value of the right stick
+ * @param rightStickY - The y-axis value of the right stick
+ * @param scrollSpeed - The speed of the scroll (default is 1)
+ */
 export function handleScrolling(rightStickX: number, rightStickY: number, scrollSpeed: number = 1) {
     const scrollMultiplier = 10 * scrollSpeed; // Base scroll speed
     

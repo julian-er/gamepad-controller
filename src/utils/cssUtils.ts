@@ -1,11 +1,17 @@
-// cssUtils.ts
-// CSS styling and theming utilities
-
-// Add navigation styles dynamically to the page
+/**
+ * Adds basic CSS styles for gamepad navigation to the page.
+ * Creates or updates a style element with configurable navigation styles.
+ *
+ * @param options - Configuration options for the navigation styles
+ * @param options.scopeId - ID for the style element (default: 'gamepad-navigation-styles')
+ * @param options.primaryColor - Primary color for focus/selection styles (default: '#007bff')
+ * @param options.focusWidth - Width of focus outline (default: '2px')
+ * @param options.animationDuration - Duration of transitions (default: '0.2s')
+ */
 export function addNavigationStyles(options: any = {}): void {
     // COMPLETELY OPTIONAL: Add basic CSS styles for navigation
     // This function is intentionally kept minimal to avoid forcing styles on users
-    
+
     // Allow customization through options
     const config = {
         scopeId: 'gamepad-navigation-styles',

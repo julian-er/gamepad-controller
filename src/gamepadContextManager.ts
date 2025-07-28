@@ -1,19 +1,31 @@
-// gamepadContextManager.ts
-// Context manager for handling multiple independent navigation contexts
-
 import {
   getFocusableElements,
   findNearestInDirection,
   addGamepadDataAttributes,
   removeGamepadDataAttributes,
-  setGamepadContext,
 } from "./utils/index.js";
 
 import type { GamepadNavigationContextOptions } from "./Interfaces/GamepadNavigationContextOptions.js";
 import type { GamepadContextManagerCallback } from "./Interfaces/GamepadContextManagerCallback.js";
 
 /**
- * Individual navigation context with its own state and focus tracking
+ * Individual navigation context that maintains its own state and focus tracking.
+ * Each context represents an independent navigation area with its own focusable elements.
+ *
+ * @example
+ * ```ts
+ * const context = new GamepadNavigationContext('menu', {
+ *   containerSelector: '.menu',
+ *   navigationMode: 'spatial'
+ * });
+ *
+ * // Activate the context
+ * context.activate();
+ *
+ * // Navigate elements
+ * context.next();
+ * context.previous();
+ * ```
  */
 export class GamepadNavigationContext {
   id: string;
@@ -36,7 +48,7 @@ export class GamepadNavigationContext {
       useDataAttributes: options.useDataAttributes ?? true,
       wrapNavigation: options.wrapNavigation ?? true,
       autoDetectElements: options.autoDetectElements ?? true,
-      onlyViewport: options.onlyViewport ?? false, // Include all elements by default
+      onlyViewport: options.onlyViewport ?? false,
     };
 
     // Context state
@@ -53,39 +65,49 @@ export class GamepadNavigationContext {
   }
 
   /**
-   * Detect navigable elements for this context
+   * Detects and stores navigable elements for this context based on configuration options.
+   * Uses getFocusableElements() to find elements that can receive gamepad focus.
+   * Updates the internal elements array and adjusts focused index if needed.
+   * Logs debug information about detected elements.
+   *
+   * @remarks
+   * - Only runs if autoDetectElements option is true
+   * - Uses containerSelector to limit scope if provided
+   * - Can filter by viewport visibility if onlyViewport is true
+   * - Can use gamepad-index attributes if useGamepadIndex is true
    */
   detectElements(): void {
     if (!this.options.autoDetectElements) return;
 
-    // Use getFocusableElements with viewport filtering based on options
-    console.log(`🔍 [${this.id}] Detecting elements with useGamepadIndex: ${this.options.useGamepadIndex ?? false}, onlyViewport: ${this.options.onlyViewport ?? false}`);
+    console.debug(`[🎮 🕹️ Gamepad Controller] - 🔍 [${this.id}] Detecting elements with useGamepadIndex: ${this.options.useGamepadIndex ?? false}, onlyViewport: ${this.options.onlyViewport ?? false}`);
     this.elements = getFocusableElements(
       this.options.containerSelector ?? null, 
       this.options.useGamepadIndex ?? false,
       this.options.onlyViewport ?? false
     );
-    console.log(`📊 [${this.id}] Found ${this.elements.length} elements in container: ${this.options.containerSelector ?? 'body'}`);
-    
-    // Log some element details for debugging
+    console.debug(`[🎮 🕹️ Gamepad Controller] - 📊 [${this.id}] Found ${this.elements.length} elements in container: ${this.options.containerSelector ?? 'body'}`);
+
     this.elements.slice(0, 5).forEach((el, index) => {
       const hasGamepadIndex = el.hasAttribute('gamepad-index');
       const gamepadIndexValue = el.getAttribute('gamepad-index');
-      console.log(`  ${index + 1}. ${el.tagName.toLowerCase()} - gamepad-index: ${hasGamepadIndex ? gamepadIndexValue : 'none'} - text: "${el.textContent?.slice(0, 30)}"`);
+      console.debug(` [🎮 🕹️ Gamepad Controller] -  ${index + 1}. ${el.tagName.toLowerCase()} - gamepad-index: ${hasGamepadIndex ? gamepadIndexValue : 'none'} - text: "${el.textContent?.slice(0, 30)}"`);
     });
 
-    // Ensure focused index is within bounds
     if (this.focusedElementIndex >= this.elements.length) {
       this.focusedElementIndex = Math.max(0, this.elements.length - 1);
     }
 
-    console.log(
-      `Context ${this.id}: Detected ${this.elements.length} elements`
-    );
+    console.info(`[🎮 🕹️ Gamepad Controller] - Context ${this.id}: Detected ${this.elements.length} elements`);
   }
 
   /**
-   * Activate this context and update focus
+   * Activate this context and update focus.
+   * 
+   * @remarks
+   * - Only activates if not already active
+   * - Updates focus styling
+   * - Fires onActivate callback if set
+   * - Logs activation information
    */
   activate() {
     if (this.isActive) return;
@@ -97,11 +119,17 @@ export class GamepadNavigationContext {
       this.onActivate(this);
     }
 
-    console.log(`Context ${this.id} activated`);
+    console.info(`[🎮 🕹️ Gamepad Controller] - Context ${this.id} activated`);
   }
 
   /**
-   * Deactivate this context and clear focus
+   * Deactivate this context and clear focus.
+   * 
+   * @remarks
+   * - Only deactivates if active
+   * - Clears focus styling
+   * - Fires onDeactivate callback if set
+   * - Logs deactivation information
    */
   deactivate() {
     if (!this.isActive) return;
@@ -113,11 +141,18 @@ export class GamepadNavigationContext {
       this.onDeactivate(this);
     }
 
-    console.log(`Context ${this.id} deactivated`);
+    console.info(`[🎮 🕹️ Gamepad Controller] - Context ${this.id} deactivated`);
   }
 
   /**
-   * Update focus styling for current element
+   * Update focus styling for current element.
+   * 
+   * @remarks
+   * - Only runs if active
+   * - Removes focus from all elements
+   * - Adds focus to current element
+   * - Scrolls focused element into view
+   * - Fires onFocus callback if set
    */
   updateFocus() {
     if (!this.isActive) return;
@@ -157,7 +192,11 @@ export class GamepadNavigationContext {
   }
 
   /**
-   * Clear focus from all elements in this context
+   * Clear focus from all elements in this context.
+   * 
+   * @remarks
+   * - Removes focus from all elements
+   * - Clears last focused element reference
    */
   clearFocus() {
     this.elements.forEach((element) => {
@@ -172,7 +211,11 @@ export class GamepadNavigationContext {
   }
 
   /**
-   * Navigate in this context
+   * Navigate in this context.
+   *
+   * @remarks
+   * - Only navigates if active and has elements
+   * - Delegates to navigateHorizontal or navigateSpatial based on navigationMode
    */
   navigate(direction: string) {
     if (!this.isActive || this.elements.length === 0) return false;
@@ -185,7 +228,12 @@ export class GamepadNavigationContext {
   }
 
   /**
-   * Navigate horizontally (for menus)
+   * Navigate horizontally (for menus).
+   *
+   * @remarks
+   * - Handles left/right navigation
+   * - Wraps navigation if wrapNavigation is true
+   * - Returns false if direction is not left/right
    */
   navigateHorizontal(direction: string) {
     let newIndex = this.focusedElementIndex;
@@ -213,7 +261,12 @@ export class GamepadNavigationContext {
   }
 
   /**
-   * Navigate spatially (for general content)
+   * Navigate spatially (for general content).
+   *
+   * @remarks
+   * - Finds nearest element in specified direction
+   * - Wraps navigation if wrapNavigation is true
+   * - Returns false if no element found
    */
   navigateSpatial(direction: string) {
     const currentElement = this.elements[this.focusedElementIndex];
@@ -225,7 +278,7 @@ export class GamepadNavigationContext {
       this.elements,
       direction
     );
-    
+
          // If no element found, try simple wrapping (only for horizontal)
      if (!nearestElement && this.options.wrapNavigation) {
        if (direction === 'left') {
@@ -237,7 +290,7 @@ export class GamepadNavigationContext {
        }
        // Don't wrap for vertical navigation - it's confusing
      }
-    
+
     if (nearestElement) {
       const newIndex = this.elements.indexOf(nearestElement);
       if (newIndex !== -1) {
@@ -246,12 +299,18 @@ export class GamepadNavigationContext {
         return true;
       }
     }
-    
+
     return false;
   }
 
   /**
-   * Handle selection in this context
+   * Handle selection in this context.
+   *
+   * @remarks
+   * - Only handles selection if active
+   * - Toggles selected state using data attributes or classes
+   * - Fires onSelect callback if set
+   * - Handles navigation menu links
    */
   select() {
     if (!this.isActive) return false;
@@ -284,18 +343,13 @@ export class GamepadNavigationContext {
       "href" in focusedElement &&
       (focusedElement as HTMLAnchorElement).href
     ) {
-      console.log(
-        `🔗 Navigating to: ${(focusedElement as HTMLAnchorElement).href}`
-      );
+      console.debug(`[🎮 🕹️ Gamepad Controller] - 🔗 Navigating to: ${(focusedElement as HTMLAnchorElement).href}`);
       window.location.href = (focusedElement as HTMLAnchorElement).href;
       return true;
     }
 
     // Handle regular click events
-    if (
-      "click" in focusedElement &&
-      typeof (focusedElement as HTMLElement).click === "function"
-    ) {
+    if ("click" in focusedElement && typeof (focusedElement as HTMLElement).click === "function") {
       (focusedElement as HTMLElement).click();
     }
 
@@ -304,6 +358,11 @@ export class GamepadNavigationContext {
 
   /**
    * Navigate to specific index
+   *
+   * @remarks
+   * - Only navigates if active and index is within bounds
+   * - Updates focus styling
+   * - Returns false if navigation fails
    */
   navigateToIndex(index: number) {
     if (!this.isActive || index < 0 || index >= this.elements.length)
@@ -316,27 +375,39 @@ export class GamepadNavigationContext {
 
   /**
    * Get current focused element
+   *
+   * @remarks
+   * - Returns the currently focused element or null if none
    */
-  getCurrentElement() {
+  getCurrentElement(): Element | null {
     return this.elements[this.focusedElementIndex] || null;
   }
 
   /**
    * Get current focused index
+   *
+   * @remarks
+   * - Returns the index of the currently focused element
    */
-  getCurrentIndex() {
+  getCurrentIndex(): number {
     return this.focusedElementIndex;
   }
 
   /**
    * Get all elements in this context
+   *
+   * @remarks
+   * - Returns a copy of the elements array
    */
-  getElements() {
+  getElements(): Element[] {
     return [...this.elements];
   }
 
   /**
    * Check if context has elements
+   *
+   * @remarks
+   * - Returns true if there are elements in the context
    */
   hasElements() {
     return this.elements.length > 0;
@@ -344,8 +415,12 @@ export class GamepadNavigationContext {
 
   /**
    * Refresh context (re-detect elements and update focus)
+   *
+   * @remarks
+   * - Re-detects elements
+   * - Updates focus if active
    */
-  refresh() {
+  refresh(): void {
     this.detectElements();
     if (this.isActive) {
       this.updateFocus();
@@ -353,8 +428,32 @@ export class GamepadNavigationContext {
   }
 }
 
+
 /**
- * Manager for multiple independent navigation contexts
+ * Manager class that handles multiple independent navigation contexts.
+ * Allows registering, activating, and switching between different navigation contexts.
+ * Each context maintains its own state and focus tracking.
+ *
+ * @example
+ * ```ts
+ * const manager = new GamepadContextManager();
+ *
+ * // Register a menu context
+ * const menuContext = manager.registerContext('menu', {
+ *   containerSelector: '.menu',
+ *   navigationMode: 'spatial'
+ * });
+ *
+ * // Register a content context
+ * const contentContext = manager.registerContext('content', {
+ *   containerSelector: '.content',
+ *   navigationMode: 'spatial'
+ * });
+ *
+ * // Switch between contexts
+ * manager.setActiveContext('menu');
+ * manager.setActiveContext('content');
+ * ```
  */
 export class GamepadContextManager {
   contexts: Map<string, GamepadNavigationContext>;
@@ -369,6 +468,18 @@ export class GamepadContextManager {
     this.onContextSwitch = null;
   }
 
+  /**
+   * Registers a new navigation context with the GamepadContextManager.
+   *
+   * @remarks
+   * - Creates a new GamepadNavigationContext instance
+   * - Registers callbacks for activation/deactivation
+   * - Logs registration information
+   *
+   * @param id - The ID of the context
+   * @param options - The options for the context
+   * @returns {GamepadNavigationContext} The registered context
+   */
   registerContext(
     id: string,
     options: GamepadNavigationContextOptions = { navigationMode: 'spatial', containerSelector: null }
@@ -387,22 +498,46 @@ export class GamepadContextManager {
         this.activeContext = null;
       }
     };
-    console.log(`Registered context: ${id}`);
+    console.info(`[🎮 🕹️ Gamepad Controller] - Registered context: ${id}`);
     return context;
   }
 
+  /**
+   * Retrieves a registered context by its ID.
+   *
+   * @remarks
+   * - Returns the context if found, undefined otherwise
+   *
+   * @param id - The ID of the context to retrieve
+   * @returns {GamepadNavigationContext | undefined} The context if found, undefined otherwise
+   */
   getContext(id: string): GamepadNavigationContext | undefined {
     return this.contexts.get(id);
   }
 
+  /**
+   * Returns all registered contexts as an array.
+   * @returns {GamepadNavigationContext[]} An array of all registered contexts
+   */
   getAllContexts(): GamepadNavigationContext[] {
     return Array.from(this.contexts.values());
   }
 
+  /**
+   * Sets the active context by activating it and deactivating the previous active context.
+   *
+   * @remarks
+   * - Activates the new context
+   * - Deactivates the previous active context
+   * - Fires onContextSwitch callback if set
+   * - Returns true if the context was set successfully, false otherwise
+   * @param contextId - The ID of the context to set as active
+   * @returns {boolean} True if the context was set successfully, false otherwise
+   */
   setActiveContext(contextId: string): boolean {
     const context = this.contexts.get(contextId);
     if (!context) {
-      console.warn(`Context not found: ${contextId}`);
+      console.warn(`[🎮 🕹️ Gamepad Controller] - Context not found: ${contextId}`);
       return false;
     }
     if (this.activeContext && this.activeContext !== context) {
@@ -417,20 +552,45 @@ export class GamepadContextManager {
     return true;
   }
 
+  /**
+   * Gets the currently active context.
+   *
+   * @remarks
+   * - Returns the currently active context or null if none
+   */
   getActiveContext(): GamepadNavigationContext | null {
     return this.activeContext;
   }
 
+  /**
+   * Handles navigation by activating the current context and delegating navigation within it.
+   *
+   * @remarks
+   * - Only handles navigation if an active context exists
+   * - Returns true if navigation was handled successfully, false otherwise
+   *
+   * @param direction - The direction of navigation ('up', 'down', 'left', 'right')
+   * @returns {boolean} True if navigation was handled successfully, false otherwise
+   */
   handleNavigation(direction: string): boolean {
     if (!this.activeContext) return false;
     return this.activeContext.navigate(direction);
   }
 
+  /**
+   * Handles selection by activating the current context and delegating selection within it.
+   * @returns {boolean} True if selection was handled successfully, false otherwise
+   */
   handleSelection(): boolean {
     if (!this.activeContext) return false;
     return this.activeContext.select();
   }
 
+  /**
+   * Handles shoulder navigation by finding the menu/navigation context and delegating navigation within it.
+   * @param button - The button pressed ('R1' or 'L1')
+   * @returns {boolean} True if navigation was handled successfully, false otherwise
+   */
   handleShoulderNavigation(button: string): boolean {
     // Find menu/navigation context
     const menuContext = Array.from(this.contexts.values()).find(
@@ -452,6 +612,12 @@ export class GamepadContextManager {
     return menuContext.navigate(direction);
   }
 
+  /**
+   * Handles navigation using analog stick input by finding and activating the main/content context
+   * and delegating navigation within that context.
+   * @param direction - The direction of navigation ('up', 'down', 'left', 'right')
+   * @returns {boolean} True if navigation was handled successfully, false otherwise
+   */
   handleStickNavigation(direction: string): boolean {
     // Find main content context
     const mainContext = Array.from(this.contexts.values()).find(
@@ -472,10 +638,23 @@ export class GamepadContextManager {
     return mainContext.navigate(direction);
   }
 
+  /**
+   * Refreshes all contexts by calling refresh() on each one.
+   * This updates element detection and grid dimensions for each context.
+   * Useful after DOM changes or window resizing.
+   */
   refresh(): void {
     this.contexts.forEach((context) => context.refresh());
   }
 
+  /**
+   * Destroys the GamepadContextManager by cleaning up all contexts and references.
+   * - Deactivates all contexts
+   * - Clears all callback references and element references for each context
+   * - Clears the contexts collection
+   * - Nullifies active context references
+   * - Removes context switch callback
+   */
   destroy(): void {
     // Deactivate all contexts first
     this.contexts.forEach((context) => {
@@ -489,17 +668,17 @@ export class GamepadContextManager {
       context.elements = [];
       context.lastFocusedElement = null;
     });
-    
+
     // Clear all contexts
     this.contexts.clear();
-    
+
     // Clear active context references
     this.activeContext = null;
     this.lastActiveContext = null;
-    
+
     // Clear context switch callback
     this.onContextSwitch = null;
-    
-    console.log('GamepadContextManager destroyed and cleaned up');
+
+    console.info('[🎮 🕹️ Gamepad Controller] - GamepadContextManager destroyed and cleaned up');
   }
 }

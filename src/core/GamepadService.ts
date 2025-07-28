@@ -1,7 +1,7 @@
 // GamepadService.ts
 // Main GamepadService class with enhanced dual context support
 
-import { gameLoop as createGameLoop, setupEventListeners, removeEventListeners, startGameLoop, stopGameLoop, handleGamepadConnected as handleConnected, handleGamepadDisconnected as handleDisconnected, type GamepadEvent } from './gamepadEventHandler.js';
+import { gameLoop as createGameLoop, setupEventListeners, removeEventListeners, startGameLoop, stopGameLoop, handleGamepadConnected as handleConnected, handleGamepadDisconnected as handleDisconnected } from './gamepadEventHandler.js';
 import { navigateToIndex } from './gamepadNavigation.js';
 import { calculateGridDimensions, getFocusableElements } from '../utils/domUtils.js';
 import {
@@ -13,7 +13,7 @@ import {
 import { addNavigationStyles } from '../utils/cssUtils.js';
 import { debounce } from '../utils/navigationUtils.js';
 import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
-import type { GamepadEventState } from './gamepadEventHandler.js';
+import type { GamepadEventState, GamepadEvent } from '../Interfaces/GamepadEvents.js';
 import { GamepadContextManager } from '../gamepadContextManager.js';
 import type { NavigationState } from '../Interfaces/NavigationState';
 
@@ -112,7 +112,7 @@ export class GamepadService {
         this.gameLoopFn = createGameLoop(this.eventState, this.navState, this.contextManager, this.updateFocus.bind(this));
         this.handleGamepadConnected = (event: GamepadEvent) => handleConnected(this.eventState, event);
         this.handleGamepadDisconnected = (event: GamepadEvent) => handleDisconnected(this.eventState, event);
-        
+
         // Create debounced resize handler with cancel capability
         this.handleResize = debounce(() => {
             if (this.options.enableDualContext) {
@@ -124,25 +124,34 @@ export class GamepadService {
         }, 100);
     }
 
-    // Initialize the service
+    /**
+     * Initializes the GamepadService by setting up event listeners, navigation elements,
+     * styles and status indicators. Will not reinitialize if already running.
+     * 
+     * - Sets up gamepad connection/disconnection event listeners
+     * - Configures either dual context or single context navigation mode
+     * - Adds navigation styles if enabled
+     * - Creates status element if configured
+     * - Starts the gamepad input polling loop
+     */
     init() {
         if (this.eventState.isRunning) return;
-        
+
         setupEventListeners(this.eventState, this.handleGamepadConnected, this.handleGamepadDisconnected);
         window.addEventListener('resize', this.handleResize);
-        
+
         if (this.options.enableDualContext) {
             this.setupDualContextMode();
         } else {
             this.detectElements();
             this.updateFocus();
         }
-        
+
         // Auto-add styles if enabled (opt-in only)
         if (this.options.autoAddStyles) {
             addNavigationStyles();
         }
-        
+
         // Auto-create status element only if explicitly requested
         if (this.options.statusElementId) {
             // User provided a statusElementId, so they want the status element
@@ -154,16 +163,25 @@ export class GamepadService {
             this.eventState.statusElementId = defaultStatusId;
             ensureStatusElement(defaultStatusId);
         }
-        
+
         // Set gamepad context for styling hooks
         setGamepadContext(this.options.gamepadContext);
-        
+
         startGameLoop(this.eventState, this.gameLoopFn);
-        
-        console.log(`GamepadService initialized with ${this.options.enableDualContext ? 'dual context' : 'single context'} navigation support`);
+
+        console.info(`[🎮 🕹️ Gamepad Controller] - GamepadService initialized with ${this.options.enableDualContext ? 'dual context' : 'single context'} navigation support`);
     }
 
-    // Setup dual context mode
+    /**
+     * Sets up dual context navigation mode by registering menu and content contexts
+     * with the context manager. Configures context-specific settings and event handlers
+     * for focus and selection events.
+     *
+     * Menu context handles R1/L1 navigation in horizontal mode, while content context
+     * uses spatial navigation with analog sticks. Both contexts inherit global
+     * navigation options and can trigger onFocus/onSelect callbacks.
+     * @private
+     */
     setupDualContextMode() {
         // Register menu context for R1/L1 navigation
         const menuContext = this.contextManager.registerContext('menu', {
@@ -210,7 +228,7 @@ export class GamepadService {
 
         // Set up context switching callback
         (this.contextManager as any).onContextSwitch = (newContext: any, oldContext: any) => {
-            console.log(`Context switched from ${oldContext?.id || 'none'} to ${newContext.id}`);
+            console.log(`[🎮 🕹️ Gamepad Controller] - Context switched from ${oldContext?.id || 'none'} to ${newContext.id}`);
             if (this.onContextSwitch) {
                 this.onContextSwitch(newContext, oldContext);
             }
@@ -223,12 +241,20 @@ export class GamepadService {
         // Start with content context active
         this.contextManager.setActiveContext('content');
 
-        console.log('Dual context mode initialized - Menu: R1/L1, Content: Stick');
+        console.info('[🎮 🕹️ Gamepad Controller] - Dual context mode initialized - Menu: R1/L1, Content: Stick');
     }
 
-    // Destroy the service with comprehensive cleanup
-    destroy() {
-        console.log('GamepadService: Starting cleanup...');
+    /**
+     * Destroys the GamepadService instance and performs comprehensive cleanup.
+     * - Stops the game loop
+     * - Removes event listeners
+     * - Cancels pending operations
+     * - Clears focus and element references
+     * - Cleans up gamepad references and callbacks
+     * - Destroys the context manager
+     */
+    destroy(): void {
+        console.info('[🎮 🕹️ Gamepad Controller] - GamepadService: Starting cleanup...');
         
         // Stop the game loop first
         stopGameLoop(this.eventState);
@@ -266,10 +292,17 @@ export class GamepadService {
         // Clear context switch callback
         this._onContextSwitch = null;
         
-        console.log('GamepadService destroyed and cleaned up');
+        console.info('[🎮 🕹️ Gamepad Controller] - GamepadService destroyed and cleaned up');
     }
 
-    // Detect elements for navigation
+    /**
+     * Detects and filters focusable elements for gamepad navigation.
+     * - Gets focusable elements based on container selector and viewport settings
+     * - Filters out disabled and invisible elements
+     * - Calculates grid dimensions for navigation
+     * - Ensures focused index stays within bounds
+     * - Logs summary of detected elements
+     */
     detectElements() {
         this.navState.elements = getFocusableElements(
             this.options.containerSelector,
@@ -313,7 +346,14 @@ export class GamepadService {
         this.updateFocus();
     }
 
-    // Update focus styling for current element
+    /**
+     * Updates focus styling for the currently focused element.
+     * - Skips if dual context mode is enabled (handled by context manager)
+     * - Removes focus styling from all elements
+     * - Adds focus styling to currently focused element
+     * - Scrolls focused element into view
+     * - Triggers onFocus callback if defined
+     */
     updateFocus() {
         if (this.options.enableDualContext) return; // Handled by context manager
 
