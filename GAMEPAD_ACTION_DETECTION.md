@@ -4,10 +4,16 @@ This document explains how the gamepad controller library detects and processes 
 
 ## Overview
 
-The gamepad controller library uses the **Web Gamepad API** combined with a **continuous polling system** to detect and process gamepad inputs in real-time. The system operates at 60fps (or display refresh rate) using `requestAnimationFrame` to ensure responsive input handling.
+The gamepad controller library supports **dual operation modes** for gamepad input detection:
+
+1. **Native Browser Mode** (default): Uses the **Web Gamepad API** combined with a **continuous polling system** to detect and process gamepad inputs in real-time
+2. **Custom Events Mode** (WinUI integration): Uses custom DOM events dispatched by the host application instead of native browser APIs
+
+Both modes operate at 60fps (or display refresh rate) using `requestAnimationFrame` to ensure responsive input handling and maintain identical APIs for seamless integration.
 
 ## Architecture Flow
 
+### Native Browser Mode
 ```
 Browser Gamepad API
         ↓
@@ -24,6 +30,198 @@ Debouncing & Timing Logic
 Action Mapping & Callbacks
         ↓
 User-defined Behavior Execution
+```
+
+### Custom Events Mode (WinUI Integration)
+```
+Host Application (WinUI)
+        ↓
+Custom DOM Events (hubgamepad*)
+        ↓
+Custom Event Listener Setup
+        ↓
+Custom Game Loop (requestAnimationFrame)
+        ↓
+Event-based State Updates
+        ↓
+State Comparison & Change Detection
+        ↓
+Debouncing & Timing Logic
+        ↓
+Action Mapping & Callbacks
+        ↓
+User-defined Behavior Execution
+```
+
+## 0. Custom Events Mode (WinUI Integration)
+
+For environments where native browser gamepad APIs are restricted (such as WinUI applications), the library supports a **custom events mode** that receives gamepad input through DOM events instead of browser APIs.
+
+### Custom Event Types
+
+The library listens for three types of custom events:
+
+#### Connection Events
+```typescript
+// hubgamepadconnected - Controller connected
+window.dispatchEvent(new CustomEvent('hubgamepadconnected', {
+    detail: {
+        gamepad: {
+            index: 0,
+            connected: true,
+            timestamp: performance.now(),
+            buttons: [/* button states */],
+            axes: [/* axis values */]
+        }
+    }
+}));
+```
+
+#### Disconnection Events
+```typescript
+// hubgamepaddisconnected - Controller disconnected
+window.dispatchEvent(new CustomEvent('hubgamepaddisconnected', {
+    detail: {
+        gamepad: {
+            index: 0,
+            connected: false,
+            timestamp: performance.now()
+        }
+    }
+}));
+```
+
+#### State Change Events
+```typescript
+// hubgamepadstatechanged - Gamepad state updated
+window.dispatchEvent(new CustomEvent('hubgamepadstatechanged', {
+    detail: {
+        gamepad: {
+            axes: [-0.1658, 0.0557, -0.0194, 0.0200],
+            buttons: [
+                { pressed: true, value: 1 },
+                { pressed: false, value: 0 },
+                // ... more buttons
+            ],
+            connected: true,
+            index: 0,
+            timestamp: 1753294113544
+        }
+    }
+}));
+```
+
+### Custom Event Listener Setup
+
+```typescript
+// From: src/core/gamepadEventHandler.ts:52-84
+export function setupCustomEventListeners(
+    state: GamepadEventState,
+    handleGamepadConnected: (event: GamepadEvent) => void,
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    options: GamepadServiceOptions
+) {
+    const connectedEvent = options.customConnectedEvent || 'hubgamepadconnected';
+    const disconnectedEvent = options.customDisconnectedEvent || 'hubgamepaddisconnected';
+    const stateChangedEvent = options.customStateChangedEvent || 'hubgamepadstatechanged';
+
+    // Listen for custom gamepad connected events
+    window.addEventListener(connectedEvent, (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            const mockGamepadEvent = createMockGamepadEvent(customEvent.detail.gamepad);
+            handleGamepadConnected(mockGamepadEvent);
+        }
+    });
+
+    // Listen for custom gamepad state changed events
+    window.addEventListener(stateChangedEvent, (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            const gamepad = customEvent.detail.gamepad;
+            if (isValidGamepad(gamepad)) {
+                state.gamepads[gamepad.index || 0] = gamepad;
+            }
+        }
+    });
+}
+```
+
+### Custom Event Game Loop
+
+The custom events mode uses a separate game loop that processes gamepad state from the stored event data instead of polling `navigator.getGamepads()`:
+
+```typescript
+// From: src/core/gamepadEventHandler.ts:86-170
+export function createCustomEventGameLoop(
+    eventState: GamepadEventState, 
+    navState: NavigationState,
+    contextManager?: any,
+    updateFocusCallback?: () => void
+): () => void {
+    return function customEventGameLoopImpl(): void {
+        if (!eventState.isRunning) {
+            eventState.animationFrameId = null;
+            return;
+        }
+        
+        const currentTimestamp = performance.now();
+        
+        // Process gamepads from custom events (stored in eventState.gamepads)
+        for (const gamepadIndex in eventState.gamepads) {
+            const gp = eventState.gamepads[gamepadIndex];
+            if (gp && isValidGamepad(gp)) {
+                // Same button/axis processing logic as native mode
+                // ... (processes buttons, analog sticks, D-pad, etc.)
+            }
+        }
+        
+        eventState.animationFrameId = requestAnimationFrame(customEventGameLoopImpl);
+    };
+}
+```
+
+### Event-to-API Compatibility
+
+The custom events mode maintains full compatibility with native browser APIs by:
+
+1. **Mock GamepadEvent Creation**: Converting custom events to standard `GamepadEvent` objects
+2. **State Storage**: Storing gamepad state from events in `eventState.gamepads`
+3. **Identical Processing**: Using the same button/axis processing logic as native mode
+4. **Same Callbacks**: Triggering the same callback functions as native mode
+
+### Configuration Options
+
+```typescript
+interface GamepadServiceOptions {
+    // Custom Events Support
+    useCustomEvents?: boolean;           // Enable custom events mode
+    customConnectedEvent?: string;       // Connection event name (default: 'hubgamepadconnected')
+    customDisconnectedEvent?: string;    // Disconnection event name (default: 'hubgamepaddisconnected')
+    customStateChangedEvent?: string;    // State change event name (default: 'hubgamepadstatechanged')
+}
+```
+
+### Usage Example
+
+```typescript
+import { initCustomEventGamepad } from 'gamepad-controller';
+
+// Initialize with custom events
+const gamepad = initCustomEventGamepad({
+    enableNavigation: true,
+    enableBackButton: true,
+    focusedClass: 'gamepad-focused'
+});
+
+// Same callback API as native mode
+gamepad.onSelect = (element, index) => {
+    console.log('Selected:', element.textContent);
+};
+
+gamepad.onControllerConnect = (gamepad) => {
+    console.log('Controller connected via custom events');
+};
 ```
 
 ## 1. Browser API Foundation
@@ -44,31 +242,45 @@ window.addEventListener('gamepaddisconnected', ...) // Disconnection events
 
 ## 2. Event Listener Setup
 
-The system starts by setting up event listeners for gamepad connection/disconnection:
+The system sets up event listeners based on the operation mode:
+
+### Native Browser Mode
 
 ```typescript
 // From: src/core/gamepadEventHandler.ts:42-50
 export function setupEventListeners(
     state: GamepadEventState, 
     handleGamepadConnected: (event: GamepadEvent) => void,
-    handleGamepadDisconnected: (event: GamepadEvent) => void
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    options?: GamepadServiceOptions
 ) {
-    window.addEventListener('gamepadconnected', handleGamepadConnected);
-    window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
-    
-    // Check for already connected gamepads
-    detectExistingGamepads(state);
+    if (options?.useCustomEvents) {
+        setupCustomEventListeners(state, handleGamepadConnected, handleGamepadDisconnected, options);
+    } else {
+        window.addEventListener('gamepadconnected', handleGamepadConnected);
+        window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+        
+        // Check for already connected gamepads
+        detectExistingGamepads(state);
+    }
 }
 ```
 
-### Connection Detection:
+### Connection Detection (Native Mode):
 - **`gamepadconnected`**: Fired when a gamepad is connected
 - **`gamepaddisconnected`**: Fired when a gamepad is disconnected
 - **`detectExistingGamepads`**: Checks for gamepads already connected when the page loads
 
+### Connection Detection (Custom Events Mode):
+- **Custom connected event**: Listens for WinUI-dispatched connection events
+- **Custom disconnected event**: Listens for WinUI-dispatched disconnection events
+- **Custom state change event**: Receives gamepad state updates from host application
+
 ## 3. Continuous Game Loop - The Heart of Detection
 
-The library uses `requestAnimationFrame` to create a continuous loop that polls gamepad states:
+The library uses `requestAnimationFrame` to create a continuous loop that processes gamepad inputs. The implementation varies based on the operation mode:
+
+### Native Browser Mode Game Loop
 
 ```typescript
 // From: src/core/gamepadEventHandler.ts:172-186
@@ -86,7 +298,7 @@ export function gameLoop(
         }
 
         const currentTimestamp = performance.now();
-        const connectedGamepads = navigator.getGamepads();
+        const connectedGamepads = navigator.getGamepads(); // Polls browser API
 
         for (const gp of connectedGamepads) {
             if (gp && isValidGamepad(gp)) {
@@ -100,11 +312,44 @@ export function gameLoop(
 }
 ```
 
-### Game Loop Characteristics:
+### Custom Events Mode Game Loop
+
+```typescript
+// From: src/core/gamepadEventHandler.ts:86-170
+export function createCustomEventGameLoop(
+    eventState: GamepadEventState, 
+    navState: NavigationState,
+    contextManager?: any,
+    updateFocusCallback?: () => void
+): () => void {
+    return function customEventGameLoopImpl() {
+        if (!eventState.isRunning) {
+            eventState.animationFrameId = null;
+            return;
+        }
+
+        const currentTimestamp = performance.now();
+        
+        // Process gamepads from custom events (stored in eventState.gamepads)
+        for (const gamepadIndex in eventState.gamepads) {
+            const gp = eventState.gamepads[gamepadIndex]; // Uses event-stored state
+            if (gp && isValidGamepad(gp)) {
+                // Process gamepad inputs... (same logic as native mode)
+            }
+        }
+
+        eventState.animationFrameId = requestAnimationFrame(customEventGameLoopImpl);
+    };
+}
+```
+
+### Game Loop Characteristics (Both Modes):
 - **Frequency**: Runs at display refresh rate (typically 60fps)
 - **Timing**: Uses `performance.now()` for precise timestamp tracking
 - **Cleanup**: Properly manages animation frame IDs for cleanup
 - **Validation**: Checks gamepad validity before processing
+- **Input Source**: Native mode polls `navigator.getGamepads()`, custom events mode uses stored event data
+- **Processing Logic**: Identical button/axis processing logic regardless of input source
 
 ## 4. Button State Tracking & Detection
 
@@ -452,15 +697,32 @@ const gamepadService = new GamepadService({
 
 ## Summary
 
-The gamepad action detection system is a sophisticated, real-time input processing system that:
+The gamepad action detection system is a sophisticated, real-time input processing system that supports **dual operation modes**:
 
-1. **Leverages native browser APIs** for gamepad access
+### Native Browser Mode
+1. **Leverages native browser APIs** (`navigator.getGamepads()`, connection events)
 2. **Uses continuous polling** at display refresh rate
-3. **Implements state tracking** for edge detection
-4. **Provides debouncing** to prevent input spam
-5. **Supports multiple controller types** with automatic detection
-6. **Offers flexible callback system** for custom behaviors
-7. **Maintains high performance** through efficient state management
-8. **Ensures proper cleanup** to prevent memory leaks
+3. **Automatic controller detection** and existing gamepad discovery
 
-This system enables responsive, cross-platform gamepad navigation for web applications while maintaining performance and providing a rich API for customization. 
+### Custom Events Mode (WinUI Integration)
+1. **Listens to custom DOM events** dispatched by host applications
+2. **Event-driven state updates** instead of API polling
+3. **Full API compatibility** with native mode
+
+### Shared Characteristics (Both Modes)
+1. **Implements state tracking** for edge detection
+2. **Provides debouncing** to prevent input spam
+3. **Supports multiple controller types** with automatic detection
+4. **Offers flexible callback system** for custom behaviors
+5. **Maintains high performance** through efficient state management
+6. **Ensures proper cleanup** to prevent memory leaks
+7. **Identical processing logic** for buttons, axes, and navigation
+8. **Same callback API** regardless of input source
+
+### Benefits
+- **Environment Flexibility**: Works in standard browsers and restricted environments like WinUI
+- **Seamless Migration**: Switch between modes with minimal code changes
+- **API Consistency**: Same interfaces and callbacks across all modes
+- **Performance**: Optimized for both polling and event-driven architectures
+
+This dual-mode system enables responsive, cross-platform gamepad navigation for web applications in any environment while maintaining performance and providing a rich, consistent API for customization. 

@@ -1,7 +1,7 @@
 // GamepadService.ts
 // Main GamepadService class with enhanced dual context support
 
-import { gameLoop as createGameLoop, setupEventListeners, removeEventListeners, startGameLoop, stopGameLoop, handleGamepadConnected as handleConnected, handleGamepadDisconnected as handleDisconnected } from './gamepadEventHandler.js';
+import { gameLoop as createGameLoop, setupEventListeners, removeEventListeners, startGameLoop, stopGameLoop, handleGamepadConnected as handleConnected, handleGamepadDisconnected as handleDisconnected, createCustomEventGameLoop } from './gamepadEventHandler.js';
 import { navigateToIndex } from './gamepadNavigation.js';
 import { calculateGridDimensions, getFocusableElements } from '../utils/domUtils.js';
 import {
@@ -128,7 +128,7 @@ export class GamepadService {
      * Initializes the GamepadService by setting up event listeners, navigation elements,
      * styles and status indicators. Will not reinitialize if already running.
      * 
-     * - Sets up gamepad connection/disconnection event listeners
+     * - Sets up gamepad connection/disconnection event listeners (native or custom events)
      * - Configures either dual context or single context navigation mode
      * - Adds navigation styles if enabled
      * - Creates status element if configured
@@ -137,7 +137,8 @@ export class GamepadService {
     init() {
         if (this.eventState.isRunning) return;
 
-        setupEventListeners(this.eventState, this.handleGamepadConnected, this.handleGamepadDisconnected);
+        // Setup event listeners with custom events support
+        setupEventListeners(this.eventState, this.handleGamepadConnected, this.handleGamepadDisconnected, this.options);
         window.addEventListener('resize', this.handleResize);
 
         if (this.options.enableDualContext) {
@@ -167,9 +168,23 @@ export class GamepadService {
         // Set gamepad context for styling hooks
         setGamepadContext(this.options.gamepadContext);
 
-        startGameLoop(this.eventState, this.gameLoopFn);
+        // Use custom event game loop if custom events are enabled
+        if (this.options.useCustomEvents) {
+            const customGameLoopFn = createCustomEventGameLoop(
+                this.eventState, 
+                this.navState, 
+                this.contextManager, 
+                this.updateFocus.bind(this)
+            );
+            startGameLoop(this.eventState, customGameLoopFn);
+            console.info('[🎮 🕹️ Gamepad Controller] - Using custom events mode for WinUI integration');
+        } else {
+            startGameLoop(this.eventState, this.gameLoopFn);
+        }
 
-        console.info(`[🎮 🕹️ Gamepad Controller] - GamepadService initialized with ${this.options.enableDualContext ? 'dual context' : 'single context'} navigation support`);
+        const modeText = this.options.enableDualContext ? 'dual context' : 'single context';
+        const eventText = this.options.useCustomEvents ? 'custom events' : 'native browser APIs';
+        console.info(`[🎮 🕹️ Gamepad Controller] - GamepadService initialized with ${modeText} navigation support using ${eventText}`);
     }
 
     /**

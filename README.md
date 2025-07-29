@@ -75,6 +75,130 @@ const gamepad = initDualContextGamepad({
 });
 ```
 
+## 🎮 WinUI Integration & Custom Events
+
+The gamepad controller library supports **dual operation modes** to work in environments where native browser gamepad APIs are restricted, such as **WinUI applications**.
+
+### Native Browser Mode (Default)
+Uses standard Web Gamepad API:
+- `navigator.getGamepads()` for gamepad state polling
+- `gamepadconnected` and `gamepaddisconnected` events
+- Works in all modern browsers
+
+### Custom Events Mode (WinUI Integration)
+Uses custom DOM events for gamepad input:
+- `hubgamepadconnected` for controller connection
+- `hubgamepaddisconnected` for controller disconnection  
+- `hubgamepadstatechanged` for gamepad state updates
+
+### WinUI Custom Events Setup
+
+```ts
+import { initCustomEventGamepad } from 'gamepad-controller';
+
+// Initialize for WinUI with custom events
+const gamepad = initCustomEventGamepad({
+    enableNavigation: true,
+    enableBackButton: true,
+    focusedClass: 'gamepad-focused'
+});
+```
+
+### Custom Event Configuration
+
+```ts
+import { initCustomEventGamepad } from 'gamepad-controller';
+
+// Configure custom event names (optional)
+const gamepad = initCustomEventGamepad({
+    useCustomEvents: true,
+    customConnectedEvent: 'myAppGamepadConnected',
+    customDisconnectedEvent: 'myAppGamepadDisconnected', 
+    customStateChangedEvent: 'myAppGamepadStateChanged',
+    enableNavigation: true,
+    enableDualContext: true,
+    menuContextSelector: '.nav-menu',
+    contentContextSelector: '.content'
+});
+```
+
+### WinUI Event Dispatching
+
+Your WinUI application should dispatch events in this format:
+
+```ts
+// Connection event
+window.dispatchEvent(new CustomEvent('hubgamepadconnected', {
+    detail: {
+        gamepad: {
+            index: 0,
+            connected: true,
+            timestamp: performance.now(),
+            buttons: [/* button states */],
+            axes: [/* axis values */]
+        }
+    }
+}));
+
+// State change event
+window.dispatchEvent(new CustomEvent('hubgamepadstatechanged', {
+    detail: {
+        gamepad: {
+            axes: [-0.1658, 0.0557, -0.0194, 0.0200],
+            buttons: [
+                { pressed: true, value: 1 },
+                { pressed: false, value: 0 },
+                // ... more buttons
+            ],
+            connected: true,
+            index: 0,
+            timestamp: 1753294113544
+        }
+    }
+}));
+
+// Disconnection event
+window.dispatchEvent(new CustomEvent('hubgamepaddisconnected', {
+    detail: {
+        gamepad: {
+            index: 0,
+            connected: false,
+            timestamp: performance.now()
+        }
+    }
+}));
+```
+
+### Custom Events API Compatibility
+
+The custom events mode maintains **full API compatibility** with the native mode:
+- Same callback functions (`onFocus`, `onSelect`, `onBackButton`, etc.)
+- Same navigation modes (spatial, grid, horizontal)
+- Same configuration options
+- Same TypeScript interfaces
+- Same dual context support
+
+### Choosing the Right Mode
+
+| Mode | Use Case | Event Source | Best For |
+|------|----------|--------------|----------|
+| **Native** | Web browsers | Browser Gamepad API | Standard web applications |
+| **Custom Events** | WinUI/Restricted environments | Custom DOM events | Desktop apps, embedded browsers |
+
+### Migration Between Modes
+
+Switching between modes requires only changing the initialization function:
+
+```ts
+// Native mode
+const gamepad = initGamepadForPage(options);
+
+// Custom events mode  
+const gamepad = initCustomEventGamepad(options);
+```
+
+All other code remains unchanged, ensuring easy migration and testing across different environments.
+
 ## 📖 API Reference
 
 ### TypeScript Types and Interfaces
@@ -207,10 +331,16 @@ Creates a gamepad navigation service for a specific container or the entire page
 - `options` (GamepadServiceOptions): Configuration options
 
 #### `initGamepadForPage(options?)`
-Quick initialization with automatic setup and event handlers.
+Quick initialization with automatic setup and event handlers for standard web environments.
 
 #### `initDualContextGamepad(options?)`
-Sets up dual context navigation for menu and content areas.
+Sets up dual context navigation for menu and content areas with native gamepad APIs.
+
+#### `initCustomEventGamepad(options?)`
+Initializes gamepad service for WinUI/custom events environments. Automatically configures custom event listeners and provides the same API as native mode.
+
+**Parameters:**
+- `options` (GamepadServiceOptions): Configuration options with custom events enabled by default
 
 #### `initGamepadNavigation(options?)`
 Low-level initialization function with full control.
@@ -251,6 +381,12 @@ interface GamepadServiceOptions {
     enableDualContext?: boolean;         // Enable dual context mode
     menuContextSelector?: string;        // Menu area selector
     contentContextSelector?: string | null; // Content area selector
+    
+    // Custom Events Support (WinUI Integration)
+    useCustomEvents?: boolean;           // Enable custom events mode (default: false)
+    customConnectedEvent?: string;       // Custom connection event name (default: 'hubgamepadconnected')
+    customDisconnectedEvent?: string;    // Custom disconnection event name (default: 'hubgamepaddisconnected')
+    customStateChangedEvent?: string;    // Custom state change event name (default: 'hubgamepadstatechanged')
     
     // Automation
     autoCreateStatusElement?: boolean;   // Auto-create status display

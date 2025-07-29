@@ -28,4 +28,34 @@ export interface GamepadServiceOptions {
     enableDualContext?: boolean;
     menuContextSelector?: string;
     contentContextSelector?: string | null;
+    
+    // Custom Events Support (for WinUI integration)
+    /**
+     * Enable custom DOM events instead of native gamepad APIs.
+     * When true, listens to custom events instead of navigator.getGamepads()
+     * @default false
+     */
+    useCustomEvents?: boolean;
+    
+    /**
+     * Name of the custom event dispatched when a gamepad connects.
+     * Only used when useCustomEvents is true.
+     * @default "hubgamepadconnected"
+     */
+    customConnectedEvent?: string;
+    
+    /**
+     * Name of the custom event dispatched when a gamepad disconnects.
+     * Only used when useCustomEvents is true.
+     * @default "hubgamepaddisconnected"
+     */
+    customDisconnectedEvent?: string;
+    
+    /**
+     * Name of the custom event dispatched with gamepad state updates.
+     * Only used when useCustomEvents is true.
+     * Event detail should contain: { gamepad: Gamepad }
+     * @default "hubgamepadstatechanged"
+     */
+    customStateChangedEvent?: string;
 } 

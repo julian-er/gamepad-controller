@@ -5,25 +5,121 @@ import { updateStatusElement } from '../utils/domUtils.js';
 import type { ControllerType } from '../Interfaces/ControllerMappings.js';
 import type { NavigationState } from '../Interfaces/NavigationState.js';
 import { GamepadEventState, GamepadEvent } from '../Interfaces/GamepadEvents.js';
-
+import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
 
 
 /**
- * Sets up event listeners for gamepad connection events and detects existing gamepads
+ * Sets up event listeners for gamepad connection events and detects existing gamepads.
+ * Supports both native browser APIs and custom DOM events based on configuration.
  * @param state - The current gamepad event state object
  * @param handleGamepadConnected - The callback function for gamepad connected events
  * @param handleGamepadDisconnected - The callback function for gamepad disconnected events
+ * @param options - Optional configuration for custom events mode
  */
 export function setupEventListeners(
     state: GamepadEventState, 
     handleGamepadConnected: (event: GamepadEvent) => void,
-    handleGamepadDisconnected: (event: GamepadEvent) => void
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    options?: GamepadServiceOptions
 ) {
-    window.addEventListener('gamepadconnected', handleGamepadConnected);
-    window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+    if (options?.useCustomEvents) {
+        // Setup custom event listeners for WinUI integration
+        setupCustomEventListeners(state, handleGamepadConnected, handleGamepadDisconnected, options);
+    } else {
+        // Setup native browser gamepad event listeners
+        window.addEventListener('gamepadconnected', handleGamepadConnected);
+        window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
 
-    // Check for already connected gamepads
-    detectExistingGamepads(state);
+        // Check for already connected gamepads
+        detectExistingGamepads(state);
+    }
+}
+
+/**
+ * Sets up custom DOM event listeners for gamepad events (WinUI integration).
+ * Listens to custom events instead of native browser gamepad APIs.
+ * @param state - The current gamepad event state object
+ * @param handleGamepadConnected - The callback function for gamepad connected events
+ * @param handleGamepadDisconnected - The callback function for gamepad disconnected events
+ * @param options - Configuration containing custom event names
+ */
+export function setupCustomEventListeners(
+    state: GamepadEventState,
+    handleGamepadConnected: (event: GamepadEvent) => void,
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    options: GamepadServiceOptions
+) {
+    const connectedEvent = options.customConnectedEvent || 'hubgamepadconnected';
+    const disconnectedEvent = options.customDisconnectedEvent || 'hubgamepaddisconnected';
+    const stateChangedEvent = options.customStateChangedEvent || 'hubgamepadstatechanged';
+
+    console.info(`[🎮 🕹️ Gamepad Controller] - Setting up custom event listeners: ${connectedEvent}, ${disconnectedEvent}, ${stateChangedEvent}`);
+
+    // Listen for custom gamepad connected events
+    window.addEventListener(connectedEvent, (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            const mockGamepadEvent = createMockGamepadEvent(customEvent.detail.gamepad);
+            handleGamepadConnected(mockGamepadEvent);
+        }
+    });
+
+    // Listen for custom gamepad disconnected events
+    window.addEventListener(disconnectedEvent, (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            const mockGamepadEvent = createMockGamepadEvent(customEvent.detail.gamepad);
+            handleGamepadDisconnected(mockGamepadEvent);
+        }
+    });
+
+    // Listen for custom gamepad state changed events
+    window.addEventListener(stateChangedEvent, (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            // Update the gamepad state directly
+            const gamepad = customEvent.detail.gamepad;
+            if (isValidGamepad(gamepad)) {
+                state.gamepads[gamepad.index || 0] = gamepad;
+            }
+        }
+    });
+
+    console.info('[🎮 🕹️ Gamepad Controller] - Custom event listeners initialized for WinUI integration');
+}
+
+/**
+ * Creates a mock GamepadEvent object from a custom gamepad object.
+ * This ensures compatibility with existing event handlers.
+ * @param gamepad - The gamepad object from the custom event
+ * @returns A mock GamepadEvent object
+ */
+function createMockGamepadEvent(gamepad: Gamepad): GamepadEvent {
+    return {
+        gamepad: gamepad,
+        type: 'gamepadconnected', // Default type, actual type doesn't matter for our handlers
+        bubbles: false,
+        cancelable: false,
+        composed: false,
+        currentTarget: window,
+        defaultPrevented: false,
+        eventPhase: 0,
+        isTrusted: true,
+        target: window,
+        timeStamp: Date.now(),
+        preventDefault: () => {},
+        stopImmediatePropagation: () => {},
+        stopPropagation: () => {},
+        composedPath: () => [window],
+        initEvent: () => {},
+        NONE: 0,
+        CAPTURING_PHASE: 1,
+        AT_TARGET: 2,
+        BUBBLING_PHASE: 3,
+        cancelBubble: false,
+        returnValue: true,
+        srcElement: window
+    } as unknown as GamepadEvent;
 }
 
 /**
@@ -357,5 +453,227 @@ export function gameLoop(
          * @type {number} The ID returned by requestAnimationFrame
          */
         eventState.animationFrameId = requestAnimationFrame(gameLoopImpl);
+    };
+}
+
+/**
+ * Creates a custom game loop implementation for custom events mode.
+ * Instead of polling navigator.getGamepads(), relies on custom state change events.
+ * @param eventState - The current gamepad event state containing button states and callbacks
+ * @param navState - The current navigation state containing focused elements and options
+ * @param contextManager - Optional context manager for dual context navigation mode
+ * @param updateFocusCallback - Optional callback function to run after focus is updated
+ * @returns A function that implements the custom events game loop logic
+ */
+export function createCustomEventGameLoop(
+    eventState: GamepadEventState, 
+    navState: NavigationState,
+    contextManager?: any,
+    updateFocusCallback?: () => void
+): () => void {
+    /**
+     * Custom events game loop implementation that processes gamepad state from custom events.
+     * @returns {void}
+     */
+    return function customEventGameLoopImpl(): void {
+        // Check if loop should continue running
+        if (!eventState.isRunning) {
+            eventState.animationFrameId = null;
+            return;
+        }
+
+        const currentTimestamp = performance.now();
+        
+        // Process gamepads from custom events (stored in eventState.gamepads)
+        for (const gamepadIndex in eventState.gamepads) {
+            const gp = eventState.gamepads[gamepadIndex];
+            if (gp && isValidGamepad(gp)) {
+                // --- Button event handling ---
+                if (!eventState.lastButtonStates) eventState.lastButtonStates = {};
+                if (!eventState.lastButtonStates[gp.index]) {
+                    eventState.lastButtonStates[gp.index] = gp.buttons.map(b => b.pressed);
+                }
+                const prevStates = eventState.lastButtonStates[gp.index];
+                for (let i = 0; i < gp.buttons.length; i++) {
+                    const prev = prevStates[i] || false;
+                    const curr = gp.buttons[i].pressed;
+                    if (curr && !prev && typeof eventState.onButtonDown === 'function') {
+                        eventState.onButtonDown(i, gp);
+                    }
+                    if (!curr && prev && typeof eventState.onButtonUp === 'function') {
+                        eventState.onButtonUp(i, gp);
+                    }
+                    prevStates[i] = curr;
+                }
+
+                // Update controller type if changed
+                const detectedType = detectControllerType(gp);
+                if (detectedType !== eventState.currentControllerType) {
+                    eventState.currentControllerType = detectedType;
+                    updateStatus(navState, eventState.gamepads, eventState.currentControllerType);
+                }
+
+                // Handle primary action button (A/X/Cross)
+                const primaryButtonIndex = getPrimaryActionButtonIndex(eventState.currentControllerType as ControllerType);
+                if (gp.buttons[primaryButtonIndex] && gp.buttons[primaryButtonIndex].pressed) {
+                    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
+                        handleSelection(navState, contextManager);
+                        eventState.lastButtonPress = currentTimestamp;
+                    }
+                }
+
+                // Handle back button (B/Circle) - Button index 1
+                if (navState.options.enableBackButton) {
+                    const backPressed = gp.buttons[1]?.pressed || false;
+                    if (backPressed && !eventState.lastBackButtonState) {
+                        if (currentTimestamp - eventState.lastBackTime > 300) {
+                            handleBackButton(eventState.onBackButton);
+                            eventState.lastBackTime = currentTimestamp;
+                        }
+                    }
+                    eventState.lastBackButtonState = backPressed;
+                }
+
+                // Handle shoulder buttons (R1/L1) for navigation menu
+                if (navState.options.enableShoulderNavigation) {
+                    const r1Pressed = gp.buttons[5]?.pressed || false;
+                    const l1Pressed = gp.buttons[4]?.pressed || false;
+
+                    if ((r1Pressed && !eventState.lastR1State) || (l1Pressed && !eventState.lastL1State)) {
+                        if (currentTimestamp - eventState.lastShoulderTime > 300) {
+                            const button = r1Pressed ? 'R1' : 'L1';
+                            handleShoulderNavigation(navState, contextManager, button);
+                            eventState.lastShoulderTime = currentTimestamp;
+                        }
+                    }
+
+                    eventState.lastR1State = r1Pressed;
+                    eventState.lastL1State = l1Pressed;
+                }
+
+                // Handle D-pad and analog stick navigation
+                const dpadIndices = getDpadIndices(eventState.currentControllerType as ControllerType);
+                let navigationHandled = false;
+
+                // D-pad navigation
+                if (dpadIndices.up !== -1 && gp.buttons[dpadIndices.up]?.pressed) {
+                    if (currentTimestamp - eventState.lastAxisMove > (navState.options.debounceTime ?? 0)) {
+                        if (contextManager) {
+                            navigationHandled = contextManager.handleStickNavigation('up');
+                        } else {
+                            if (navState.options.navigationMode === 'grid') {
+                                navigateGrid(navState, 'up', updateFocusCallback || (() => {}));
+                            } else {
+                                navigateSpatial(navState, 'up', updateFocusCallback || (() => {}));
+                            }
+                            navigationHandled = true;
+                        }
+                        if (navigationHandled) {
+                            eventState.lastAxisMove = currentTimestamp;
+                        }
+                    }
+                } else if (dpadIndices.down !== -1 && gp.buttons[dpadIndices.down]?.pressed) {
+                    if (currentTimestamp - eventState.lastAxisMove > (navState.options.debounceTime ?? 0)) {
+                        if (contextManager) {
+                            navigationHandled = contextManager.handleStickNavigation('down');
+                        } else {
+                            if (navState.options.navigationMode === 'grid') {
+                                navigateGrid(navState, 'down', updateFocusCallback || (() => {}));
+                            } else {
+                                navigateSpatial(navState, 'down', updateFocusCallback || (() => {}));
+                            }
+                            navigationHandled = true;
+                        }
+                        if (navigationHandled) {
+                            eventState.lastAxisMove = currentTimestamp;
+                        }
+                    }
+                } else if (dpadIndices.left !== -1 && gp.buttons[dpadIndices.left]?.pressed) {
+                    if (currentTimestamp - eventState.lastAxisMove > (navState.options.debounceTime ?? 0)) {
+                        if (contextManager) {
+                            navigationHandled = contextManager.handleStickNavigation('left');
+                        } else {
+                            if (navState.options.navigationMode === 'grid') {
+                                navigateGrid(navState, 'left', updateFocusCallback || (() => {}));
+                            } else {
+                                navigateSpatial(navState, 'left', updateFocusCallback || (() => {}));
+                            }
+                            navigationHandled = true;
+                        }
+                        if (navigationHandled) {
+                            eventState.lastAxisMove = currentTimestamp;
+                        }
+                    }
+                } else if (dpadIndices.right !== -1 && gp.buttons[dpadIndices.right]?.pressed) {
+                    if (currentTimestamp - eventState.lastAxisMove > (navState.options.debounceTime ?? 0)) {
+                        if (contextManager) {
+                            navigationHandled = contextManager.handleStickNavigation('right');
+                        } else {
+                            if (navState.options.navigationMode === 'grid') {
+                                navigateGrid(navState, 'right', updateFocusCallback || (() => {}));
+                            } else {
+                                navigateSpatial(navState, 'right', updateFocusCallback || (() => {}));
+                            }
+                            navigationHandled = true;
+                        }
+                        if (navigationHandled) {
+                            eventState.lastAxisMove = currentTimestamp;
+                        }
+                    }
+                }
+
+                // Left analog stick navigation (if D-pad didn't handle it)
+                if (!navigationHandled) {
+                    const leftStickX = applyDeadzone(gp.axes[0] || 0, navState.options.deadzone ?? 0.1);
+                    const leftStickY = applyDeadzone(gp.axes[1] || 0, navState.options.deadzone ?? 0.1);
+
+                    if (Math.abs(leftStickX) > 0 || Math.abs(leftStickY) > 0) {
+                        if (currentTimestamp - eventState.lastAxisMove > (navState.options.debounceTime ?? 0)) {
+                            let direction: string | null = null;
+
+                            if (Math.abs(leftStickX) > Math.abs(leftStickY)) {
+                                direction = leftStickX > 0 ? 'right' : 'left';
+                            } else {
+                                direction = leftStickY > 0 ? 'down' : 'up';
+                            }
+
+                            if (direction) {
+                                if (contextManager) {
+                                    navigationHandled = contextManager.handleStickNavigation(direction);
+                                } else {
+                                    if (navState.options.navigationMode === 'grid') {
+                                        navigateGrid(navState, direction, updateFocusCallback || (() => {}));
+                                    } else {
+                                        navigateSpatial(navState, direction, updateFocusCallback || (() => {}));
+                                    }
+                                    navigationHandled = true;
+                                }
+                                if (navigationHandled) {
+                                    eventState.lastAxisMove = currentTimestamp;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Handle right stick scrolling if enabled
+                if (navState.options.enableRightStickScroll) {
+                    const rightStickX = applyDeadzone(gp.axes[2] || 0, navState.options.deadzone ?? 0.1);
+                    const rightStickY = applyDeadzone(gp.axes[3] || 0, navState.options.deadzone ?? 0.1);
+
+                    if (Math.abs(rightStickX) > 0 || Math.abs(rightStickY) > 0) {
+                        if (currentTimestamp - eventState.lastScrollTime > (navState.options.scrollDebounceTime ?? 50)) {
+                            handleScrolling(rightStickX, rightStickY, navState.options.scrollSpeed ?? 1);
+                            eventState.lastScrollTime = currentTimestamp;
+                        }
+                    }
+                }
+
+                break; // Handle only the first valid gamepad
+            }
+        }
+
+        // Schedule next frame
+        eventState.animationFrameId = requestAnimationFrame(customEventGameLoopImpl);
     };
 }

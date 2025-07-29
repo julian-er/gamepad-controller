@@ -248,26 +248,197 @@ export function initDualContextGamepad(options: GamepadServiceOptions = {}): Gam
 }
 
 /**
+ * Initializes the GamepadService to listen for custom DOM events instead of native gamepad APIs.
+ * This is designed for WinUI integration where native gamepad APIs are not available.
+ * 
+ * @param {GamepadServiceOptions} options - Configuration options for custom events integration
+ * @returns {GamepadService} The initialized GamepadService instance configured for custom events
+ * 
+ * @example
+ * // Basic custom events usage with default event names
+ * const gamepad = initCustomEventGamepad();
+ * 
+ * // Custom event names for specific integration
+ * const gamepad = initCustomEventGamepad({
+ *   customConnectedEvent: 'myapp-gamepad-connected',
+ *   customDisconnectedEvent: 'myapp-gamepad-disconnected',
+ *   customStateChangedEvent: 'myapp-gamepad-state-changed'
+ * });
+ * 
+ * // Custom events with dual context navigation
+ * const gamepad = initCustomEventGamepad({
+ *   enableDualContext: true,
+ *   menuContextSelector: '.navigation-menu',
+ *   contentContextSelector: '.main-content'
+ * });
+ */
+export function initCustomEventGamepad(options: GamepadServiceOptions = {}): GamepadService {
+    console.info('[🎮 🕹️ Gamepad Controller] - 🎮 Initializing custom event gamepad navigation for WinUI integration...');
+    
+    // Merge with custom events defaults
+    const customEventDefaults: GamepadServiceOptions = {
+        // Enable custom events mode
+        useCustomEvents: true,
+        
+        // Default custom event names for WinUI/Hub integration
+        customConnectedEvent: 'hubgamepadconnected',
+        customDisconnectedEvent: 'hubgamepaddisconnected', 
+        customStateChangedEvent: 'hubgamepadstatechanged',
+        
+        // Common gamepad options
+        focusedClass: 'gamepad-focused',
+        selectedClass: 'gamepad-selected',
+        useDataAttributes: false,
+        useGamepadIndex: false,
+        statusElementId: 'gamepad-status',
+        autoCreateStatusElement: true,
+        autoAddStyles: false,
+        enableNavigation: true,
+        enableBackButton: true,
+        enableShoulderNavigation: true,
+        debounceTime: 150,
+        deadzone: 0.1,
+        
+        // Default to single context (can be overridden)
+        enableDualContext: false,
+        menuContextSelector: '.nav-menu, nav, .navigation',
+        contentContextSelector: null,
+        
+        ...options
+    };
+
+    // Create new instance with custom events configuration
+    gamepadInstance = new GamepadService(customEventDefaults);
+    gamepadInstance.init();
+
+    // Set up event handlers with custom events context
+    gamepadInstance.onFocus = (element: Element, index: number) => {
+        const context = gamepadInstance?.getActiveContext();
+        const title = (element instanceof HTMLElement) ? (element as HTMLElement).dataset?.title : undefined;
+        const contextInfo = context ? ` (${context.id})` : '';
+        console.debug(`[🎮 🕹️ Gamepad Controller] - 🎯 Focused${contextInfo}: ${element.textContent || title || element.tagName}`);
+    };
+
+    gamepadInstance.onSelect = (element: Element, index: number) => {
+        const context = gamepadInstance?.getActiveContext();
+        const title = (element instanceof HTMLElement) ? (element as HTMLElement).dataset?.title : undefined;
+        const contextInfo = context ? ` (${context.id})` : '';
+        console.debug(`[🎮 🕹️ Gamepad Controller] - ✅ Selected${contextInfo}: ${element.textContent || title || element.tagName}`);
+        
+        // Auto-handle navigation menu links
+        if (element.classList.contains('nav-item') && 'href' in element && (element as HTMLAnchorElement).href) {
+            console.debug(`[🎮 🕹️ Gamepad Controller] - 🔗 Navigating to: ${(element as HTMLAnchorElement).href}`);
+        }
+    };
+
+    gamepadInstance.onControllerConnect = (gamepad: Gamepad) => {
+        console.debug('[🎮 🕹️ Gamepad Controller] - 🎮 Custom event: Controller connected via WinUI integration');
+    };
+
+    gamepadInstance.onControllerDisconnect = (gamepad: Gamepad) => {
+        console.debug('[🎮 🕹️ Gamepad Controller] - 🎮 Custom event: Controller disconnected via WinUI integration');
+    };
+
+    gamepadInstance.onBackButton = () => {
+        console.debug('[🎮 🕹️ Gamepad Controller] - 🔙 Back button pressed (custom events)');
+        // Default back button behavior
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            console.debug('[🎮 🕹️ Gamepad Controller] - 🔙 No history to go back to');
+        }
+    };
+
+    // Set up context switch handler for dual context mode
+    if (customEventDefaults.enableDualContext) {
+        gamepadInstance.onContextSwitch = (newContext: any, oldContext: any) => {
+            console.debug(`[🎮 🕹️ Gamepad Controller] - 🔄 Context switched from ${oldContext?.id || 'none'} to ${newContext.id} (custom events)`);
+        };
+    }
+
+    console.info('[🎮 🕹️ Gamepad Controller] - ✅ Custom event gamepad navigation initialized for WinUI integration!');
+    console.info('[🎮 🕹️ Gamepad Controller] - 📖 Listening for custom events:', {
+        connected: customEventDefaults.customConnectedEvent,
+        disconnected: customEventDefaults.customDisconnectedEvent,
+        stateChanged: customEventDefaults.customStateChangedEvent
+    });
+
+    return gamepadInstance;
+}
+
+/**
  * Utility functions for common gamepad operations.
- * These provide convenient access to the current gamepad instance.
+ * These provide convenient access to the current gamepad instance and its state.
+ * All functions are safe to call even when no gamepad instance is active.
  */
 export const gamepadUtils = {
-    // Get current gamepad service instance
+    /**
+     * Gets the current GamepadService instance.
+     * @returns {GamepadService | null} The active GamepadService instance or null if none exists
+     * 
+     * @example
+     * const instance = gamepadUtils.getInstance();
+     * if (instance) {
+     *   console.log('Gamepad service is active');
+     * }
+     */
     getInstance: () => gamepadInstance,
 
-    // Check if gamepad is connected
+    /**
+     * Checks if a gamepad controller is currently connected and detected.
+     * @returns {boolean} True if a gamepad is connected, false otherwise
+     * 
+     * @example
+     * if (gamepadUtils.isConnected()) {
+     *   console.log('Gamepad is ready for navigation');
+     * }
+     */
     isConnected: () => gamepadInstance && gamepadInstance.isControllerConnected(),
 
-    // Get current focused element
+    /**
+     * Gets the currently focused/highlighted element in the navigation system.
+     * @returns {Element | null} The currently focused element or null if none
+     * 
+     * @example
+     * const focusedElement = gamepadUtils.getCurrentElement();
+     * if (focusedElement) {
+     *   console.log('Currently focused:', focusedElement.textContent);
+     * }
+     */
     getCurrentElement: () => gamepadInstance ? gamepadInstance.getCurrentElement() : null,
 
-    // Get current index
+    /**
+     * Gets the index of the currently focused element in the navigation array.
+     * @returns {number} The current element index, or -1 if no gamepad instance exists
+     * 
+     * @example
+     * const currentIndex = gamepadUtils.getCurrentIndex();
+     * console.log(`Currently focused element index: ${currentIndex}`);
+     */
     getCurrentIndex: () => gamepadInstance ? gamepadInstance.getCurrentIndex() : -1,
 
-    // Get all elements
+    /**
+     * Gets all navigable elements detected by the gamepad system.
+     * @returns {Element[]} Array of all navigable elements, empty array if no instance
+     * 
+     * @example
+     * const elements = gamepadUtils.getElements();
+     * console.log(`Found ${elements.length} navigable elements`);
+     */
     getElements: () => gamepadInstance ? gamepadInstance.getElements() : [],
 
-    // Navigate to specific element
+    /**
+     * Programmatically navigates to a specific element by reference.
+     * The element must be in the current navigation array.
+     * @param {Element} element - The element to navigate to
+     * @returns {boolean} True if navigation was successful, false otherwise
+     * 
+     * @example
+     * const targetButton = document.querySelector('#my-button');
+     * if (gamepadUtils.navigateToElement(targetButton)) {
+     *   console.log('Successfully navigated to button');
+     * }
+     */
     navigateToElement: (element: Element) => {
         if (!gamepadInstance) return false;
         const elements = gamepadInstance.getElements();
@@ -278,7 +449,17 @@ export const gamepadUtils = {
         return false;
     },
 
-    // Navigate to specific index
+    /**
+     * Programmatically navigates to a specific element by its index in the navigation array.
+     * @param {number} index - The zero-based index of the element to navigate to
+     * @returns {boolean} True if navigation was successful, false otherwise
+     * 
+     * @example
+     * // Navigate to the first element
+     * if (gamepadUtils.navigateToIndex(0)) {
+     *   console.log('Navigated to first element');
+     * }
+     */
     navigateToIndex: (index: number) => {
         if (gamepadInstance) {
             return gamepadInstance.navigateToIndex(index);
@@ -286,32 +467,89 @@ export const gamepadUtils = {
         return false;
     },
 
-    // Refresh navigation (useful after DOM changes)
+    /**
+     * Refreshes the navigation system by re-detecting elements and updating focus.
+     * Useful after DOM changes, new elements added, or layout modifications.
+     * @returns {void}
+     * 
+     * @example
+     * // After adding new buttons to the page
+     * document.body.appendChild(newButton);
+     * gamepadUtils.refresh(); // Re-detect all navigable elements
+     */
     refresh: () => {
         if (gamepadInstance) {
             gamepadInstance.refresh();
         }
     },
 
-    // CSS Styling utilities
+    /**
+     * Adds default CSS styles for gamepad navigation focus and selection states.
+     * @param {GamepadServiceOptions} options - Optional styling configuration
+     * @returns {void}
+     * 
+     * @example
+     * // Add default styles
+     * gamepadUtils.addStyles();
+     * 
+     * // Add styles with custom configuration
+     * gamepadUtils.addStyles({
+     *   focusedClass: 'my-focus-class',
+     *   selectedClass: 'my-selected-class'
+     * });
+     */
     addStyles: (options: GamepadServiceOptions = {}) => {
         addNavigationStyles(options);
     },
 
+    /**
+     * Removes all gamepad navigation CSS styles from the page.
+     * @returns {void}
+     * 
+     * @example
+     * gamepadUtils.removeStyles(); // Clean up all navigation styles
+     */
     removeStyles: () => {
         removeNavigationStyles();
     },
 
+    /**
+     * Prints example CSS styles to the browser console for gamepad navigation.
+     * Helpful for developers to see what CSS classes and styles are available.
+     * @returns {void}
+     * 
+     * @example
+     * gamepadUtils.printCSSExamples(); // Check console for CSS examples
+     */
     printCSSExamples: () => {
         printCSSExamples();
     },
 
-    // Cleanup utility
+    /**
+     * Cleans up and destroys the current gamepad service instance.
+     * Removes all event listeners and clears references.
+     * @returns {void}
+     * 
+     * @example
+     * gamepadUtils.cleanup(); // Clean shutdown of gamepad service
+     */
     cleanup: () => {
         cleanupGamepadService();
     },
 
-    // Get navigation information
+    /**
+     * Gets comprehensive information about the current navigation state.
+     * @returns {object | null} Navigation info object or null if no instance exists
+     * 
+     * @example
+     * const info = gamepadUtils.getNavigationInfo();
+     * if (info) {
+     *   console.log(`Connected: ${info.isConnected}`);
+     *   console.log(`Controller: ${info.controllerType}`);
+     *   console.log(`Elements: ${info.totalElements}`);
+     *   console.log(`Current: ${info.currentIndex}`);
+     * }
+     */
     getNavigationInfo: () => {
         if (!gamepadInstance) return null;
 
@@ -327,40 +565,124 @@ export const gamepadUtils = {
         };
     },
 
-    // Dual context utilities
+    /**
+     * Checks if dual context navigation mode is currently enabled.
+     * @returns {boolean} True if dual context is enabled, false otherwise
+     * 
+     * @example
+     * if (gamepadUtils.isDualContextEnabled()) {
+     *   console.log('Dual context navigation is active');
+     * }
+     */
     isDualContextEnabled: () => {
         return gamepadInstance && gamepadInstance.options.enableDualContext;
     },
 
+    /**
+     * Gets the currently active navigation context in dual context mode.
+     * @returns {object | null} The active context object or null
+     * 
+     * @example
+     * const activeContext = gamepadUtils.getActiveContext();
+     * if (activeContext) {
+     *   console.log(`Active context: ${activeContext.id}`);
+     * }
+     */
     getActiveContext: () => {
         return gamepadInstance ? gamepadInstance.getActiveContext() : null;
     },
 
+    /**
+     * Gets a specific navigation context by its ID.
+     * @param {string} contextId - The ID of the context to retrieve
+     * @returns {object | null} The context object or null if not found
+     * 
+     * @example
+     * const menuContext = gamepadUtils.getContext('menu');
+     * if (menuContext) {
+     *   console.log('Menu context found');
+     * }
+     */
     getContext: (contextId: string) => {
         return gamepadInstance ? gamepadInstance.getContext(contextId) : null;
     },
 
+    /**
+     * Switches to a specific navigation context by its ID.
+     * @param {string} contextId - The ID of the context to switch to
+     * @returns {boolean} True if context switch was successful, false otherwise
+     * 
+     * @example
+     * if (gamepadUtils.switchToContext('menu')) {
+     *   console.log('Switched to menu context');
+     * }
+     */
     switchToContext: (contextId: string) => {
         return gamepadInstance ? gamepadInstance.switchToContext(contextId) : false;
     },
 
+    /**
+     * Gets all available navigation contexts.
+     * @returns {object[]} Array of all navigation context objects
+     * 
+     * @example
+     * const contexts = gamepadUtils.getAllContexts();
+     * contexts.forEach(ctx => console.log(`Context: ${ctx.id}`));
+     */
     getAllContexts: () => {
         return gamepadInstance ? gamepadInstance.getAllContexts() : [];
     },
 
-    // Context-specific utilities
+    /**
+     * Gets the menu navigation context (if it exists).
+     * @returns {object | null} The menu context object or null
+     * 
+     * @example
+     * const menuContext = gamepadUtils.getMenuContext();
+     * if (menuContext) {
+     *   console.log(`Menu has ${menuContext.elements.length} items`);
+     * }
+     */
     getMenuContext: () => {
         return gamepadInstance ? gamepadInstance.getContext('menu') : null;
     },
 
+    /**
+     * Gets the content navigation context (if it exists).
+     * @returns {object | null} The content context object or null
+     * 
+     * @example
+     * const contentContext = gamepadUtils.getContentContext();
+     * if (contentContext) {
+     *   console.log('Content context is available');
+     * }
+     */
     getContentContext: () => {
         return gamepadInstance ? gamepadInstance.getContext('content') : null;
     },
 
+    /**
+     * Switches navigation focus to the menu context.
+     * @returns {boolean} True if switch was successful, false otherwise
+     * 
+     * @example
+     * if (gamepadUtils.switchToMenu()) {
+     *   console.log('Now navigating in menu');
+     * }
+     */
     switchToMenu: () => {
         return gamepadInstance ? gamepadInstance.switchToContext('menu') : false;
     },
 
+    /**
+     * Switches navigation focus to the content context.
+     * @returns {boolean} True if switch was successful, false otherwise
+     * 
+     * @example
+     * if (gamepadUtils.switchToContent()) {
+     *   console.log('Now navigating in content');
+     * }
+     */
     switchToContent: () => {
         return gamepadInstance ? gamepadInstance.switchToContext('content') : false;
     }
