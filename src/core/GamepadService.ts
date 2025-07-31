@@ -173,7 +173,7 @@ export class GamepadService {
             const customGameLoopFn = createCustomEventGameLoop(
                 this.eventState, 
                 this.navState, 
-                this.contextManager, 
+                this.options.enableDualContext ? this.contextManager : undefined, // Only pass contextManager if dual context is enabled
                 this.updateFocus.bind(this)
             );
             startGameLoop(this.eventState, customGameLoopFn);
