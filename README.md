@@ -1,586 +1,952 @@
-# Gamepad Navigation Service 🎮
+# Gamepad Controller
 
-A lightweight, framework-agnostic gamepad navigation system for web applications. Provides seamless controller support for any HTML interface without overriding existing styles.
+A TypeScript library for advanced gamepad navigation and UI control in web applications. Supports dual context navigation, custom mapping, and is compatible with Xbox, PlayStation, Nintendo, and generic controllers.
 
-## ✨ Features
+## 🎮 Features
 
-### 🎮 Universal Controller Support
-- **Xbox Controllers** (Xbox One, Xbox Series X/S, Xbox 360)
-- **PlayStation Controllers** (DualShock 4, DualSense, PS3)
-- **Nintendo Controllers** (Switch Pro Controller, Joy-Cons)
-- **Generic Controllers** with automatic fallback
+- **Dual Context Navigation**: Separate navigation for menu and content areas
+- **Multiple Navigation Modes**: Grid-based and spatial navigation
+- **Controller Support**: Xbox, PlayStation, Nintendo, and generic gamepads
+- **TypeScript Support**: Full type declarations and IntelliSense
+- **Modern Architecture**: Modular, tree-shakable codebase
+- **Memory Management**: Automatic cleanup and leak prevention
+- **Customizable Styling**: Optional CSS with theming support
+- **Auto-Detection**: Automatically finds navigable elements
+- **Accessibility**: ARIA support and keyboard fallbacks
+- **Performance Optimized**: Efficient game loop with smart polling
 
-### 🛡️ Style Isolation
-- **Zero Style Conflicts** - No automatic CSS injection
-- **Data Attributes** - Clean styling hooks without class conflicts
-- **Context-Aware** - Different styles for different UI contexts
-- **Customizable** - Full control over visual feedback
+## 📦 Installation
 
-### 🔧 Smart Navigation
-- **Spatial Navigation** - Intelligent element detection
-- **Grid Navigation** - Perfect for CSS Grid layouts
-- **Menu Navigation** - Enhanced support for navigation menus
-- **Form Navigation** - Optimized for form elements
+### From Package File (Recommended for Development)
 
-### 🚀 Easy Integration
-- **Plug-and-Play** - Works with any HTML/CSS/JS app
-- **Framework Support** - React, Angular, Vue.js examples
-- **SPA Compatible** - Works with single-page applications
-- **No Dependencies** - Pure vanilla JavaScript
+1. Build and package the library:
+   ```sh
+   npm run build
+   npm pack
+   ```
 
-### 🔄 Dual Context Navigation
-- **Separate Contexts** - Independent navigation for menu and content
-- **Mutual Exclusion** - Only one context active at a time
-- **Context Switching** - R1/L1 for menu, stick for content
-- **Isolated State** - Each context maintains its own focus and selection
+2. Install in your project:
+   ```sh
+   npm install /path/to/gamepad-controller-1.0.0.tgz
+   ```
 
-## 🔧 Quick Setup
-
-### Prerequisites
-
-⚠️ **Important**: This service uses ES6 modules and requires a local server (not `file://`).
-
-**Option 1: VS Code Live Server (Recommended)**
-1. Install the "Live Server" extension
-2. Right-click `index.html` → "Open with Live Server"
-
-**Option 2: Node.js Static Server**
-```bash
-npx http-server
-# Visit: http://localhost:8080
+### From NPM (When Published)
+```sh
+npm install gamepad-controller
 ```
 
-**Option 3: Any Static Server**
-```bash
-# Examples:
-python3 -m http.server 8000
-php -S localhost:8000
-ruby -run -e httpd . -p 8000
-```
+## 🚀 Quick Start
 
-### Basic HTML Integration
+### Basic Navigation Setup
 
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>My App with Gamepad Support</title>
-    <style>
-        /* Your existing styles remain unchanged */
-        .my-button:focus {
-            outline: 2px solid #007bff;
-        }
-        
-        /* Optional: Add gamepad-specific styles */
-        [data-gamepad-focused="true"] {
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
-        }
-    </style>
-</head>
-<body>
-    <div class="my-app">
-        <button class="my-button">Button 1</button>
-        <button class="my-button">Button 2</button>
-        <button class="my-button">Button 3</button>
-    </div>
+```ts
+import { gamepadService } from 'gamepad-controller';
 
-    <script type="module">
-        import { initGamepadForPage } from './gamepadService.js';
-        
-        // One-line setup - no style conflicts!
-        initGamepadForPage();
-    </script>
-</body>
-</html>
-```
-
-### Custom Integration
-
-```javascript
-import { initGamepadNavigation } from './gamepadService.js';
-
-// Initialize with custom options
-const gamepad = initGamepadNavigation({
-    navigationMode: 'spatial',        // 'spatial' or 'grid'
-    useDataAttributes: true,          // Use data attributes (recommended)
-    autoAddStyles: false,             // Don't inject CSS (default)
-    gamepadContext: 'buttons',        // Context for styling
-    enableBackButton: true,           // B/Circle button support
-    enableShoulderNavigation: true    // R1/L1 navigation
-});
-
-// Add event listeners
-gamepad.onFocus = (element, index) => {
-    console.log(`Focused on: ${element.textContent}`);
-};
-
-gamepad.onSelect = (element, index) => {
-    console.log(`Selected: ${element.textContent}`);
-    // Your custom logic here
-};
-```
-
-### Dual Context Integration
-
-```javascript
-import { initDualContextGamepad } from './gamepadService.js';
-
-// Initialize with dual context support
-const gamepad = initDualContextGamepad({
-    // Menu context (R1/L1 navigation)
-    menuContextSelector: '.nav-menu',
-    
-    // Content context (stick navigation)
-    contentContextSelector: '.main-content',
-    
-    // Styling options
-    useDataAttributes: true,
+// Simple one-line initialization for any page
+const gamepad = gamepadService('.container', {
+    navigationMode: 'spatial',
     focusedClass: 'gamepad-focused',
     selectedClass: 'gamepad-selected'
 });
-
-// Handle context switching
-gamepad.onContextSwitch = (newContext, oldContext) => {
-    console.log(`Context switched from ${oldContext?.id} to ${newContext.id}`);
-    
-    // Update UI based on active context
-    document.body.className = `${newContext.id}-context-active`;
-};
 ```
 
-**How it works:**
-- **Left Stick**: Navigates content area elements spatially
-- **R1/L1 Buttons**: Navigate menu items horizontally
-- **Automatic Switching**: Using stick activates content context, R1/L1 activates menu context
-- **Mutual Exclusion**: Only one context is active at a time
-- **X Button**: Only affects the currently active context
+### Super Simple Page Setup
 
-## 📖 Integration Guides
+```ts
+import { initGamepadForPage } from 'gamepad-controller';
 
-### React Integration
-
-```jsx
-import { useEffect, useRef } from 'react';
-
-function GamepadEnabledComponent({ items }) {
-    const gamepadRef = useRef(null);
-    
-    useEffect(() => {
-        // Initialize gamepad service
-        import('./gamepadService.js').then(({ initGamepadNavigation }) => {
-            gamepadRef.current = initGamepadNavigation({
-                containerSelector: '.my-container',
-                navigationMode: 'spatial',
-                useDataAttributes: true,
-                autoAddStyles: false // Keep your existing styles
-            });
-            
-            // Set up event handlers
-            gamepadRef.current.onFocus = (element, index) => {
-                console.log('Gamepad focused:', element);
-            };
-            
-            gamepadRef.current.onSelect = (element, index) => {
-                // Trigger React onClick handler
-                element.click();
-            };
-        });
-        
-        // Cleanup
-        return () => {
-            if (gamepadRef.current) {
-                gamepadRef.current.destroy();
-            }
-        };
-    }, []);
-    
-    // Refresh navigation when items change
-    useEffect(() => {
-        if (gamepadRef.current) {
-            gamepadRef.current.refresh();
-        }
-    }, [items]);
-    
-    return (
-        <div className="my-container">
-            {items.map((item, index) => (
-                <button 
-                    key={index} 
-                    className="my-button"
-                    onClick={() => handleClick(item)}
-                >
-                    {item.label}
-                </button>
-            ))}
-        </div>
-    );
-}
-
-// CSS for React component
-const styles = `
-    .my-button[data-gamepad-focused="true"] {
-        box-shadow: 0 0 0 3px #007bff;
-        transform: scale(1.05);
-    }
-`;
-```
-
-### Angular Integration
-
-```typescript
-// gamepad.component.ts
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-
-@Component({
-    selector: 'app-gamepad-navigation',
-    template: `
-        <div class="navigation-container">
-            <button 
-                *ngFor="let item of items; let i = index"
-                class="nav-button"
-                (click)="onItemClick(item)"
-            >
-                {{ item.label }}
-            </button>
-        </div>
-    `,
-    styles: [`
-        .nav-button[data-gamepad-focused="true"] {
-            box-shadow: 0 0 0 3px #007bff;
-            transform: scale(1.05);
-        }
-    `]
-})
-export class GamepadNavigationComponent implements OnInit, OnDestroy {
-    @Input() items: any[] = [];
-    
-    private gamepadService: any;
-    
-    async ngOnInit() {
-        // Dynamic import to load gamepad service
-        const { initGamepadNavigation } = await import('./gamepadService.js');
-        
-        this.gamepadService = initGamepadNavigation({
-            containerSelector: '.navigation-container',
-            navigationMode: 'spatial',
-            useDataAttributes: true,
-            autoAddStyles: false
-        });
-        
-        // Set up event handlers
-        this.gamepadService.onFocus = (element: HTMLElement, index: number) => {
-            console.log('Gamepad focused:', element);
-        };
-        
-        this.gamepadService.onSelect = (element: HTMLElement, index: number) => {
-            // Trigger Angular click handler
-            element.click();
-        };
-    }
-    
-    ngOnDestroy() {
-        if (this.gamepadService) {
-            this.gamepadService.destroy();
-        }
-    }
-    
-    onItemClick(item: any) {
-        console.log('Item clicked:', item);
-        // Your click handling logic
-    }
-}
-```
-
-### Vue.js Integration
-
-```vue
-<template>
-    <div class="vue-gamepad-container">
-        <button 
-            v-for="(item, index) in items" 
-            :key="index"
-            class="vue-button"
-            @click="handleClick(item)"
-        >
-            {{ item.label }}
-        </button>
-    </div>
-</template>
-
-<script>
-export default {
-    name: 'GamepadNavigation',
-    props: {
-        items: {
-            type: Array,
-            default: () => []
-        }
-    },
-    data() {
-        return {
-            gamepadService: null
-        };
-    },
-    async mounted() {
-        // Initialize gamepad service
-        const { initGamepadNavigation } = await import('./gamepadService.js');
-        
-        this.gamepadService = initGamepadNavigation({
-            containerSelector: '.vue-gamepad-container',
-            navigationMode: 'spatial',
-            useDataAttributes: true,
-            autoAddStyles: false
-        });
-        
-        // Event handlers
-        this.gamepadService.onFocus = (element, index) => {
-            console.log('Vue gamepad focused:', element);
-        };
-        
-        this.gamepadService.onSelect = (element, index) => {
-            element.click();
-        };
-    },
-    beforeUnmount() {
-        if (this.gamepadService) {
-            this.gamepadService.destroy();
-        }
-    },
-    watch: {
-        items: {
-            handler() {
-                // Refresh when items change
-                if (this.gamepadService) {
-                    this.$nextTick(() => {
-                        this.gamepadService.refresh();
-                    });
-                }
-            },
-            deep: true
-        }
-    },
-    methods: {
-        handleClick(item) {
-            console.log('Vue item clicked:', item);
-            // Your click handling logic
-        }
-    }
-};
-</script>
-
-<style scoped>
-.vue-button[data-gamepad-focused="true"] {
-    box-shadow: 0 0 0 3px #42b883;
-    transform: scale(1.05);
-}
-</style>
-```
-
-## 🎨 Styling Guide
-
-### No Style Conflicts (Default)
-
-```javascript
-// By default, the service adds NO styles
-const gamepad = initGamepadForPage();
-// Navigation works, but no visual changes
-```
-
-### Using Data Attributes (Recommended)
-
-```css
-/* Style using data attributes for better isolation */
-[data-gamepad-focused="true"] {
-    /* Your custom focus styles */
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
-}
-
-[data-gamepad-selected="true"] {
-    /* Your custom selection styles */
-    background-color: #007bff;
-    color: white;
-}
-
-/* Context-specific styles */
-[data-gamepad-context="grid"] [data-gamepad-focused="true"] {
-    transform: scale(1.05);
-}
-
-[data-gamepad-context="menu"] [data-gamepad-focused="true"] {
-    background-color: rgba(0, 123, 255, 0.1);
-    border-left: 4px solid #007bff;
-}
-```
-
-### Respecting Existing Styles
-
-```css
-/* Your existing focus styles */
-.my-button:focus {
-    outline: 2px solid #28a745;
-}
-
-/* Enhance with gamepad focus (don't override) */
-.my-button[data-gamepad-focused="true"] {
-    outline: 2px solid #28a745;
-    box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.3);
-}
-```
-
-### Optional Built-in Styles
-
-```javascript
-// Only if you want the built-in styles
+// Automatic setup with sensible defaults
 const gamepad = initGamepadForPage({
-    autoAddStyles: true,  // Opt-in to built-in styles
-    useDataAttributes: true
-});
-
-// Or add them later
-import { gamepadUtils } from './gamepadService.js';
-gamepadUtils.addStyles({
-    primaryColor: '#007bff',
-    focusWidth: '2px'
+    enableNavigation: true,
+    enableBackButton: true
 });
 ```
 
-## 🎮 Controls
+### Dual Context Navigation
 
-| Input | Action |
-|-------|--------|
-| **D-pad / Left Stick** | Navigate elements |
-| **A / Cross / A** | Select element |
-| **B / Circle** | Go back (if enabled) |
-| **R1 / L1** | Navigate pages (if enabled) |
+```ts
+import { initDualContextGamepad } from 'gamepad-controller';
 
-## 🔧 API Reference
+// Separate navigation for menu and content
+const gamepad = initDualContextGamepad({
+    menuContextSelector: '.nav-menu, nav',
+    contentContextSelector: '.main-content',
+    enableDualContext: true
+});
+```
+
+## 📖 API Reference
+
+### TypeScript Types and Interfaces
+
+The library provides comprehensive TypeScript support with full type definitions:
+
+```ts
+// Import main service class
+import { GamepadService } from 'gamepad-controller';
+
+// Import helper functions
+import { gamepadService, initGamepadForPage, initDualContextGamepad } from 'gamepad-controller';
+
+// Import TypeScript interfaces and types
+import type { 
+    GamepadServiceOptions,
+    GamepadNavigationContextOptions,
+    NavigationState,
+    ControllerMappings,
+    GridDimensions,
+    GamepadContextManagerCallback
+} from 'gamepad-controller';
+```
+
+### Using Types in Your Project
+
+```ts
+// Type your configuration options
+const options: GamepadServiceOptions = {
+    navigationMode: 'spatial',
+    focusedClass: 'my-focused-class',
+    enableRightStickScroll: true,
+    scrollSpeed: 1.5
+};
+
+// Type your event handlers
+const handleFocus = (element: Element, index: number): void => {
+    console.log(`Element ${index} focused:`, element);
+};
+
+const handleControllerConnect = (gamepad: Gamepad): void => {
+    console.log('Controller connected:', gamepad.id);
+};
+
+// Type your service instance
+const gamepadInstance: GamepadService = gamepadService('.container', options);
+gamepadInstance.onFocus = handleFocus;
+gamepadInstance.onControllerConnect = handleControllerConnect;
+```
+
+### Available Interfaces
+
+| Interface | Description | Use Case |
+|-----------|-------------|----------|
+| `GamepadServiceOptions` | Main configuration options | Service initialization |
+| `GamepadNavigationContextOptions` | Context-specific options | Dual context setup |
+| `NavigationState` | Current navigation state | Internal state management |
+| `ControllerMappings` | Controller button mappings | Custom controller support |
+| `GridDimensions` | Grid layout dimensions | Grid navigation |
+| `GamepadContextManagerCallback` | Context switch callback | Dual context events |
+
+### Custom Controller Configuration
+
+```ts
+import type { ControllerMappings } from 'gamepad-controller';
+
+const customMapping: ControllerMappings = {
+    up: 12,
+    down: 13,
+    left: 14,
+    right: 15,
+    primary: 0,
+    secondary: 1
+};
+```
+
+### Extending Service Options
+
+```ts
+// Extend the interface for custom options
+interface CustomGamepadOptions extends GamepadServiceOptions {
+    customFeature?: boolean;
+    customHandler?: (data: any) => void;
+}
+
+const customOptions: CustomGamepadOptions = {
+    navigationMode: 'spatial',
+    focusedClass: 'custom-focus',
+    customFeature: true,
+    customHandler: (data) => console.log('Custom handler:', data)
+};
+```
+
+### Type Safety Benefits
+
+- **IntelliSense Support**: Full autocomplete and type checking in VS Code and other TypeScript-aware editors
+- **Compile-time Validation**: Catch configuration errors before runtime
+- **Better Documentation**: Type hints show available options and expected values
+- **Refactoring Safety**: Rename and refactor with confidence
+
+### Common Type Patterns
+
+```ts
+// Event handler typing
+type GamepadEventHandler = (element: Element, index: number) => void;
+type ControllerEventHandler = (gamepad: Gamepad) => void;
+
+// Configuration with strict typing
+const config: GamepadServiceOptions = {
+    navigationMode: 'spatial', // TypeScript ensures valid values
+    debounceTime: 100,         // Type-checked number
+    enableRightStickScroll: true // Type-checked boolean
+};
+
+// Service instance with full typing
+const service: GamepadService = gamepadService('.container', config);
+service.onFocus = (element, index) => {
+    // TypeScript knows element is Element and index is number
+    console.log(`Focused element ${index}:`, element.tagName);
+};
+```
 
 ### Main Functions
 
-```javascript
-import { 
-    initGamepadForPage,      // One-line setup
-    initGamepadNavigation,   // Custom setup
-    gamepadService,          // Quick setup
-    gamepadUtils             // Utility functions
-} from './gamepadService.js';
+#### `gamepadService(containerSelector?, options?)`
+Creates a gamepad navigation service for a specific container or the entire page.
 
-// One-line initialization
-initGamepadForPage();
+**Parameters:**
+- `containerSelector` (string | null): CSS selector for navigation container
+- `options` (GamepadServiceOptions): Configuration options
 
-// Custom initialization
-const gamepad = initGamepadNavigation({
-    navigationMode: 'spatial',
-    useDataAttributes: true,
-    autoAddStyles: false,
-    gamepadContext: 'default'
-});
+#### `initGamepadForPage(options?)`
+Quick initialization with automatic setup and event handlers.
 
-// Utility functions
-gamepadUtils.addStyles();           // Add optional styles
-gamepadUtils.removeStyles();        // Remove styles
-gamepadUtils.printCSSExamples();    // Print CSS examples
-gamepadUtils.refresh();             // Refresh navigation
+#### `initDualContextGamepad(options?)`
+Sets up dual context navigation for menu and content areas.
+
+#### `initGamepadNavigation(options?)`
+Low-level initialization function with full control.
+
+#### `cleanupGamepadService()`
+Manually cleanup the global gamepad service instance and free memory.
+
+### Configuration Options
+
+```ts
+interface GamepadServiceOptions {
+    // Core Settings
+    debounceTime?: number;              // Input debounce (default: 150ms)
+    deadzone?: number;                  // Analog stick deadzone (default: 0.1)
+    containerSelector?: string | null;  // Navigation container
+    
+    // Styling
+    focusedClass?: string;              // CSS class for focused elements
+    selectedClass?: string;             // CSS class for selected elements
+    statusElementId?: string | null;    // Status display element ID
+    
+    // Navigation Behavior
+    navigationMode?: 'grid' | 'spatial' | 'horizontal'; // Navigation algorithm
+    wrapNavigation?: boolean;            // Wrap around edges
+    autoDetectElements?: boolean;        // Auto-find navigable elements
+    
+    // Features
+    enableNavigation?: boolean;          // Enable D-pad navigation
+    enableBackButton?: boolean;          // Enable back button
+    enableShoulderNavigation?: boolean;  // Enable R1/L1 navigation
+    
+    // Right Stick Scrolling
+    enableRightStickScroll?: boolean;    // Enable right stick for window scrolling (default: true)
+    scrollSpeed?: number;                // Multiplier for scroll speed (default: 1)
+    scrollDebounceTime?: number;         // Debounce time for scrolling (default: 50ms)
+    
+    // Dual Context
+    enableDualContext?: boolean;         // Enable dual context mode
+    menuContextSelector?: string;        // Menu area selector
+    contentContextSelector?: string | null; // Content area selector
+    
+    // Automation
+    autoCreateStatusElement?: boolean;   // Auto-create status display
+    autoAddStyles?: boolean;            // Auto-add default styles
+    useDataAttributes?: boolean;        // Use data-* attributes
+    useGamepadIndex?: boolean;          // Enable gamepad-index attribute filtering
+    onlyViewport?: boolean;             // Only include elements visible in viewport (default: false)
+}
 ```
 
 ### Event Handlers
 
-```javascript
-gamepad.onFocus = (element, index) => {
-    // Element gained focus
+```ts
+// Focus events
+gamepad.onFocus = (element: Element, index: number) => {
+    console.log('Element focused:', element);
 };
 
-gamepad.onSelect = (element, index) => {
-    // Element was selected
+// Selection events
+gamepad.onSelect = (element: Element, index: number) => {
+    console.log('Element selected:', element);
 };
 
-gamepad.onControllerConnect = (gamepad, type) => {
-    // Controller connected
+// Controller events
+gamepad.onControllerConnect = (gamepad: Gamepad) => {
+    console.log('Controller connected');
 };
 
-gamepad.onControllerDisconnect = (gamepad) => {
-    // Controller disconnected
+gamepad.onControllerDisconnect = (gamepad: Gamepad) => {
+    console.log('Controller disconnected');
 };
 
+// Navigation events
 gamepad.onBackButton = () => {
-    // Back button pressed
+    console.log('Back button pressed');
+};
+
+gamepad.onContextSwitch = (newContext: any, oldContext: any) => {
+    console.log('Context switched');
 };
 ```
 
-## 📁 File Structure
+### Memory Management
+
+The library automatically handles memory cleanup, but you can also manage it manually:
+
+```ts
+import { cleanupGamepadService } from 'gamepad-controller';
+
+// Manual cleanup (useful in SPAs)
+cleanupGamepadService();
+
+// Or via service utility
+gamepadService.cleanup();
+
+// Service instance cleanup
+const gamepad = initGamepadForPage();
+// ... use gamepad
+gamepad.destroy(); // Clean up this specific instance
+```
+
+## 🔍 Viewport Filtering
+
+### Element Detection Options
+
+The library can be configured to include all focusable elements or only those visible in the viewport:
+
+```ts
+// Include all elements (default behavior)
+const gamepad = gamepadService('.container', {
+    onlyViewport: false  // Include all focusable elements
+});
+
+// Only include elements visible in viewport
+const gamepad = gamepadService('.container', {
+    onlyViewport: true   // Only include viewport-visible elements
+});
+```
+
+### Use Cases
+
+- **`onlyViewport: false`** (default): Best for navigation menus, toolbars, or when you want to navigate to off-screen elements
+- **`onlyViewport: true`**: Best for content-heavy pages where you only want to navigate visible elements
+
+### Example: Dynamic Content
+
+```ts
+// Initialize with all elements
+const gamepad = gamepadService('.container', {
+    onlyViewport: false
+});
+
+// Add new elements dynamically
+const newElement = document.createElement('button');
+newElement.textContent = 'New Button';
+container.appendChild(newElement);
+
+// Refresh to include new elements
+gamepad.refresh();
+```
+
+## 🎨 Styling
+
+### Quick Styling Setup
+
+```ts
+import { addNavigationStyles } from 'gamepad-controller';
+
+// Add default navigation styles
+addNavigationStyles();
+```
+
+### Custom CSS Classes
+
+```css
+/* Focused element styling */
+.gamepad-focused {
+    outline: 2px solid #007acc;
+    outline-offset: 2px;
+    background-color: rgba(0, 122, 204, 0.1);
+}
+
+/* Selected element styling */
+.gamepad-selected {
+    background-color: #007acc;
+    color: white;
+}
+```
+
+### Data Attributes for Enhanced Styling
+
+```html
+<!-- Enhanced styling with data attributes -->
+<button data-gamepad-focusable="true" data-title="Save Game">
+    Save
+</button>
+```
+
+### Custom Navigation Selection
+
+Use `gamepad-index="true"` to explicitly mark elements as focusable when the feature is enabled:
+
+```html
+<!-- Enable gamepad-index in service options -->
+<script>
+const gamepad = initGamepadForPage({
+    useGamepadIndex: true
+});
+</script>
+
+<!-- HTML with explicit focusable marking -->
+<div class="menu">
+    <button gamepad-index="true">Focusable Button</button>
+    <button>Not focusable (no gamepad-index)</button>
+    <button gamepad-index="true">Another Focusable Button</button>
+    <div>Regular div (not focusable)</div>
+    <input gamepad-index="true" type="text" placeholder="Focusable input" />
+    <input type="text" placeholder="Not focusable input" />
+</div>
+```
+
+**Navigation Selection Features:**
+- When `useGamepadIndex: false` → All normally focusable elements are included
+- When `useGamepadIndex: true` → Only elements with `gamepad-index="true"` are included
+- Provides precise control over which elements can receive gamepad focus
+- Perfect for complex layouts where you want to limit navigation scope
+- Works with both spatial and grid navigation modes
+
+## 🧭 Navigation Modes
+
+The gamepad controller supports different navigation algorithms optimized for different UI patterns:
+
+### Spatial Navigation (Default)
+**Best for:** Most web layouts, menus, forms, irregular layouts
+- Finds the nearest element in the direction of movement
+- Works naturally with any layout regardless of structure
+- Intelligent direction detection based on element positions
+- Handles complex layouts with mixed element sizes
+
+```ts
+const gamepad = gamepadService('.container', {
+    navigationMode: 'spatial' // Default mode
+});
+```
+
+### Grid Navigation
+**Best for:** Card grids, image galleries, uniform layouts
+- Assumes elements are arranged in a regular grid pattern
+- Moves in predictable rows and columns
+- Calculates grid dimensions automatically
+- More predictable movement in structured layouts
+
+```ts
+const gamepad = gamepadService('.grid-container', {
+    navigationMode: 'grid',
+    wrapNavigation: true // Wrap to opposite side when reaching edge
+});
+```
+
+### Horizontal Navigation
+**Best for:** Menu bars, tab lists, horizontal toolbars
+- Optimized for single-row horizontal navigation
+- **Available only in dual context mode** (used automatically for menu areas)
+- Supports wrapping from last to first element
+- Only responds to left/right navigation, ignores up/down
+
+```ts
+// Used automatically in dual context mode
+const gamepad = initDualContextGamepad({
+    menuContextSelector: '.nav-menu', // Uses horizontal navigation
+    contentContextSelector: '.content' // Uses spatial navigation
+});
+
+// NOT available in single context mode - will fallback to spatial
+const gamepad = gamepadService('.menu', {
+    navigationMode: 'horizontal' // ⚠️ Only available in dual context mode
+});
+```
+
+### Navigation Mode Comparison
+
+| Mode | Use Case | Movement | Wrapping | Structure | Availability |
+|------|----------|----------|----------|-----------|--------------|
+| **Spatial** | General layouts, menus, forms | Nearest element | Smart wrapping | Any layout | All modes |
+| **Grid** | Card grids, galleries | Row/column based | Edge wrapping | Regular grid | Single context only |
+| **Horizontal** | Menu bars, tabs | Left/right only | First ↔ last | Single row | Dual context only |
+
+### Mode Availability
+
+- **Single Context Mode** (`gamepadService`): Supports `'spatial'` and `'grid'` navigation
+- **Dual Context Mode** (`initDualContextGamepad`): Supports `'spatial'` and `'horizontal'` navigation
+- **Context Manager**: Supports `'spatial'` and `'horizontal'` navigation
+
+### Choosing the Right Mode
+
+```ts
+// Complex layouts with mixed elements
+const gamepad = gamepadService('.page', {
+    navigationMode: 'spatial' // Handles any layout
+});
+
+// Uniform card grid
+const gamepad = gamepadService('.card-grid', {
+    navigationMode: 'grid' // Predictable grid movement
+});
+
+// Navigation menu
+const gamepad = gamepadService('.nav-menu', {
+    navigationMode: 'spatial' // Works well for menus
+});
+```
+
+## 🎮 Analog Stick Deadzone Configuration
+
+### What is Deadzone?
+
+The **deadzone** is a threshold value that determines how much an analog stick must be moved before it registers as input. This prevents unwanted navigation from:
+- **Controller drift** - When sticks don't return to perfect center position
+- **Accidental touches** - Light pressure that shouldn't trigger navigation
+- **Worn controllers** - Older controllers with loose sticks
+
+### Default Deadzone Value
+
+The library uses a default deadzone of **0.1** (10% of full stick range), which works well for most controllers and users.
+
+### How Deadzone Works
+
+```ts
+// Analog stick values range from -1.0 to 1.0
+// With deadzone = 0.1:
+// - Stick values between -0.1 and 0.1 are ignored
+// - Only values outside this range trigger navigation
+// - Prevents accidental movement from slight stick positions
+
+const gamepad = gamepadService('.container', {
+    deadzone: 0.1 // 10% deadzone (default)
+});
+```
+
+### Adjusting Deadzone
+
+#### For Sensitive Controllers (New/Precise)
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0.05 // 5% - More sensitive, responds to smaller movements
+});
+```
+
+#### For Worn/Drifting Controllers
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0.2 // 20% - Less sensitive, requires more stick movement
+});
+```
+
+#### Disable Deadzone (Not Recommended)
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0 // No deadzone - responds to any stick movement
+});
+```
+
+### Visual Deadzone Explanation
 
 ```
-gamepad-navigation/
-├── gamepadService.js           # Main service (convenience wrapper)
-├── gamepadServiceModel.js      # Core GamepadService class
-├── gamepadUtils.js             # Utility functions
-├── controllerMappings.js       # Controller mappings
-├── index.html                  # Demo page
-├── example-menu.html           # Menu navigation demo
-├── example-simple.html         # Simple setup demo
-├── example-style-isolation.html # Style isolation demo
-├── debug-test.html             # Debug tools
-├── style.css                   # Demo styles
-├── README.md                   # This file
-└── USAGE_GUIDE.md              # Detailed usage guide
+Analog Stick Range: -1.0 ←→ 1.0
+                        ┌─────────────────────┐
+Deadzone (0.1):    -0.1 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 0.1
+                        ╚═════════════════════╝
+                           Ignored Range
+                        
+← Active Range →      ← Ignored →      ← Active Range →
 ```
 
-## 🔍 Testing & Debugging
+### Common Deadzone Values
 
-### Debug Tools
+| Value | Sensitivity | Best For |
+|-------|-------------|----------|
+| `0.05` | Very High | New controllers, precise users |
+| `0.1` | High | Default - works for most users |
+| `0.15` | Medium | General use, slightly worn controllers |
+| `0.2` | Low | Worn controllers, accessibility needs |
+| `0.25` | Very Low | Heavily worn/drifting controllers |
 
-Visit `debug-test.html` for comprehensive debugging tools:
-- Controller connection status
-- Element detection
-- Navigation testing
-- Style management
-- Console logging
+### Deadzone and Scrolling
 
-### Print CSS Examples
+The deadzone also affects right stick scrolling:
 
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0.1,              // Navigation deadzone
+    enableRightStickScroll: true,
+    scrollSpeed: 1.0            // Scrolling uses same deadzone value
+});
+```
+
+### Testing Your Deadzone
+
+```ts
+const gamepad = gamepadService('.container', {
+    deadzone: 0.1
+});
+
+// Test navigation responsiveness
+gamepad.onFocus = (element, index) => {
+    console.log(`Focused element ${index}: ${element.tagName}`);
+};
+
+// If navigation is too sensitive: increase deadzone
+// If navigation is unresponsive: decrease deadzone
+```
+
+## 🎯 Navigation Controls
+
+| Controller | Navigate | Select | Back | Menu Navigation | Scroll |
+|------------|----------|--------|------|-----------------|---------|
+| Xbox | D-pad / Left Stick | A | B | RB / LB | Right Stick |
+| PlayStation | D-pad / Left Stick | X | Circle | R1 / L1 | Right Stick |
+| Nintendo | D-pad / Left Stick | B | A | R / L | Right Stick |
+
+## 📋 Usage Examples
+
+### Grid Navigation Example
+
+Perfect for card layouts, image galleries, and uniform grids:
+
+```ts
+import { gamepadService } from 'gamepad-controller';
+
+const gamepad = gamepadService('.grid-container', {
+    navigationMode: 'grid',        // Grid-based movement
+    focusedClass: 'focused',
+    selectedClass: 'selected',
+    wrapNavigation: true           // Wrap around edges
+});
+
+// Add styling
+gamepad.addNavigationStyles();
+```
+
+```html
+<!-- HTML Structure -->
+<div class="grid-container">
+    <div class="card">Card 1</div>
+    <div class="card">Card 2</div>
+    <div class="card">Card 3</div>
+    <div class="card">Card 4</div>
+    <!-- Grid navigation moves in predictable rows/columns -->
+</div>
+```
+
+### Spatial Navigation Example
+
+Ideal for complex layouts, forms, and irregular element arrangements:
+
+```ts
+import { gamepadService } from 'gamepad-controller';
+
+const gamepad = gamepadService('.content-area', {
+    navigationMode: 'spatial',     // Finds nearest element in direction
+    focusedClass: 'focused',
+    selectedClass: 'selected',
+    wrapNavigation: false          // Don't wrap for complex layouts
+});
+```
+
+```html
+<!-- HTML Structure -->
+<div class="content-area">
+    <h1>Page Title</h1>
+    <button class="action-btn">Primary Action</button>
+    <div class="sidebar">
+        <button>Settings</button>
+        <button>Help</button>
+    </div>
+    <main>
+        <p>Content with <a href="#">links</a> and <button>buttons</button></p>
+    </main>
+    <!-- Spatial navigation finds nearest element regardless of structure -->
+</div>
+```
+
+### Dual Context Navigation Example
+
+Separate navigation contexts for menu and content areas:
+
+```ts
+import { initDualContextGamepad } from 'gamepad-controller';
+
+const gamepad = initDualContextGamepad({
+    menuContextSelector: '.main-nav',    // Horizontal navigation (R1/L1)
+    contentContextSelector: '.content-area', // Spatial navigation (left stick)
+    enableShoulderNavigation: true
+});
+
+// Custom menu selection handler
+gamepad.onSelect = (element) => {
+    if (element.classList.contains('nav-item')) {
+        // Handle menu navigation
+        const href = element.getAttribute('href');
+        if (href) window.location.href = href;
+    }
+};
+```
+
+```html
+<!-- HTML Structure -->
+<nav class="main-nav">
+    <!-- R1/L1 navigates horizontally through menu -->
+    <a href="/" class="nav-item">Home</a>
+    <a href="/about" class="nav-item">About</a>
+    <a href="/contact" class="nav-item">Contact</a>
+</nav>
+<div class="content-area">
+    <!-- Left stick navigates spatially through content -->
+    <h1>Page Content</h1>
+    <button>Action 1</button>
+    <button>Action 2</button>
+    <form>
+        <input type="text" placeholder="Search...">
+        <button type="submit">Search</button>
+    </form>
+</div>
+```
+
+### Custom Element Filtering Example
+
+```ts
+import { gamepadService } from 'gamepad-controller';
+
+const gamepad = gamepadService('.form-container', {
+    useGamepadIndex: true,
+    navigationMode: 'spatial'
+});
+```
+
+```html
+<!-- Form with explicit focusable element control -->
+<form class="form-container">
+    <input gamepad-index="true" type="text" placeholder="First Name" />
+    <input gamepad-index="true" type="text" placeholder="Last Name" />
+    <input gamepad-index="true" type="email" placeholder="Email" />
+    <button gamepad-index="true" type="submit">Submit</button>
+    <button gamepad-index="true" type="button">Cancel</button>
+    <!-- This input will NOT be focusable (no gamepad-index attribute) -->
+    <input type="text" placeholder="Optional Notes" />
+    <!-- This div will NOT be focusable (no gamepad-index="true") -->
+    <div>Some decorative content</div>
+</form>
+```
+
+## 🎮 Custom Button Callbacks
+
+You can override the behavior of **any button** on the gamepad using the `onButtonDown` and `onButtonUp` callbacks in `GamepadService`.
+
+### Common Button Index Mapping
+
+| Index | Xbox         | PlayStation   | Nintendo      | Description         |
+|-------|--------------|--------------|--------------|---------------------|
+| 0     | A            | Cross (X)    | B            | Primary/Select      |
+| 1     | B            | Circle (O)   | A            | Back/Cancel         |
+| 2     | X            | Square (☐)   | Y            | Secondary           |
+| 3     | Y            | Triangle (△) | X            | Tertiary            |
+| 4     | LB           | L1           | L             | Left Shoulder       |
+| 5     | RB           | R1           | R             | Right Shoulder      |
+| 6     | LT           | L2           | ZL            | Left Trigger        |
+| 7     | RT           | R2           | ZR            | Right Trigger       |
+| 8     | View         | Share        | -             | Select/Share/Menu   |
+| 9     | Menu         | Options      | +             | Start/Pause         |
+| 10    | LS           | L3           | L3            | Left Stick Press    |
+| 11    | RS           | R3           | R3            | Right Stick Press   |
+| 12    | D-pad Up     | D-pad Up     | D-pad Up      | D-pad Up            |
+| 13    | D-pad Down   | D-pad Down   | D-pad Down    | D-pad Down          |
+| 14    | D-pad Left   | D-pad Left   | D-pad Left    | D-pad Left          |
+| 15    | D-pad Right  | D-pad Right  | D-pad Right   | D-pad Right         |
+| 16    | Xbox         | PS           | Home          | System/Home         |
+
+> **Note:** Button indices may vary for some controllers. Always test with your target device.
+
+### Usage Example
+
+```ts
+import { GamepadService } from 'gamepad-controller';
+
+const gamepadService = new GamepadService({
+  // ...options
+});
+
+gamepadService.onButtonDown = (buttonIndex, gamepad) => {
+  if (buttonIndex === 0) {
+    // X/A/Cross pressed
+    alert('Primary button pressed!');
+  } else if (buttonIndex === 1) {
+    // O/B/Circle pressed
+    alert('Back button pressed!');
+  } else {
+    console.log('Button', buttonIndex, 'pressed');
+  }
+};
+
+gamepadService.onButtonUp = (buttonIndex, gamepad) => {
+  if (buttonIndex === 0) {
+    console.log('Primary button released!');
+  } else if (buttonIndex === 1) {
+    console.log('Back button released!');
+  } else {
+    console.log('Button', buttonIndex, 'released');
+  }
+};
+
+gamepadService.init();
+```
+
+- `buttonIndex` is the index of the button (see your controller mapping for details).
+- `gamepad` is the Gamepad object from the browser API.
+
+You can use this to implement custom actions for any button, including X/A, O/B, triggers, shoulders, etc.
+
+## 📜 Right Stick Scrolling
+
+The gamepad controller includes built-in window scrolling support using the right analog stick, similar to how X/A is used for actions and Circle/B for back navigation.
+
+### Basic Usage
 ```javascript
-import { gamepadUtils } from './gamepadService.js';
-gamepadUtils.printCSSExamples();
-// Prints ready-to-use CSS examples to console
+const gamepadService = new GamepadService({
+    enableRightStickScroll: true, // Enabled by default
+    scrollSpeed: 1, // Scroll speed multiplier (default: 1)
+    scrollDebounceTime: 50, // Debounce time for smooth scrolling (default: 50ms)
+});
 ```
 
-### Common Issues
+### Configuration Options
+- **`enableRightStickScroll`**: Enable/disable right stick scrolling (default: `true`)
+- **`scrollSpeed`**: Multiplier for scroll speed - higher values = faster scrolling (default: `1`)
+- **`scrollDebounceTime`**: Debounce time in milliseconds for smooth scrolling (default: `50ms`)
 
-1. **Module loading errors**: Ensure you're using a local server
-2. **Navigation not working**: Check if elements are focusable
-3. **Style conflicts**: Use data attributes instead of CSS classes
-4. **SPA routing**: Refresh navigation after route changes
+### Examples
 
-## 🌟 Examples
+**Faster Scrolling:**
+```javascript
+const gamepadService = new GamepadService({
+    scrollSpeed: 2, // 2x faster scrolling
+});
+```
 
-- **`index.html`** - Basic demo with navigation menu
-- **`example-menu.html`** - Menu navigation example
-- **`example-simple.html`** - Simple setup example
-- **`example-style-isolation.html`** - Style isolation demo
-- **`debug-test.html`** - Debug and testing tools
+**Disable Scrolling:**
+```javascript
+const gamepadService = new GamepadService({
+    enableRightStickScroll: false, // Disable right stick scrolling
+});
+```
 
-## 📱 Browser Support
+**Custom Scroll Settings:**
+```javascript
+const gamepadService = new GamepadService({
+    enableRightStickScroll: true,
+    scrollSpeed: 1.5, // 1.5x speed
+    scrollDebounceTime: 25, // Faster response (more sensitive)
+});
+```
 
-- **Chrome**: ✅ Full support
-- **Firefox**: ✅ Full support
-- **Safari**: ✅ Full support
-- **Edge**: ✅ Full support
-- **Mobile**: ⚠️ Limited (gamepad support varies)
+> **🎮 Controls**: 
+> - **Left Stick/D-Pad**: Navigate between elements
+> - **Right Stick**: Scroll the window/page
+> - **X/A**: Select/Click elements
+> - **Circle/B**: Go back
+> - **R1/L1**: Navigate between sections
 
-## 🤝 Contributing
+## Status Element Options
 
-Contributions welcome! Areas for improvement:
-- Additional controller support
-- Framework-specific optimizations
-- Accessibility enhancements
-- Performance optimizations
+The gamepad controller now provides flexible options for showing connection status:
 
-## 📄 License
+### Option 1: No Status Element (Default)
+```javascript
+const gamepadService = new GamepadService({
+    // No status element will be created (autoCreateStatusElement is false by default)
+});
+```
 
-MIT License - feel free to use in any project!
+### Option 2: Provide Your Own Status Element
+```javascript
+const gamepadService = new GamepadService({
+    statusElementId: 'my-custom-status', // Element must exist in your HTML
+});
+```
 
----
+### Option 3: Auto-Create Status Element
+```javascript
+const gamepadService = new GamepadService({
+    autoCreateStatusElement: true, // Creates a default status element
+});
+```
 
-**Perfect for:** Gaming UIs, TV interfaces, accessibility navigation, dashboard controls, kiosk applications, and any web app that needs gamepad support! 🎮✨
+### Option 4: Both Options Combined
+```javascript
+const gamepadService = new GamepadService({
+    statusElementId: 'custom-status',
+    autoCreateStatusElement: true, // Fallback if custom element doesn't exist
+});
+```
+
+### Option 5: Bypass Status System (Advanced)
+```javascript
+const gamepadService = new GamepadService({
+    statusElementId: null,           // No GamepadService status integration
+    autoCreateStatusElement: false,  // No auto-creation
+    // ... other options
+});
+
+// Handle status updates manually with your own function
+const updateStatus = (id, message, type = '') => {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = message;
+        element.className = `status ${type}`;
+    }
+};
+
+// Use your own status update logic
+gamepadService.onControllerConnect = (gamepad) => {
+    updateStatus('my-status', `🎮 Controller connected: ${gamepad.id}`, 'success');
+};
+
+gamepadService.onControllerDisconnect = (gamepad) => {
+    updateStatus('my-status', '🎮 Controller disconnected', 'warning');
+};
+```
+
+> **💡 Pro Tip**: Use the bypass approach when you need complete control over styling and status updates, or when integrating with existing UI frameworks that manage their own status elements.
+
+## 🛠️ Development
+
+### Project Structure
+
+```
+gamepad-controller/
+├── src/                    # Source code
+│   ├── core/              # Core GamepadService classes
+│   ├── utils/             # Utility functions
+│   ├── Interfaces/        # TypeScript interfaces
+│   └── index.ts           # Main exports
+├── examples/              # Vite-based examples
+│   └── pages/            # Example implementations
+├── dist/                 # Compiled output
+└── docs/                 # Documentation
+```
+
+### Building the Library
+
+```sh
+# Install dependencies
+npm install
+
+# Build TypeScript and generate types
+npm run build
+
+# Create package for distribution
+npm pack
+```

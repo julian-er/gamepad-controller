@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Viewport Demo - Gamepad Controller</title>
+    <link rel="stylesheet" href="viewportDemoPage.css" />
+  </head>
+  <body>
+    <div class="demo-container">
+      <h1>🎮 Viewport Demo - Gamepad Controller</h1>
+
+      <div class="instructions">
+        <h3>📋 Instructions</h3>
+        <ul>
+          <li><strong>Connect a gamepad</strong> to test the navigation</li>
+          <li>
+            <strong>Toggle viewport mode</strong> to see the difference between
+            including all elements vs only viewport elements
+          </li>
+          <li>
+            <strong>Navigate with the gamepad</strong> to see which elements are
+            focusable
+          </li>
+        </ul>
+      </div>
+
+      <div class="viewport-toggle">
+        <label>Viewport Mode:</label>
+        <button id="all-elements" class="active">
+          All Elements (onlyViewport: false)
+        </button>
+        <button id="viewport-only">Viewport Only (onlyViewport: true)</button>
+        <span id="current-mode">Current: All Elements</span>
+      </div>
+
+      <div class="gamepad-container">
+        <div class="card" tabindex="0">
+          <h3>Card 1</h3>
+          <p>Visible element in viewport</p>
+        </div>
+
+        <div class="card" tabindex="0">
+          <h3>Card 2</h3>
+          <p>Another visible element</p>
+        </div>
+
+        <div class="card" tabindex="0">
+          <h3>Card 3</h3>
+          <p>Third visible element</p>
+        </div>
+
+        <div class="card" tabindex="0">
+          <h3>Card 4</h3>
+          <p>Fourth visible element</p>
+        </div>
+
+        <div class="card" tabindex="0">
+          <h3>Card 5</h3>
+          <p>Fifth visible element</p>
+        </div>
+
+        <div class="card" tabindex="0">
+          <h3>Card 6</h3>
+          <p>Sixth visible element</p>
+        </div>
+      </div>
+
+      <!-- Off-screen elements in a separate container -->
+      <div class="offscreen-container">
+        <div class="card offscreen-element" tabindex="0">
+          <h3>Off-Screen Card 1</h3>
+          <p>This element is 2000px below viewport</p>
+        </div>
+        <div class="card offscreen-element" tabindex="0">
+          <h3>Off-Screen Card 2</h3>
+          <p>This element is also below viewport</p>
+        </div>
+        <div class="card offscreen-element" tabindex="0">
+          <h3>Off-Screen Card 3</h3>
+          <p>Another off-screen element</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="gamepad-status" class="status-info">
+      🎮 Waiting for gamepad connection...
+    </div>
+
+    <script type="module" src="viewportDemoPage.ts"></script>
+  </body>
+</html>

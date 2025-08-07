@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎯 Gamepad-Index Boolean Demo</title>
+    <link rel="stylesheet" href="gamepad-index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎯 Gamepad-Index Boolean Demo</h1>
+
+      <div class="instructions">
+        <h2>📋 Custom Navigation Selection</h2>
+        <p>
+          This page demonstrates the <code>gamepad-index="true"</code> attribute for
+          controlling which elements are focusable!
+        </p>
+        <p>
+          When <code>useGamepadIndex: true</code>, only elements with
+          <code>gamepad-index="true"</code> are included in navigation.
+        </p>
+      </div>
+
+      <!-- Mixed content example -->
+      <section class="demo-section">
+        <h3>Mixed Content Selection</h3>
+        <p>Cards with selective focusability:</p>
+        <div class="mixed-content">
+          <div
+            class="card focusable"
+            gamepad-index="true"
+            tabindex="0"
+            onclick="showMessage('Focusable Card 1')"
+          >
+            <h4>✅ Focusable Card 1</h4>
+            <p>This card has gamepad-index="true" so it's focusable.</p>
+          </div>
+          <div class="card not-focusable" tabindex="0" onclick="showMessage('Not Focusable Card 1')">
+            <h4>❌ Not Focusable Card 1</h4>
+            <p>This card has no gamepad-index attribute.</p>
+          </div>
+          <div
+            class="card focusable"
+            gamepad-index="true"
+            tabindex="0"
+            onclick="showMessage('Focusable Card 2')"
+          >
+            <h4>✅ Focusable Card 2</h4>
+            <p>This card also has gamepad-index="true".</p>
+          </div>
+          <div class="card not-focusable" tabindex="0" onclick="showMessage('Not Focusable Card 2')">
+            <h4>❌ Not Focusable Card 2</h4>
+            <p>This card will be ignored when gamepad-index is enabled.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Test controls -->
+      <section class="demo-section controls">
+        <h3>🎮 Test Controls</h3>
+        <div class="control-buttons">
+          <button gamepad-index="true" onclick="toggleGamepadIndex()" id="toggle-btn">
+            🔄 Toggle Gamepad-Index (Currently: ON)
+          </button>
+          <button gamepad-index="true" onclick="refreshNavigation()">🔄 Refresh Navigation</button>
+          <button gamepad-index="true" onclick="showNavigationOrder()">
+            📋 Show Navigation Order
+          </button>
+        </div>
+      </section>
+
+      <div class="highlight">
+        <strong>💡 Navigation Tips:</strong>
+        <ul>
+          <li>
+            When <code>useGamepadIndex: false</code> → All normally focusable elements are included
+          </li>
+          <li>
+            When <code>useGamepadIndex: true</code> → Only elements with <code>gamepad-index="true"</code> are included
+          </li>
+          <li>Provides precise control over gamepad navigation scope</li>
+          <li>Perfect for complex layouts with selective focus</li>
+        </ul>
+      </div>
+    </div>
+
+    <script type="module" src="gamepadIndexPage.ts"></script>
+
+    <script>
+      function showMessage(message) {
+        alert(`You selected: ${message}`);
+      }
+    </script>
+  </body>
+</html>

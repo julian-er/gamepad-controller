@@ -1,0 +1,41 @@
+# Ignore output of TypeScript
+/dist/
+
+# Documentation output
+/docs/
+
+# Ignore VSCode configuration
+.vscode/
+
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor swap/backup files
+*.swp
+*.swo
+*~
+
+# Env files
+.env
+.env.*
+
+# MacOS
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~ 
