@@ -403,7 +403,7 @@ export function gameLoop(
                             const scrollSpeed = navState.options.scrollSpeed ?? 1;
 
                             // Use the dedicated scrolling function
-                            handleScrolling(rightStickX, rightStickY, scrollSpeed);
+                            handleScrolling(rightStickX, rightStickY, scrollSpeed, navState.options.containerSelector);
 
                             eventState.lastScrollTime = currentTimestamp;
                         }
@@ -663,7 +663,7 @@ export function createCustomEventGameLoop(
 
                     if (Math.abs(rightStickX) > 0 || Math.abs(rightStickY) > 0) {
                         if (currentTimestamp - eventState.lastScrollTime > (navState.options.scrollDebounceTime ?? 50)) {
-                            handleScrolling(rightStickX, rightStickY, navState.options.scrollSpeed ?? 1);
+                            handleScrolling(rightStickX, rightStickY, navState.options.scrollSpeed ?? 1, navState.options.containerSelector);
                             eventState.lastScrollTime = currentTimestamp;
                         }
                     }

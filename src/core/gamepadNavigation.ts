@@ -231,23 +231,39 @@ export function handleShoulderNavigation(
 }
 
 /**
- * Handles window scrolling with right stick
+ * Handles scrolling with right stick - either window or container scrolling
  * @param rightStickX - The x-axis value of the right stick
  * @param rightStickY - The y-axis value of the right stick
  * @param scrollSpeed - The speed of the scroll (default is 1)
+ * @param container - Optional container element to scroll within. If not provided, scrolls the window
  */
-export function handleScrolling(rightStickX: number, rightStickY: number, scrollSpeed: number = 1) {
+export function handleScrolling(rightStickX: number, rightStickY: number, scrollSpeed: number = 1, container?: string | null) {
     const scrollMultiplier = 10 * scrollSpeed; // Base scroll speed
     
     // Calculate scroll amounts
     const scrollX = rightStickX * scrollMultiplier;
     const scrollY = rightStickY * scrollMultiplier;
     
-    // Perform the scroll
-    window.scrollBy(scrollX, scrollY);
+    // Perform the scroll - either on container or window
+    if (container) {
+        // Get the container element from the selector string
+        const containerElement = document.querySelector(container) as HTMLElement;
+        if (containerElement) {
+            // Scroll within the specified container
+            containerElement.scrollBy(scrollX, scrollY);
+        } else {
+            // Fallback to window scroll if container not found
+            console.warn(`[🎮 🕹️ Gamepad Controller] - Container "${container}" not found, falling back to window scroll`);
+            window.scrollBy(scrollX, scrollY);
+        }
+    } else {
+        // Scroll the window (default behavior)
+        window.scrollBy(scrollX, scrollY);
+    }
     
     // Log for debugging (can be removed in production)
     if (Math.abs(scrollX) > 1 || Math.abs(scrollY) > 1) {
-        console.debug(`[🎮 🕹️ Gamepad Controller] - 🔄 Scrolling: X=${scrollX.toFixed(1)}, Y=${scrollY.toFixed(1)}`);
+        const target = container ? `container (${container})` : 'window';
+        console.debug(`[🎮 🕹️ Gamepad Controller] - 🔄 Scrolling ${target}: X=${scrollX.toFixed(1)}, Y=${scrollY.toFixed(1)}`);
     }
 } 
