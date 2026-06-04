@@ -4,7 +4,7 @@
 // Main service options interface
 export type { GamepadServiceOptions } from './GamepadServiceOptions';
 
-// Navigation context options interface  
+// Navigation context options interface
 export type { GamepadNavigationContextOptions } from './GamepadNavigationContextOptions';
 
 // Navigation state interface
@@ -18,4 +18,3 @@ export type { GridDimensions } from './GridDimensions';
 
 // Callback types
 export type { GamepadContextManagerCallback } from './GamepadContextManagerCallback';
-export type { GamepadContextManagerCallback as GamepadNavigationContextManagerCallback } from './GamepadNavigationContextManagerCallback'; 

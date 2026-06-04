@@ -2,6 +2,34 @@
 
 A TypeScript library for advanced gamepad navigation and UI control in web applications. Supports dual context navigation, custom mapping, and is compatible with Xbox, PlayStation, Nintendo, and generic controllers.
 
+> **Heads up (v0.1.0):** the event API changed from single-slot setters
+> (`service.onFocus = fn`) to a **multi-subscriber** `service.on('focus', fn)` API, and the
+> public surface was locked down (internal functions are no longer exported). If you used
+> `1.0.0`, read the **[Migration Guide](MIGRATION.md)** — it's a short, mostly find-and-replace
+> change.
+
+## 📚 Guides
+
+- **[BUILDING.md](BUILDING.md)** — build, pack, and test the library locally
+- **[USAGE_REACT.md](USAGE_REACT.md)** — React integration (`useGamepad` hook)
+- **[USAGE_ANGULAR.md](USAGE_ANGULAR.md)** — Angular integration (injectable service)
+- **[USAGE_VANILLA.md](USAGE_VANILLA.md)** — vanilla JS / CDN usage
+- **[MIGRATION.md](MIGRATION.md)** — upgrading from `1.0.0`
+
+## ⚙️ Runtime requirements
+
+- **Secure context:** the native Gamepad API only works over **HTTPS or `localhost`**.
+- **Background tabs:** the input loop uses `requestAnimationFrame`, which browsers pause for
+  hidden/backgrounded tabs — input is not read while the tab is not visible.
+- **SSR-safe:** `init()` no-ops in non-browser environments; call it on the client only.
+- **`color-mix` styling:** the optional injected default styles use `color-mix(in srgb, …)`
+  (Chromium 111+, Firefox 113+, Safari 16.2+). This affects only the opt-in stylesheet.
+- **Logging:** quiet by default (`logLevel: 'error'`). Set `logLevel: 'debug'` while developing.
+
+> Several older code snippets below still show the legacy `service.onX = fn` setters. The
+> current API is `service.on('event', fn)` — see **[Event Handlers](#event-handlers)** and the
+> [Migration Guide](MIGRATION.md).
+
 ## 🎮 Features
 
 - **Dual Context Navigation**: Separate navigation for menu and content areas
@@ -27,7 +55,7 @@ A TypeScript library for advanced gamepad navigation and UI control in web appli
 
 2. Install in your project:
    ```sh
-   npm install /path/to/gamepad-controller-1.0.0.tgz
+   npm install /path/to/gamepad-controller-0.1.0.tgz
    ```
 
 ### From NPM (When Published)
@@ -399,35 +427,42 @@ interface GamepadServiceOptions {
 
 ### Event Handlers
 
+Events use a multi-subscriber `on(event, listener)` API. Each `on()` returns an unsubscribe
+function, and multiple subscribers can listen to the same event without clobbering each other.
+
 ```ts
 // Focus events
-gamepad.onFocus = (element: Element, index: number) => {
+const offFocus = gamepad.on('focus', (element: Element, index: number) => {
     console.log('Element focused:', element);
-};
+});
 
 // Selection events
-gamepad.onSelect = (element: Element, index: number) => {
+gamepad.on('select', (element: Element, index: number) => {
     console.log('Element selected:', element);
-};
+});
 
 // Controller events
-gamepad.onControllerConnect = (gamepad: Gamepad) => {
-    console.log('Controller connected');
-};
-
-gamepad.onControllerDisconnect = (gamepad: Gamepad) => {
-    console.log('Controller disconnected');
-};
+gamepad.on('controllerconnect', (pad: Gamepad) => console.log('Controller connected', pad.id));
+gamepad.on('controllerdisconnect', (pad: Gamepad) => console.log('Controller disconnected'));
 
 // Navigation events
-gamepad.onBackButton = () => {
-    console.log('Back button pressed');
-};
+gamepad.on('backbutton', () => console.log('Back button pressed'));
+gamepad.on('contextswitch', (newContext, oldContext) => console.log('Context switched'));
 
-gamepad.onContextSwitch = (newContext: any, oldContext: any) => {
-    console.log('Context switched');
-};
+// Generic per-button events
+gamepad.on('buttondown', (index, pad) => console.log('button down', index));
+gamepad.on('buttonup', (index, pad) => console.log('button up', index));
+
+// Unsubscribe when done
+offFocus();
+// or: gamepad.off('focus', handler);
 ```
+
+**Event names:** `focus`, `select`, `controllerconnect`, `controllerdisconnect`, `backbutton`,
+`navigationmenuopen`, `buttondown`, `buttonup`, `contextswitch`.
+
+> If you do **not** subscribe to `'backbutton'`, the default behavior (`window.history.back()`)
+> still runs. Subscribe to override it.
 
 ### Memory Management
 
@@ -447,6 +482,46 @@ const gamepad = initGamepadForPage();
 // ... use gamepad
 gamepad.destroy(); // Clean up this specific instance
 ```
+
+## 🔌 Device filtering (what counts as a "gamepad")
+
+`navigator.getGamepads()` does **not** return only game controllers. Browsers surface many
+HID devices as `Gamepad` objects — webcams, headset dongles, some keyboards/mice — often with
+a few buttons but **no axes (sticks)**. You'll see them in `gamepadconnected` logs like:
+
+```
+Gamepad connected at index 1: Brio 300 (Vendor: 046d Product: 0942) with 7 buttons, 0 axes.
+Gamepad connected at index 2: Microsoft USB Link (Vendor: 045e Product: 083c) with 7 buttons, 0 axes.
+```
+
+The library filters these out via `isValidGamepad`, which only accepts a device when:
+
+1. **`gamepad.mapping === 'standard'`** — the browser matched it to the Standard Gamepad
+   layout, so it's a real controller; **or**
+2. it reports enough real inputs to plausibly be a controller: **≥ 4 buttons _and_ ≥ 2 axes**
+   (one stick). A 0-axis webcam/headset is rejected.
+
+Rejected devices never enter the service's state, are not counted by
+`isControllerConnected()`, and never drive navigation. The `gamepadconnected`/
+`gamepaddisconnected` events themselves are dispatched by the browser for every device — that
+logging is outside the library's control — but only valid controllers are acted upon.
+
+```ts
+import { GamepadService } from 'gamepad-controller';
+
+// isValidGamepad is applied internally — your real DualShock/Xbox pad is accepted,
+// while a webcam or headset reporting 0 axes is ignored.
+const service = new GamepadService();
+service.init();
+service.on('controllerconnect', (pad) => {
+    // Only fires for a device that passed validation.
+    console.log('Real controller connected:', pad.id, pad.mapping);
+});
+```
+
+> If you have a legitimate controller that reports a non-standard mapping **and** fewer than
+> 2 axes, it would be filtered out. Open an issue with its `id`/button/axis counts and we can
+> widen the heuristic or expose tuning options.
 
 ## 🔍 Viewport Filtering
 

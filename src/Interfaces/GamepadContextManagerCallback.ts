@@ -1,4 +1,4 @@
-// Callback para cambios de contexto en GamepadContextManager
+// Callback fired on context changes in GamepadContextManager.
 import type { GamepadNavigationContext } from '../gamepadContextManager.js';
 
 export interface GamepadContextManagerCallback {

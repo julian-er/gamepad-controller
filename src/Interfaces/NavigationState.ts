@@ -8,4 +8,4 @@ export interface NavigationState {
     options: GamepadServiceOptions;
     onFocus: ((element: Element, index: number) => void) | null;
     onSelect: ((element: Element, index: number) => void) | null;
-} 
+}

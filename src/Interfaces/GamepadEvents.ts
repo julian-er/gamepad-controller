@@ -29,4 +29,14 @@ export interface GamepadEventState {
     onButtonUp?: (buttonIndex: number, gamepad: Gamepad) => void;
     // Track last button states per gamepad
     lastButtonStates?: { [gamepadIndex: number]: boolean[] };
+    // Custom-event mode: stored listener references so they can be removed on destroy().
+    // Without these the window listeners leak across destroy()/re-init() cycles.
+    customListeners?: {
+        connectedEvent: string;
+        disconnectedEvent: string;
+        stateChangedEvent: string;
+        onConnected: (event: Event) => void;
+        onDisconnected: (event: Event) => void;
+        onStateChanged: (event: Event) => void;
+    } | null;
 }

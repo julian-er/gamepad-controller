@@ -1,8 +1,26 @@
 // Options for GamepadService
 
+import type { LogLevel } from '../utils/logger.js';
+
 export interface GamepadServiceOptions {
     debounceTime?: number;
     deadzone?: number;
+    /**
+     * Cooldown (ms) between back-button (B/Circle) activations.
+     * @default 300
+     */
+    backButtonCooldown?: number;
+    /**
+     * Cooldown (ms) between shoulder-button (L1/R1) activations.
+     * @default 300
+     */
+    shoulderCooldown?: number;
+    /**
+     * Verbosity of the library's internal logging. Defaults to `error` so the
+     * package stays quiet inside host applications.
+     * @default "error"
+     */
+    logLevel?: LogLevel;
     containerSelector?: string | null;
     // Status element options - both are optional
     statusElementId?: string | null; // Provide a specific element ID to show gamepad status
@@ -28,7 +46,7 @@ export interface GamepadServiceOptions {
     enableDualContext?: boolean;
     menuContextSelector?: string;
     contentContextSelector?: string | null;
-    
+
     // Custom Events Support (for WinUI integration)
     /**
      * Enable custom DOM events instead of native gamepad APIs.
@@ -36,21 +54,21 @@ export interface GamepadServiceOptions {
      * @default false
      */
     useCustomEvents?: boolean;
-    
+
     /**
      * Name of the custom event dispatched when a gamepad connects.
      * Only used when useCustomEvents is true.
      * @default "hubgamepadconnected"
      */
     customConnectedEvent?: string;
-    
+
     /**
      * Name of the custom event dispatched when a gamepad disconnects.
      * Only used when useCustomEvents is true.
      * @default "hubgamepaddisconnected"
      */
     customDisconnectedEvent?: string;
-    
+
     /**
      * Name of the custom event dispatched with gamepad state updates.
      * Only used when useCustomEvents is true.
@@ -58,4 +76,4 @@ export interface GamepadServiceOptions {
      * @default "hubgamepadstatechanged"
      */
     customStateChangedEvent?: string;
-} 
+}

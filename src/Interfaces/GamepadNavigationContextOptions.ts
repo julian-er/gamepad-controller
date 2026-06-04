@@ -10,4 +10,4 @@ export interface GamepadNavigationContextOptions {
     onlyViewport?: boolean; // Only include elements visible in viewport (default: false)
     wrapNavigation?: boolean;
     autoDetectElements?: boolean;
-} 
+}

@@ -3,11 +3,9 @@
 
 import { findNearestInDirection } from '../utils/navigationUtils.js';
 import { addGamepadDataAttributes, removeGamepadDataAttributes, updateStatusElement } from '../utils/domUtils.js';
-import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
-import type { GridDimensions } from '../Interfaces/GridDimensions.js';
-import type { NavigationState } from '../Interfaces/NavigationState';
-
-
+import { logger } from '../utils/logger.js';
+import type { NavigationState } from '../Interfaces/NavigationState.js';
+import type { GamepadContextManager } from '../gamepadContextManager.js';
 
 // Update status display
 /**
@@ -16,11 +14,15 @@ import type { NavigationState } from '../Interfaces/NavigationState';
  * @param gamepads - Object containing connected gamepads indexed by id
  * @param currentControllerType - The type of controller currently connected ('xbox', 'playstation', 'nintendo', or 'unknown')
  */
-export function updateStatus(state: NavigationState, gamepads: { [key: string]: Gamepad }, currentControllerType: string) {
+export function updateStatus(
+    state: NavigationState,
+    gamepads: { [key: string]: Gamepad },
+    currentControllerType: string
+) {
     if (!state.options.statusElementId) return;
-    
+
     const isConnected = Object.keys(gamepads).length > 0;
-    updateStatusElement((state.options.statusElementId ?? ''), currentControllerType, isConnected);
+    updateStatusElement(state.options.statusElementId ?? '', currentControllerType, isConnected);
 }
 
 /**
@@ -46,10 +48,7 @@ export function navigateToIndex(state: NavigationState, index: number, updateFoc
  * @param updateFocusCallback - Callback function to update the focused element
  */
 export function navigateGrid(state: NavigationState, direction: string, updateFocusCallback: () => void) {
-    const { rows, cols } = state.gridDimensions;
-    const currentRow = Math.floor(state.focusedElementIndex / cols);
-    const currentCol = state.focusedElementIndex % cols;
-    
+    const { cols } = state.gridDimensions;
     let newIndex = state.focusedElementIndex;
 
     switch (direction) {
@@ -111,11 +110,35 @@ export function navigateSpatial(state: NavigationState, direction: string, updat
 }
 
 /**
+ * Routes a navigation input to the correct handler based on mode/context.
+ * In dual-context mode it delegates to the context manager; otherwise it runs
+ * single-context spatial or grid navigation.
+ * @param navState - The current navigation state object
+ * @param direction - The direction to navigate ('up', 'down', 'left', 'right')
+ * @param contextManager - Optional context manager for dual context navigation mode
+ * @param updateFocusCallback - Optional callback to run after focus is updated
+ */
+export function handleNavigation(
+    navState: NavigationState,
+    direction: string,
+    contextManager?: GamepadContextManager,
+    updateFocusCallback?: () => void
+) {
+    if (navState.options.enableDualContext && contextManager) {
+        contextManager.handleStickNavigation(direction);
+    } else if (navState.options.navigationMode === 'spatial') {
+        navigateSpatial(navState, direction, updateFocusCallback || (() => {}));
+    } else {
+        navigateGrid(navState, direction, updateFocusCallback || (() => {}));
+    }
+}
+
+/**
  * Handles selection of a focused element with enhanced navigation menu support
  * @param state - The current navigation state object
  * @param contextManager - Optional context manager for dual context navigation mode
  */
-export function handleSelection(state: NavigationState, contextManager?: any) {
+export function handleSelection(state: NavigationState, contextManager?: GamepadContextManager) {
     if (state.options.enableDualContext && contextManager) {
         // In dual context mode, use context manager
         contextManager.handleSelection();
@@ -136,7 +159,7 @@ export function handleSelection(state: NavigationState, contextManager?: any) {
         } else {
             focusedElement.classList.toggle(state.options.selectedClass ?? '');
         }
-        
+
         // Fire callback first
         if (state.onSelect) {
             state.onSelect(focusedElement, state.focusedElementIndex);
@@ -144,13 +167,17 @@ export function handleSelection(state: NavigationState, contextManager?: any) {
 
         // Handle navigation menu links specially
         if (focusedElement.classList.contains('nav-item') && (focusedElement as HTMLAnchorElement).href) {
-            console.debug(`[🎮 🕹️ Gamepad Controller] - 🔗 Navigating to: ${(focusedElement as HTMLAnchorElement).href}`);
+            logger.debug(`🔗 Navigating to: ${(focusedElement as HTMLAnchorElement).href}`);
             window.location.href = (focusedElement as HTMLAnchorElement).href;
             return;
         }
 
         // Handle regular click events
-        if (focusedElement && 'click' in focusedElement && typeof (focusedElement as HTMLElement).click === 'function') {
+        if (
+            focusedElement &&
+            'click' in focusedElement &&
+            typeof (focusedElement as HTMLElement).click === 'function'
+        ) {
             (focusedElement as HTMLElement).click();
         }
     }
@@ -161,8 +188,8 @@ export function handleSelection(state: NavigationState, contextManager?: any) {
  * @param onBackButton - Callback function to handle back button press
  */
 export function handleBackButton(onBackButton: (() => void) | null) {
-    console.debug('[🎮 🕹️ Gamepad Controller] - 🔙 Back button pressed - going back in history');
-    
+    logger.debug('🔙 Back button pressed - going back in history');
+
     if (onBackButton) {
         onBackButton();
     } else {
@@ -178,9 +205,9 @@ export function handleBackButton(onBackButton: (() => void) | null) {
  * @param onNavigationMenuOpen - Optional callback function to handle navigation menu open
  */
 export function handleShoulderNavigation(
-    state: NavigationState, 
-    button: string, 
-    contextManager?: any,
+    state: NavigationState,
+    button: string,
+    contextManager?: GamepadContextManager,
     onNavigationMenuOpen?: ((button: string) => void) | null
 ) {
     if (state.options.enableDualContext && contextManager) {
@@ -189,42 +216,56 @@ export function handleShoulderNavigation(
     } else {
         // Single context mode - navigate between pages
         if (button === 'R1') {
-            console.info('[🎮 🕹️ Gamepad Controller] - Shoulder Navigation - ⏭️ R1 pressed - next section');
-            
-            const navItems = document.querySelectorAll(`${state.options.navigationMenuSelector || ""} .nav-item, ${state.options.navigationMenuSelector || ""} a`);
+            logger.info('Shoulder Navigation - ⏭️ R1 pressed - next section');
+
+            const navItems = document.querySelectorAll(
+                `${state.options.navigationMenuSelector || ''} .nav-item, ${state.options.navigationMenuSelector || ''} a`
+            );
             const currentNavItem = state.elements[state.focusedElementIndex];
-            
+
             if (navItems.length > 1 && currentNavItem) {
                 const currentIndex = Array.from(navItems).indexOf(currentNavItem);
                 if (currentIndex !== -1) {
                     const nextIndex = (currentIndex + 1) % navItems.length;
                     const nextItem = navItems[nextIndex];
-                    
-                    if (nextItem && 'href' in nextItem && typeof (nextItem as HTMLAnchorElement).href === 'string' && (nextItem as HTMLAnchorElement).href) {
+
+                    if (
+                        nextItem &&
+                        'href' in nextItem &&
+                        typeof (nextItem as HTMLAnchorElement).href === 'string' &&
+                        (nextItem as HTMLAnchorElement).href
+                    ) {
                         window.location.href = (nextItem as HTMLAnchorElement).href;
                     }
                 }
             }
         } else if (button === 'L1') {
-            console.info('[🎮 🕹️ Gamepad Controller] - Shoulder Navigation - ⏮️ L1 pressed - previous section');
-            
-            const navItems = document.querySelectorAll(`${state.options.navigationMenuSelector || ""} .nav-item, ${state.options.navigationMenuSelector || ""} a`);
+            logger.info('Shoulder Navigation - ⏮️ L1 pressed - previous section');
+
+            const navItems = document.querySelectorAll(
+                `${state.options.navigationMenuSelector || ''} .nav-item, ${state.options.navigationMenuSelector || ''} a`
+            );
             const currentNavItem = state.elements[state.focusedElementIndex];
-            
+
             if (navItems.length > 1 && currentNavItem) {
                 const currentIndex = Array.from(navItems).indexOf(currentNavItem);
                 if (currentIndex !== -1) {
                     const prevIndex = currentIndex === 0 ? navItems.length - 1 : currentIndex - 1;
                     const prevItem = navItems[prevIndex];
-                    
-                    if (prevItem && 'href' in prevItem && typeof (prevItem as HTMLAnchorElement).href === 'string' && (prevItem as HTMLAnchorElement).href) {
+
+                    if (
+                        prevItem &&
+                        'href' in prevItem &&
+                        typeof (prevItem as HTMLAnchorElement).href === 'string' &&
+                        (prevItem as HTMLAnchorElement).href
+                    ) {
                         window.location.href = (prevItem as HTMLAnchorElement).href;
                     }
                 }
             }
         }
     }
-    
+
     if (onNavigationMenuOpen) {
         onNavigationMenuOpen(button);
     }
@@ -237,13 +278,18 @@ export function handleShoulderNavigation(
  * @param scrollSpeed - The speed of the scroll (default is 1)
  * @param container - Optional container element to scroll within. If not provided, scrolls the window
  */
-export function handleScrolling(rightStickX: number, rightStickY: number, scrollSpeed: number = 1, container?: string | null) {
+export function handleScrolling(
+    rightStickX: number,
+    rightStickY: number,
+    scrollSpeed: number = 1,
+    container?: string | null
+) {
     const scrollMultiplier = 10 * scrollSpeed; // Base scroll speed
-    
+
     // Calculate scroll amounts
     const scrollX = rightStickX * scrollMultiplier;
     const scrollY = rightStickY * scrollMultiplier;
-    
+
     // Perform the scroll - either on container or window
     if (container) {
         // Get the container element from the selector string
@@ -253,17 +299,18 @@ export function handleScrolling(rightStickX: number, rightStickY: number, scroll
             containerElement.scrollBy(scrollX, scrollY);
         } else {
             // Fallback to window scroll if container not found
-            console.warn(`[🎮 🕹️ Gamepad Controller] - Container "${container}" not found, falling back to window scroll`);
+            logger.warn(`Container "${container}" not found, falling back to window scroll`);
             window.scrollBy(scrollX, scrollY);
         }
     } else {
         // Scroll the window (default behavior)
         window.scrollBy(scrollX, scrollY);
     }
-    
-    // Log for debugging (can be removed in production)
+
     if (Math.abs(scrollX) > 1 || Math.abs(scrollY) > 1) {
-        const target = container ? `container (${container})` : 'window';
-        console.debug(`[🎮 🕹️ Gamepad Controller] - 🔄 Scrolling ${target}: X=${scrollX.toFixed(1)}, Y=${scrollY.toFixed(1)}`);
+        if (logger.enabled('debug')) {
+            const target = container ? `container (${container})` : 'window';
+            logger.debug(`🔄 Scrolling ${target}: X=${scrollX.toFixed(1)}, Y=${scrollY.toFixed(1)}`);
+        }
     }
-} 
+}

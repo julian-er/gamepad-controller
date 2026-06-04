@@ -1,4 +1,4 @@
-// Tipos y interfaces para mapeos de controladores
+// Types and interfaces for controller mappings.
 
 export type ControllerType = 'xbox' | 'playstation' | 'nintendo' | 'unknown';
 
@@ -19,4 +19,4 @@ export interface ControllerMappings {
     playstation: ControllerMapping;
     nintendo: ControllerMapping;
     unknown: ControllerMapping;
-} 
+}

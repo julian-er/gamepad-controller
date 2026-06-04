@@ -1,14 +1,29 @@
+import { logger } from './logger.js';
+
+/** Configuration accepted by {@link addNavigationStyles} / {@link getNavigationCSS}. */
+export interface NavigationStyleOptions {
+    /** ID for the injected `<style>` element (default: `gamepad-navigation-styles`). */
+    scopeId?: string;
+    /** CSS class prefix used by {@link getNavigationCSS} (default: `gamepad-`). */
+    prefix?: string;
+    /** Primary color for focus/selection styles (default: `#007bff`). */
+    primaryColor?: string;
+    /** Width of the focus outline (default: `2px`). */
+    focusWidth?: string;
+    /** Duration of style transitions (default: `0.2s`). */
+    animationDuration?: string;
+}
+
 /**
  * Adds basic CSS styles for gamepad navigation to the page.
  * Creates or updates a style element with configurable navigation styles.
  *
+ * Note: the injected CSS uses `color-mix(in srgb, …)`, which requires a modern
+ * browser (Chromium 111+, Firefox 113+, Safari 16.2+).
+ *
  * @param options - Configuration options for the navigation styles
- * @param options.scopeId - ID for the style element (default: 'gamepad-navigation-styles')
- * @param options.primaryColor - Primary color for focus/selection styles (default: '#007bff')
- * @param options.focusWidth - Width of focus outline (default: '2px')
- * @param options.animationDuration - Duration of transitions (default: '0.2s')
  */
-export function addNavigationStyles(options: any = {}): void {
+export function addNavigationStyles(options: NavigationStyleOptions = {}): void {
     // COMPLETELY OPTIONAL: Add basic CSS styles for navigation
     // This function is intentionally kept minimal to avoid forcing styles on users
 
@@ -18,7 +33,7 @@ export function addNavigationStyles(options: any = {}): void {
         primaryColor: '#007bff',
         focusWidth: '2px',
         animationDuration: '0.2s',
-        ...options
+        ...options,
     };
 
     // Remove existing styles if any
@@ -97,15 +112,6 @@ body[data-gamepad-active="true"] {
     // ... you can add other utilities here if needed
 }
 
-// Alias for backward compatibility
-export const addDefaultStyles = addNavigationStyles;
-
-export default {
-  addDefaultStyles,
-  addNavigationStyles,
-  // ... you can add other utilities here if needed
-};
-
 // Remove gamepad styles completely
 export function removeNavigationStyles(scopeId = 'gamepad-navigation-styles') {
     const existingStyles = document.getElementById(scopeId);
@@ -116,13 +122,13 @@ export function removeNavigationStyles(scopeId = 'gamepad-navigation-styles') {
 }
 
 // Provide CSS content for external use (developers can include this in their own CSS)
-export function getNavigationCSS(options = {}) {
+export function getNavigationCSS(options: NavigationStyleOptions = {}) {
     const config = {
         prefix: 'gamepad-',
         primaryColor: '#007bff',
         focusWidth: '2px',
         animationDuration: '0.2s',
-        ...options
+        ...options,
     };
 
     return `
@@ -172,18 +178,18 @@ export function getNavigationCSS(options = {}) {
 }
 
 // Create a downloadable CSS file with examples
-export function createNavigationCSSFile(filename = 'gamepad-navigation.css', options = {}) {
+export function createNavigationCSSFile(filename = 'gamepad-navigation.css', options: NavigationStyleOptions = {}) {
     const cssContent = getNavigationCSS(options);
     const blob = new Blob([cssContent], { type: 'text/css' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
     link.click();
-    
+
     URL.revokeObjectURL(url);
-    console.info(`🎨 Downloaded ${filename} with gamepad navigation styles`);
+    logger.info(`🎨 Downloaded ${filename} with gamepad navigation styles`);
 }
 
 // Get example CSS for different contexts
@@ -242,14 +248,10 @@ export function getExampleCSS() {
 
 // Print CSS examples to console for easy copying
 export function printCSSExamples() {
-    console.info('[🎮 🕹️ Gamepad Controller] - 🎨 CSS Examples for Gamepad Navigation:');
-    console.info('[🎮 🕹️ Gamepad Controller] - =====================================');
+    // Use console.info directly here: this is an explicit developer-facing utility,
+    // not internal diagnostics, so it should print regardless of the log level.
+    console.info('🎨 CSS Examples for Gamepad Navigation:');
+    console.info('=====================================');
     console.info(getExampleCSS());
-    console.info('[🎮 🕹️ Gamepad Controller] - Copy and paste this CSS into your stylesheet and customize as needed!');
-} 
-
-// Stubs for compatibility with exampleMenuPage
-export function getCurrentElement(): Element | null { return null; }
-export function onFocus(cb: (element: Element, index: number) => void): void {}
-export function onSelect(cb: (element: Element, index: number) => void): void {}
-export function onControllerConnect(cb: (gamepad: any, controllerType: string) => void): void {} 
+    console.info('Copy and paste this CSS into your stylesheet and customize as needed!');
+}
