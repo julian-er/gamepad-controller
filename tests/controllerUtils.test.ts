@@ -66,6 +66,37 @@ describe('detectControllerType', () => {
         expect(detectControllerType(fakeGamepad({ id: 'Pro Controller' }))).toBe('nintendo');
     });
 
+    it('detects Xbox by vendor id when the id has no brand text (Chrome)', () => {
+        // Real Chrome id for an Xbox pad: brand word absent, only the vendor code.
+        const pad = fakeGamepad({
+            id: 'HID-compliant game controller (STANDARD GAMEPAD Vendor: 045e Product: 0b13)',
+            buttons: buttons(17),
+            axes: [0, 0, 0, 0],
+        });
+        expect(detectControllerType(pad)).toBe('xbox');
+    });
+
+    it('detects PlayStation by vendor id when the id only says "Wireless Controller" (Chrome)', () => {
+        // Real Chrome id for a DualShock 4: no "playstation"/"dualshock" text, only vendor 054c.
+        const pad = fakeGamepad({
+            id: 'Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 09cc)',
+            buttons: buttons(18),
+            axes: [0, 0, 0, 0],
+        });
+        expect(detectControllerType(pad)).toBe('playstation');
+    });
+
+    it('does NOT misclassify a Microsoft (045e) headset as Xbox — no axes', () => {
+        // The 045e vendor fallback must not catch non-controllers; minAxes/minButtons + isValidGamepad gate it.
+        const headset = fakeGamepad({
+            id: 'Microsoft Modern USB Headset (Vendor: 045e Product: 0837)',
+            mapping: '' as GamepadMappingType,
+            buttons: buttons(7),
+            axes: [],
+        });
+        expect(detectControllerType(headset)).toBe('unknown');
+    });
+
     it('falls back to unknown for unrecognized ids', () => {
         expect(detectControllerType(fakeGamepad({ id: 'Some Random Pad' }))).toBe('unknown');
     });

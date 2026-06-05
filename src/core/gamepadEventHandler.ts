@@ -421,14 +421,23 @@ export function gameLoop(
         const currentTimestamp = performance.now();
         const connectedGamepads = navigator.getGamepads();
 
-        let processed = false;
+        // Pick a single "active" gamepad to drive the UI. When several controllers are
+        // present (or the browser surfaces ghost/duplicate entries for one physical pad,
+        // common with Bluetooth DualShock/DualSense), the one with the newest `timestamp`
+        // is the one actually being used — its state updates as buttons/sticks move, while
+        // idle or stale entries keep an old timestamp. Latching onto the first valid entry
+        // would let a dead duplicate swallow all input.
+        let active: Gamepad | null = null;
         for (const gp of connectedGamepads) {
             if (!gp || !isValidGamepad(gp)) continue;
             eventState.gamepads[gp.index] = gp;
-            if (!processed) {
-                processGamepad(gp, eventState, navState, currentTimestamp, contextManager, updateFocusCallback);
-                processed = true;
+            if (!active || gp.timestamp > active.timestamp) {
+                active = gp;
             }
+        }
+
+        if (active) {
+            processGamepad(active, eventState, navState, currentTimestamp, contextManager, updateFocusCallback);
         }
 
         eventState.animationFrameId = requestAnimationFrame(gameLoopImpl);

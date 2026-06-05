@@ -25,7 +25,11 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = {
         validation: {
             minButtons: 16,
             minAxes: 4,
-            idPatterns: [/xbox/i, /microsoft/i, /x-input/i],
+            // Browsers don't always put "xbox" in the id. Chrome often reports only
+            // the USB vendor code (e.g. "HID-compliant game controller (... Vendor: 045e ...)").
+            // 045e is Microsoft's vendor id, so match it as a fallback. The minButtons/minAxes
+            // gate above keeps non-controller 045e devices (headsets, keyboards) from matching.
+            idPatterns: [/xbox/i, /microsoft/i, /x-?input/i, /045e/i],
         },
     },
     playstation: {
@@ -52,7 +56,9 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = {
         validation: {
             minButtons: 16,
             minAxes: 4,
-            idPatterns: [/playstation/i, /dualsense/i, /dualshock/i, /ps3/i, /ps4/i, /ps5/i],
+            // Chrome reports a DualShock/DualSense as "Wireless Controller (... Vendor: 054c ...)"
+            // — no "playstation"/"dualshock" text. 054c is Sony's vendor id, matched as a fallback.
+            idPatterns: [/playstation/i, /dualsense/i, /dualshock/i, /ps3/i, /ps4/i, /ps5/i, /054c/i],
         },
     },
     nintendo: {
@@ -80,7 +86,8 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = {
         validation: {
             minButtons: 16,
             minAxes: 4,
-            idPatterns: [/nintendo/i, /switch/i, /pro controller/i],
+            // 057e is Nintendo's vendor id (Switch Pro Controller / Joy-Con).
+            idPatterns: [/nintendo/i, /switch/i, /pro controller/i, /057e/i],
         },
     },
     unknown: {
