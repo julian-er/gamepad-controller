@@ -84,6 +84,25 @@ export function detectControllerType(gamepad: Gamepad): string {
 }
 
 /**
+ * Maps a collection of connected gamepads to their de-duplicated controller types.
+ * Invalid entries (non-controller HID devices such as headsets) are skipped via
+ * {@link isValidGamepad}. Useful for showing every connected controller in the UI.
+ *
+ * @param gamepads - Map of connected gamepads keyed by gamepad index
+ * @returns A de-duplicated array of detected types, e.g. `['xbox', 'playstation']`
+ */
+export function getConnectedControllerTypes(gamepads: { [key: string]: Gamepad }): string[] {
+    const types: string[] = [];
+    for (const key of Object.keys(gamepads)) {
+        const gp = gamepads[key];
+        if (!gp || !isValidGamepad(gp)) continue;
+        const type = detectControllerType(gp);
+        if (!types.includes(type)) types.push(type);
+    }
+    return types;
+}
+
+/**
  * Applies a deadzone to an analog stick value to filter out small unintentional movements
  * @param value - The raw analog stick value (between -1 and 1)
  * @param deadzone - The minimum absolute value required to register movement (default: 0.1)

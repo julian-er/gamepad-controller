@@ -4,6 +4,7 @@ import {
     handleShoulderNavigation,
     handleNavigation,
     updateStatus,
+    updateGamepadStatus,
     handleScrolling,
 } from './gamepadNavigation.js';
 import { isValidGamepad, detectControllerType, applyDeadzone } from '../utils/controllerUtils.js';
@@ -13,11 +14,10 @@ import {
     getShoulderIndices,
     getDpadIndices,
 } from '../controllerMappings.js';
-import { updateStatusElement } from '../utils/domUtils.js';
 import { logger } from '../utils/logger.js';
 import type { ControllerType } from '../Interfaces/ControllerMappings.js';
 import type { NavigationState } from '../Interfaces/NavigationState.js';
-import type { GamepadEventState, GamepadEvent } from '../Interfaces/GamepadEvents.js';
+import type { GamepadEventState, GamepadEvent, PadInputState } from '../Interfaces/GamepadEvents.js';
 import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
 import type { GamepadContextManager } from '../gamepadContextManager.js';
 
@@ -145,9 +145,7 @@ export function detectExistingGamepads(state: GamepadEventState) {
             state.gamepads[gamepad.index] = gamepad;
             state.currentControllerType = detectControllerType(gamepad);
 
-            if (state.statusElementId) {
-                updateStatusElement(state.statusElementId, state.currentControllerType, true);
-            }
+            updateGamepadStatus(state.statusElementId, state.gamepads);
 
             if (state.onControllerConnect) {
                 state.onControllerConnect(gamepad);
@@ -198,9 +196,7 @@ export function handleGamepadConnected(state: GamepadEventState, event: GamepadE
 
         logger.info(`Gamepad connected: ${gamepad.id} (${state.currentControllerType})`);
 
-        if (state.statusElementId) {
-            updateStatusElement(state.statusElementId, state.currentControllerType, true);
-        }
+        updateGamepadStatus(state.statusElementId, state.gamepads);
 
         if (state.onControllerConnect) {
             state.onControllerConnect(gamepad);
@@ -218,11 +214,11 @@ export function handleGamepadDisconnected(state: GamepadEventState, event: Gamep
 
     if (state.gamepads[gamepad.index]) {
         delete state.gamepads[gamepad.index];
+        delete state.padInputStates[gamepad.index];
         logger.info(`Gamepad disconnected: ${gamepad.id}`);
 
-        if (state.statusElementId) {
-            updateStatusElement(state.statusElementId, 'unknown', false);
-        }
+        // Reflect any controllers that are still connected (or the waiting state).
+        updateGamepadStatus(state.statusElementId, state.gamepads);
 
         if (state.onControllerDisconnect) {
             state.onControllerDisconnect(gamepad);
@@ -256,13 +252,67 @@ export function stopGameLoop(state: GamepadEventState) {
 }
 
 /**
+ * Drops gamepads (and their per-pad state) that are no longer present in the live set.
+ * Guards against missed `gamepaddisconnected` events leaving stale entries that would
+ * skew {@link getConnectedControllerTypes}.
+ * @param eventState - The shared gamepad event state to prune
+ * @param liveIndices - Set of gamepad indices seen this frame
+ * @returns `true` if any entry was removed
+ */
+function pruneDisconnectedPads(eventState: GamepadEventState, liveIndices: Set<number>): boolean {
+    let removed = false;
+    for (const key of Object.keys(eventState.gamepads)) {
+        if (!liveIndices.has(Number(key))) {
+            delete eventState.gamepads[key];
+            delete eventState.padInputStates[Number(key)];
+            removed = true;
+        }
+    }
+    return removed;
+}
+
+/**
+ * Returns the per-gamepad input state for `gp`, creating and seeding it on first use.
+ * Each connected controller gets its own edge/cooldown record so that several pads can
+ * be processed in the same frame without clobbering one another's state.
+ * @param eventState - The shared gamepad event state
+ * @param gp - The gamepad whose per-pad state is needed
+ */
+function getPadState(eventState: GamepadEventState, gp: Gamepad): PadInputState {
+    if (!eventState.padInputStates) eventState.padInputStates = {};
+    let pad = eventState.padInputStates[gp.index];
+    if (!pad) {
+        pad = {
+            lastButtonPress: 0,
+            lastAxisMove: 0,
+            lastBackButtonState: false,
+            lastBackTime: 0,
+            lastR1State: false,
+            lastL1State: false,
+            lastShoulderTime: 0,
+            lastScrollTime: 0,
+            // Seed from the current frame so a button already held at connect time
+            // doesn't fire a spurious down-edge.
+            lastButtonStates: gp.buttons.map((b) => b.pressed),
+        };
+        eventState.padInputStates[gp.index] = pad;
+    }
+    return pad;
+}
+
+/**
  * Processes a single gamepad's input for one frame. This is the single source of
  * truth for input handling shared by both the native polling loop and the
  * custom-event loop — the only difference between those modes is where `gp` comes
  * from (live poll vs. event snapshot), not how it is interpreted.
  *
+ * All edge-detection flags and cooldown timestamps are kept per-gamepad (keyed by
+ * `gp.index` on {@link GamepadEventState.padInputStates}), so multiple controllers can
+ * drive the same shared navigation cursor without interfering with each other. Button
+ * mapping uses each pad's own detected type (important for Nintendo's swapped A/B).
+ *
  * @param gp - The gamepad to read this frame
- * @param eventState - Mutable event state (edge-detection timers, callbacks)
+ * @param eventState - Mutable event state (per-pad timers, shared callbacks)
  * @param navState - Navigation state (focused element, options)
  * @param currentTimestamp - `performance.now()` for the current frame
  * @param contextManager - Optional context manager for dual-context mode
@@ -278,17 +328,17 @@ export function processGamepad(
 ): void {
     const options = navState.options;
     const debounceTime = options.debounceTime ?? 0;
+    const pad = getPadState(eventState, gp);
+
+    // Tracks whether this pad produced any input this frame (drives "most-recently-active").
+    let hadInput = false;
 
     // --- Generic per-button edge detection (onButtonDown / onButtonUp) ---
-    if (!eventState.lastButtonStates) eventState.lastButtonStates = {};
-    let prevStates = eventState.lastButtonStates[gp.index];
-    if (!prevStates) {
-        prevStates = gp.buttons.map((b) => b.pressed);
-        eventState.lastButtonStates[gp.index] = prevStates;
-    }
+    const prevStates = pad.lastButtonStates;
     for (let i = 0; i < gp.buttons.length; i++) {
         const prev = prevStates[i] || false;
         const curr = gp.buttons[i]?.pressed ?? false;
+        if (curr) hadInput = true;
         if (curr && !prev && typeof eventState.onButtonDown === 'function') {
             eventState.onButtonDown(i, gp);
         }
@@ -298,20 +348,15 @@ export function processGamepad(
         prevStates[i] = curr;
     }
 
-    // --- Controller type detection ---
-    const detectedType = detectControllerType(gp);
-    if (detectedType !== eventState.currentControllerType) {
-        eventState.currentControllerType = detectedType;
-        updateStatus(navState, eventState.gamepads, eventState.currentControllerType);
-    }
-    const controllerType = eventState.currentControllerType as ControllerType;
+    // --- Controller type detection (per pad; each pad maps by its own type) ---
+    const controllerType = detectControllerType(gp) as ControllerType;
 
     // --- Primary action button (A / X / Cross) ---
     const primaryButtonIndex = getPrimaryActionButtonIndex(controllerType);
     if (gp.buttons[primaryButtonIndex]?.pressed) {
-        if (currentTimestamp - eventState.lastButtonPress > debounceTime) {
+        if (currentTimestamp - pad.lastButtonPress > debounceTime) {
             handleSelection(navState, contextManager);
-            eventState.lastButtonPress = currentTimestamp;
+            pad.lastButtonPress = currentTimestamp;
         }
     }
 
@@ -320,13 +365,13 @@ export function processGamepad(
         const backCooldown = options.backButtonCooldown ?? DEFAULT_ACTION_COOLDOWN;
         const backIndex = getBackButtonIndex(controllerType);
         const backPressed = gp.buttons[backIndex]?.pressed ?? false;
-        if (backPressed && !eventState.lastBackButtonState) {
-            if (currentTimestamp - eventState.lastBackTime > backCooldown) {
+        if (backPressed && !pad.lastBackButtonState) {
+            if (currentTimestamp - pad.lastBackTime > backCooldown) {
                 handleBackButton(eventState.onBackButton);
-                eventState.lastBackTime = currentTimestamp;
+                pad.lastBackTime = currentTimestamp;
             }
         }
-        eventState.lastBackButtonState = backPressed;
+        pad.lastBackButtonState = backPressed;
     }
 
     // --- Shoulder buttons (R1 / L1) ---
@@ -336,24 +381,24 @@ export function processGamepad(
         const r1Pressed = gp.buttons[r1]?.pressed ?? false;
         const l1Pressed = gp.buttons[l1]?.pressed ?? false;
 
-        const r1Edge = r1Pressed && !eventState.lastR1State;
-        const l1Edge = l1Pressed && !eventState.lastL1State;
+        const r1Edge = r1Pressed && !pad.lastR1State;
+        const l1Edge = l1Pressed && !pad.lastL1State;
         if (r1Edge || l1Edge) {
-            if (currentTimestamp - eventState.lastShoulderTime > shoulderCooldown) {
+            if (currentTimestamp - pad.lastShoulderTime > shoulderCooldown) {
                 // r1 takes priority if both edges fire on the same frame.
                 const button = r1Edge ? 'R1' : 'L1';
                 // Correct argument order: (state, button, contextManager, onNavigationMenuOpen).
                 handleShoulderNavigation(navState, button, contextManager, eventState.onNavigationMenuOpen);
-                eventState.lastShoulderTime = currentTimestamp;
+                pad.lastShoulderTime = currentTimestamp;
             }
         }
 
-        eventState.lastR1State = r1Pressed;
-        eventState.lastL1State = l1Pressed;
+        pad.lastR1State = r1Pressed;
+        pad.lastL1State = l1Pressed;
     }
 
     // --- Directional navigation: D-pad takes priority, left stick is the fallback ---
-    if (currentTimestamp - eventState.lastAxisMove > debounceTime) {
+    if (currentTimestamp - pad.lastAxisMove > debounceTime) {
         const dpad = getDpadIndices(controllerType);
         let direction: 'up' | 'down' | 'left' | 'right' | null = null;
 
@@ -379,7 +424,8 @@ export function processGamepad(
 
         if (direction) {
             handleNavigation(navState, direction, contextManager, updateFocusCallback);
-            eventState.lastAxisMove = currentTimestamp;
+            pad.lastAxisMove = currentTimestamp;
+            hadInput = true;
         }
     }
 
@@ -389,11 +435,18 @@ export function processGamepad(
         const rightStickY = applyDeadzone(gp.axes[3] ?? 0, options.deadzone);
 
         if (Math.abs(rightStickX) > 0 || Math.abs(rightStickY) > 0) {
-            if (currentTimestamp - eventState.lastScrollTime > (options.scrollDebounceTime ?? 50)) {
+            hadInput = true;
+            if (currentTimestamp - pad.lastScrollTime > (options.scrollDebounceTime ?? 50)) {
                 handleScrolling(rightStickX, rightStickY, options.scrollSpeed ?? 1, options.containerSelector);
-                eventState.lastScrollTime = currentTimestamp;
+                pad.lastScrollTime = currentTimestamp;
             }
         }
+    }
+
+    // --- Most-recently-active controller (drives status label / getControllerType) ---
+    if (hadInput && controllerType !== eventState.currentControllerType) {
+        eventState.currentControllerType = controllerType;
+        updateStatus(navState, eventState.gamepads, eventState.currentControllerType);
     }
 }
 
@@ -421,23 +474,23 @@ export function gameLoop(
         const currentTimestamp = performance.now();
         const connectedGamepads = navigator.getGamepads();
 
-        // Pick a single "active" gamepad to drive the UI. When several controllers are
-        // present (or the browser surfaces ghost/duplicate entries for one physical pad,
-        // common with Bluetooth DualShock/DualSense), the one with the newest `timestamp`
-        // is the one actually being used — its state updates as buttons/sticks move, while
-        // idle or stale entries keep an old timestamp. Latching onto the first valid entry
-        // would let a dead duplicate swallow all input.
-        let active: Gamepad | null = null;
+        // Process EVERY valid controller so that any connected pad can drive the shared
+        // navigation cursor (couch / hand-off model). Per-pad state in processGamepad keeps
+        // them from clobbering each other. A frozen "ghost" duplicate entry (common with
+        // Bluetooth DualShock/DualSense) reports all-buttons-unpressed, so it's a harmless
+        // no-op rather than swallowing input the way "process only the first pad" did.
+        const seen = new Set<number>();
         for (const gp of connectedGamepads) {
             if (!gp || !isValidGamepad(gp)) continue;
             eventState.gamepads[gp.index] = gp;
-            if (!active || gp.timestamp > active.timestamp) {
-                active = gp;
-            }
+            seen.add(gp.index);
+            processGamepad(gp, eventState, navState, currentTimestamp, contextManager, updateFocusCallback);
         }
 
-        if (active) {
-            processGamepad(active, eventState, navState, currentTimestamp, contextManager, updateFocusCallback);
+        // Prune slots that vanished from getGamepads() (e.g. a missed disconnect event) so
+        // the connected-types list and per-pad state stay accurate.
+        if (pruneDisconnectedPads(eventState, seen)) {
+            updateStatus(navState, eventState.gamepads, eventState.currentControllerType);
         }
 
         eventState.animationFrameId = requestAnimationFrame(gameLoopImpl);
@@ -468,11 +521,12 @@ export function createCustomEventGameLoop(
 
         const currentTimestamp = performance.now();
 
+        // Process every valid gamepad snapshot so multiple host-fed controllers all drive
+        // the shared cursor, consistent with the native loop. Per-pad state keeps them apart.
         for (const gamepadIndex in eventState.gamepads) {
             const gp = eventState.gamepads[gamepadIndex];
             if (gp && isValidGamepad(gp)) {
                 processGamepad(gp, eventState, navState, currentTimestamp, contextManager, updateFocusCallback);
-                break; // Handle only the first valid gamepad
             }
         }
 

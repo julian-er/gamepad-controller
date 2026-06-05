@@ -3,26 +3,55 @@
 
 import { findNearestInDirection } from '../utils/navigationUtils.js';
 import { addGamepadDataAttributes, removeGamepadDataAttributes, updateStatusElement } from '../utils/domUtils.js';
+import { getConnectedControllerTypes } from '../utils/controllerUtils.js';
 import { logger } from '../utils/logger.js';
 import type { NavigationState } from '../Interfaces/NavigationState.js';
 import type { GamepadContextManager } from '../gamepadContextManager.js';
 
+/** Human-readable display names for the controller types. */
+const CONTROLLER_LABELS: Record<string, string> = {
+    xbox: 'Xbox',
+    playstation: 'PlayStation',
+    nintendo: 'Nintendo',
+    unknown: 'Unknown',
+};
+
+/**
+ * Builds a display label listing every connected controller, e.g. `"Xbox + PlayStation"`.
+ * @param types - De-duplicated controller types
+ */
+function formatControllerLabel(types: string[]): string {
+    return types.map((t) => CONTROLLER_LABELS[t] ?? t).join(' + ');
+}
+
+/**
+ * Refreshes the status element to reflect ALL currently-connected controllers
+ * (e.g. "🎮 Xbox + PlayStation controller connected"), or the waiting state when none.
+ * @param statusElementId - The id of the status element (no-op if null/empty)
+ * @param gamepads - Object containing connected gamepads indexed by id
+ */
+export function updateGamepadStatus(statusElementId: string | null, gamepads: { [key: string]: Gamepad }): void {
+    if (!statusElementId) return;
+    const types = getConnectedControllerTypes(gamepads);
+    const isConnected = types.length > 0;
+    updateStatusElement(statusElementId, formatControllerLabel(types), isConnected);
+}
+
 // Update status display
 /**
- * Updates the status display element with current gamepad connection information
+ * Updates the status display element with current gamepad connection information.
+ * Lists every connected controller; the `currentControllerType` argument is retained
+ * for call-site compatibility but the label is derived from the live gamepad set.
  * @param state - The current navigation state object
  * @param gamepads - Object containing connected gamepads indexed by id
- * @param currentControllerType - The type of controller currently connected ('xbox', 'playstation', 'nintendo', or 'unknown')
+ * @param _currentControllerType - (unused) the most-recently-active controller type
  */
 export function updateStatus(
     state: NavigationState,
     gamepads: { [key: string]: Gamepad },
-    currentControllerType: string
+    _currentControllerType?: string
 ) {
-    if (!state.options.statusElementId) return;
-
-    const isConnected = Object.keys(gamepads).length > 0;
-    updateStatusElement(state.options.statusElementId ?? '', currentControllerType, isConnected);
+    updateGamepadStatus(state.options.statusElementId ?? null, gamepads);
 }
 
 /**

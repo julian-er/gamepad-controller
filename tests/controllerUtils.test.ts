@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { isValidGamepad, detectControllerType, applyDeadzone } from '../src/utils/controllerUtils';
+import {
+    isValidGamepad,
+    detectControllerType,
+    applyDeadzone,
+    getConnectedControllerTypes,
+} from '../src/utils/controllerUtils';
 
 function fakeGamepad(partial: Partial<Gamepad> & { id?: string }): Gamepad {
     return {
@@ -99,6 +104,41 @@ describe('detectControllerType', () => {
 
     it('falls back to unknown for unrecognized ids', () => {
         expect(detectControllerType(fakeGamepad({ id: 'Some Random Pad' }))).toBe('unknown');
+    });
+});
+
+describe('getConnectedControllerTypes', () => {
+    it('lists every connected controller type and skips invalid devices', () => {
+        const gamepads = {
+            '0': fakeGamepad({
+                id: 'Microsoft Modern USB Headset (Vendor: 045e Product: 0837)',
+                mapping: '' as GamepadMappingType,
+                buttons: buttons(7),
+                axes: [], // headset -> invalid, must be skipped
+            }),
+            '1': fakeGamepad({
+                id: 'Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 09cc)',
+                buttons: buttons(18),
+            }),
+            '2': fakeGamepad({
+                id: 'HID-compliant game controller (STANDARD GAMEPAD Vendor: 045e Product: 0b13)',
+                buttons: buttons(17),
+            }),
+        };
+        expect(getConnectedControllerTypes(gamepads)).toEqual(['playstation', 'xbox']);
+    });
+
+    it('de-duplicates a controller that appears twice (Bluetooth ghost)', () => {
+        const ds4 = () =>
+            fakeGamepad({
+                id: 'Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 09cc)',
+                buttons: buttons(18),
+            });
+        expect(getConnectedControllerTypes({ '1': ds4(), '3': ds4() })).toEqual(['playstation']);
+    });
+
+    it('returns an empty array when nothing is connected', () => {
+        expect(getConnectedControllerTypes({})).toEqual([]);
     });
 });
 

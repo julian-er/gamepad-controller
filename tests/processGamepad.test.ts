@@ -4,9 +4,14 @@ import type { GamepadEventState } from '../src/Interfaces/GamepadEvents';
 import type { NavigationState } from '../src/Interfaces/NavigationState';
 
 function gamepadWith(pressed: number[]): Gamepad {
+    return makePad({ pressed });
+}
+
+function makePad(opts: { id?: string; index?: number; pressed?: number[] } = {}): Gamepad {
+    const pressed = opts.pressed ?? [];
     return {
-        id: 'Xbox Wireless Controller',
-        index: 0,
+        id: opts.id ?? 'Xbox Wireless Controller',
+        index: opts.index ?? 0,
         connected: true,
         mapping: 'standard',
         timestamp: 0,
@@ -25,14 +30,7 @@ function eventState(): GamepadEventState {
         isRunning: true,
         gamepads: {},
         currentControllerType: 'xbox',
-        lastButtonPress: 0,
-        lastAxisMove: 0,
-        lastBackButtonState: false,
-        lastBackTime: 0,
-        lastR1State: false,
-        lastL1State: false,
-        lastShoulderTime: 0,
-        lastScrollTime: 0,
+        padInputStates: {},
         animationFrameId: null,
         statusElementId: null,
         onControllerConnect: null,
@@ -107,5 +105,61 @@ describe('processGamepad — selection', () => {
         processGamepad(gamepadWith([0]), eventState(), navState(), 1000, fakeContextManager as never);
 
         expect(handleSelection).toHaveBeenCalledTimes(1);
+    });
+});
+
+// Single-context navState wired with N focusable elements in a 1-column grid so
+// directional input deterministically advances the shared cursor by one.
+function navStateGrid(count: number, overrides: Partial<NavigationState['options']> = {}): NavigationState {
+    const ns = navState({ enableDualContext: false, navigationMode: 'grid', wrapNavigation: false, ...overrides });
+    ns.elements = Array.from({ length: count }, () => ({}) as unknown as Element);
+    ns.gridDimensions = { rows: count, cols: 1 };
+    return ns;
+}
+
+const PS_ID = 'Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 09cc)';
+
+describe('processGamepad — multiple controllers (shared cursor)', () => {
+    it('lets either controller drive the same navigation cursor (per-pad debounce)', () => {
+        const es = eventState();
+        const ns = navStateGrid(3);
+
+        // Xbox (index 0) presses D-pad Down (button 13) -> cursor 0 -> 1
+        processGamepad(makePad({ index: 0, pressed: [13] }), es, ns, 1000);
+        expect(ns.focusedElementIndex).toBe(1);
+
+        // PS pad (index 1) presses D-pad Down in the SAME frame timestamp -> cursor 1 -> 2.
+        // A new pad has its own lastAxisMove (0), so the shared debounce can't block it.
+        processGamepad(makePad({ id: PS_ID, index: 1, pressed: [13] }), es, ns, 1000);
+        expect(ns.focusedElementIndex).toBe(2);
+    });
+
+    it('keeps edge state independent: an idle pad does not reset another pad held button', () => {
+        const es = eventState();
+        const ns = navStateGrid(3, { enableBackButton: true, backButtonCooldown: 0 });
+        const back = vi.fn();
+        es.onBackButton = back;
+
+        // Frame 1: Xbox (0) holds Back (button 1); PS (1) idle.
+        processGamepad(makePad({ index: 0, pressed: [1] }), es, ns, 1000);
+        processGamepad(makePad({ id: PS_ID, index: 1 }), es, ns, 1000);
+        expect(back).toHaveBeenCalledTimes(1);
+
+        // Frame 2: Xbox STILL holds Back; PS still idle. The idle pad must not have
+        // cleared pad 0's lastBackButtonState, so no second (false) edge fires.
+        processGamepad(makePad({ index: 0, pressed: [1] }), es, ns, 1016);
+        processGamepad(makePad({ id: PS_ID, index: 1 }), es, ns, 1016);
+        expect(back).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats a frozen/idle duplicate pad as a no-op (no double navigation)', () => {
+        const es = eventState();
+        const ns = navStateGrid(3);
+
+        // Live PS at index 1 presses Down; ghost duplicate at index 3 reports nothing.
+        processGamepad(makePad({ id: PS_ID, index: 1, pressed: [13] }), es, ns, 1000);
+        processGamepad(makePad({ id: PS_ID, index: 3 }), es, ns, 1000);
+
+        expect(ns.focusedElementIndex).toBe(1); // advanced exactly once
     });
 });

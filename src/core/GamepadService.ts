@@ -22,6 +22,7 @@ import {
 } from '../utils/domUtils.js';
 import { addNavigationStyles } from '../utils/cssUtils.js';
 import { debounce } from '../utils/navigationUtils.js';
+import { getConnectedControllerTypes } from '../utils/controllerUtils.js';
 import { logger } from '../utils/logger.js';
 import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
 import type { GamepadEventState, GamepadEvent } from '../Interfaces/GamepadEvents.js';
@@ -115,14 +116,7 @@ export class GamepadService {
             isRunning: false,
             gamepads: {},
             currentControllerType: 'unknown',
-            lastButtonPress: 0,
-            lastAxisMove: 0,
-            lastBackButtonState: false,
-            lastBackTime: 0,
-            lastR1State: false,
-            lastL1State: false,
-            lastShoulderTime: 0,
-            lastScrollTime: 0,
+            padInputStates: {},
             animationFrameId: null,
             statusElementId: this.options.statusElementId ?? null,
             onControllerConnect: null,
@@ -346,6 +340,7 @@ export class GamepadService {
 
         this.clearFocus();
         this.eventState.gamepads = {};
+        this.eventState.padInputStates = {};
 
         // Drop all external subscribers and internal callback wiring.
         this.listeners.clear();
@@ -487,8 +482,21 @@ export class GamepadService {
         return this.navState.elements;
     }
 
+    /**
+     * The type of the most-recently-active controller (e.g. `'xbox'`). When several
+     * controllers are connected this reflects the last one the user touched. Use
+     * {@link getControllerTypes} to list every connected controller.
+     */
     getControllerType(): string {
         return this.eventState.currentControllerType;
+    }
+
+    /**
+     * The de-duplicated list of controller types currently connected, e.g.
+     * `['xbox', 'playstation']`. Empty when no controller is connected.
+     */
+    getControllerTypes(): string[] {
+        return getConnectedControllerTypes(this.eventState.gamepads);
     }
 
     isControllerConnected(): boolean {
