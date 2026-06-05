@@ -24,28 +24,28 @@ function initGamepadService(onlyViewport: boolean = true) {
         statusElementId: 'gamepad-status'
     });
 
-    // Set up event handlers
-    gamepadService.onFocus = (element, index) => {
+    // Set up event handlers (each new instance subscribes fresh)
+    gamepadService.on('focus', (element, index) => {
         console.log(`Focused element ${index}:`, element);
         updateElementCount();
-    };
+    });
 
-    gamepadService.onSelect = (element, index) => {
+    gamepadService.on('select', (element, index) => {
         console.log(`Selected element ${index}:`, element);
-        
+
         // Show which element was selected
         const cardTitle = element.querySelector('h3')?.textContent || 'Unknown';
         alert(`Selected: ${cardTitle}`);
-    };
+    });
 
-    gamepadService.onControllerConnect = (gamepad) => {
+    gamepadService.on('controllerconnect', (gamepad) => {
         console.log('Controller connected:', gamepad.id);
         updateElementCount();
-    };
+    });
 
-    gamepadService.onControllerDisconnect = (gamepad) => {
+    gamepadService.on('controllerdisconnect', (gamepad) => {
         console.log('Controller disconnected:', gamepad.id);
-    };
+    });
 
     // Initialize the service
     gamepadService.init();

@@ -1,0 +1,451 @@
+/* =============================================================================
+   gamepad-controller examples — Unified Design System (theme.css)
+   A single shared stylesheet that gives every example page a consistent,
+   modern "gamer" look. Link this BEFORE any page-specific CSS.
+
+       <link rel="stylesheet" href="../shared/theme.css" />
+       <link rel="stylesheet" href="thisPage.css" />
+
+   Page-specific files should only contain layout unique to that page and may
+   freely use the design tokens (var(--gp-*)) defined here.
+   ========================================================================== */
+
+/* ---- Design tokens ------------------------------------------------------- */
+:root {
+    /* Surfaces */
+    --gp-bg: #0b1020;
+    --gp-bg-2: #0e1530;
+    --gp-surface: #151c34;
+    --gp-surface-2: #1d2647;
+    --gp-surface-3: #263158;
+    --gp-border: #2c3760;
+    --gp-border-strong: #3b4a86;
+
+    /* Text */
+    --gp-text: #e8ecf8;
+    --gp-text-dim: #a4adcb;
+    --gp-text-muted: #6f7aa3;
+
+    /* Brand / state accents */
+    --gp-accent: #7c8cff;       /* indigo */
+    --gp-accent-2: #38e0ff;     /* cyan   */
+    --gp-focus: #4d8bff;        /* focus ring */
+    --gp-select: #22c55e;       /* selected / success */
+    --gp-danger: #f43f5e;
+    --gp-warning: #f59e0b;
+
+    /* Controller brand colors */
+    --gp-xbox: #107c10;
+    --gp-playstation: #2b6df6;
+    --gp-nintendo: #e60012;
+
+    /* Radius / shadow / motion */
+    --gp-radius-sm: 8px;
+    --gp-radius: 14px;
+    --gp-radius-lg: 20px;
+    --gp-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --gp-shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.45);
+    --gp-glow-focus: 0 0 0 3px rgba(77, 139, 255, 0.35), 0 0 24px rgba(77, 139, 255, 0.45);
+    --gp-glow-select: 0 0 0 3px rgba(34, 197, 94, 0.4), 0 0 26px rgba(34, 197, 94, 0.5);
+    --gp-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Spacing */
+    --gp-gap: 16px;
+    --gp-pad: 22px;
+    --gp-maxw: 1040px;
+
+    /* Typography */
+    --gp-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --gp-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+
+/* ---- Base ---------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 28px 20px 64px;
+    font-family: var(--gp-font);
+    color: var(--gp-text);
+    background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(124, 140, 255, 0.12), transparent 60%),
+        radial-gradient(1000px 500px at -10% 10%, rgba(56, 224, 255, 0.1), transparent 55%),
+        linear-gradient(180deg, var(--gp-bg) 0%, var(--gp-bg-2) 100%);
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gp-gap);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    margin: 0 0 0.4em;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+h1 {
+    font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+    background: linear-gradient(120deg, var(--gp-text) 10%, var(--gp-accent) 60%, var(--gp-accent-2) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+}
+
+h2 { font-size: 1.3rem; color: var(--gp-text); }
+h3 { font-size: 1.1rem; color: var(--gp-text); }
+h4 { font-size: 1rem; color: var(--gp-text); }
+
+p { margin: 0 0 0.7em; color: var(--gp-text-dim); }
+
+a { color: var(--gp-accent-2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code {
+    font-family: var(--gp-font-mono);
+    font-size: 0.88em;
+    background: var(--gp-surface-2);
+    border: 1px solid var(--gp-border);
+    color: var(--gp-accent-2);
+    padding: 1px 6px;
+    border-radius: 6px;
+}
+
+ul { color: var(--gp-text-dim); padding-left: 1.2em; }
+li { margin: 0.25em 0; }
+
+/* ---- App header / back-to-home ------------------------------------------ */
+.app-header {
+    width: 100%;
+    max-width: var(--gp-maxw);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--gp-text);
+    background: var(--gp-surface);
+    border: 1px solid var(--gp-border);
+    border-radius: 999px;
+    transition: all 0.25s var(--gp-ease);
+    white-space: nowrap;
+}
+
+.home-link:hover {
+    text-decoration: none;
+    transform: translateY(-1px);
+    border-color: var(--gp-border-strong);
+    background: var(--gp-surface-2);
+    box-shadow: var(--gp-shadow);
+}
+
+.app-header .spacer { flex: 1; }
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--gp-accent-2);
+    background: rgba(56, 224, 255, 0.08);
+    border: 1px solid rgba(56, 224, 255, 0.25);
+    border-radius: 999px;
+}
+
+/* ---- Layout shells ------------------------------------------------------- */
+.container,
+.demo-container,
+.panel {
+    width: 100%;
+    max-width: var(--gp-maxw);
+}
+
+/* Generic content panel */
+.panel,
+.demo-section,
+.info-section,
+.instructions {
+    background: var(--gp-surface);
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius);
+    padding: var(--gp-pad);
+    box-shadow: var(--gp-shadow);
+}
+
+.instructions { color: var(--gp-text-dim); }
+
+.highlight {
+    width: 100%;
+    max-width: var(--gp-maxw);
+    background: linear-gradient(135deg, rgba(124, 140, 255, 0.12), rgba(56, 224, 255, 0.08));
+    border: 1px solid var(--gp-border-strong);
+    border-left: 4px solid var(--gp-accent);
+    border-radius: var(--gp-radius-sm);
+    padding: 16px 18px;
+    color: var(--gp-text-dim);
+}
+
+/* ---- Card grid ----------------------------------------------------------- */
+.grid,
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--gp-gap);
+    width: 100%;
+}
+
+.card {
+    background: linear-gradient(180deg, var(--gp-surface-2), var(--gp-surface));
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius);
+    padding: 20px;
+    box-shadow: var(--gp-shadow);
+    transition: transform 0.2s var(--gp-ease), border-color 0.2s var(--gp-ease), box-shadow 0.2s var(--gp-ease);
+    cursor: pointer;
+    outline: none;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    border-color: var(--gp-border-strong);
+}
+
+.card h3,
+.card h4 { margin-bottom: 0.3em; }
+.card p { margin-bottom: 0; font-size: 0.92rem; }
+
+/* ---- Buttons ------------------------------------------------------------- */
+button,
+.btn {
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--gp-text);
+    background: var(--gp-surface-2);
+    border: 1px solid var(--gp-border-strong);
+    border-radius: var(--gp-radius-sm);
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: all 0.2s var(--gp-ease);
+    outline: none;
+}
+
+button:hover,
+.btn:hover {
+    transform: translateY(-1px);
+    background: var(--gp-surface-3);
+    box-shadow: var(--gp-shadow);
+}
+
+button:active,
+.btn:active { transform: translateY(0); }
+
+.btn--primary,
+.btn.primary {
+    background: linear-gradient(135deg, var(--gp-accent), #5b6bff);
+    border-color: transparent;
+    color: #fff;
+}
+
+.btn--success,
+.btn.success {
+    background: linear-gradient(135deg, var(--gp-select), #16a34a);
+    border-color: transparent;
+    color: #fff;
+}
+
+.btn--danger,
+.btn.danger {
+    background: linear-gradient(135deg, var(--gp-danger), #e11d48);
+    border-color: transparent;
+    color: #fff;
+}
+
+.btn.secondary { background: var(--gp-surface); }
+
+.btn.active,
+button.active {
+    border-color: var(--gp-accent-2);
+    box-shadow: 0 0 0 2px rgba(56, 224, 255, 0.25);
+}
+
+.button-row,
+.control-buttons,
+.buttons,
+.viewport-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+/* ---- Status bar ---------------------------------------------------------- */
+#gamepad-status,
+.status-bar,
+.status-info,
+.status-overlay,
+.gamepad-status {
+    width: 100%;
+    max-width: var(--gp-maxw);
+    padding: 14px 18px;
+    text-align: center;
+    font-family: var(--gp-font-mono);
+    font-size: 0.92rem;
+    color: var(--gp-text);
+    background: var(--gp-surface);
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius-sm);
+    box-shadow: var(--gp-shadow);
+}
+
+/* Fixed-corner status overlays (used by a couple of pages).
+   Selectors include the #gamepad-status id so they beat the id-specificity of
+   the base #gamepad-status rule above (otherwise width:100% would win). */
+.status-overlay,
+.status-info,
+#gamepad-status.status-overlay,
+#gamepad-status.status-info {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: auto;
+    max-width: 300px;
+    z-index: 9999;
+    text-align: left;
+    pointer-events: none;
+}
+
+/* ---- Log panel ----------------------------------------------------------- */
+.log-area,
+.log-panel,
+.activity-log {
+    width: 100%;
+    max-width: var(--gp-maxw);
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 14px 16px;
+    font-family: var(--gp-font-mono);
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--gp-text-dim);
+    background: #070b18;
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius-sm);
+    white-space: pre-wrap;
+}
+
+.log-entry { padding: 2px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+.log-entry.success { color: #6ee7a8; }
+.log-entry.warning { color: #fcd34d; }
+.log-entry.error { color: #fda4af; }
+.log-entry.info { color: var(--gp-text-dim); }
+
+/* Generic status pill (debug page) */
+.status {
+    width: 100%;
+    background: var(--gp-surface);
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius-sm);
+    padding: 14px 16px;
+    color: var(--gp-text-dim);
+}
+.status.success { border-color: rgba(34, 197, 94, 0.5); color: #9af2bd; }
+.status.warning { border-color: rgba(245, 158, 11, 0.5); color: #fcd34d; }
+.status.error { border-color: rgba(244, 63, 94, 0.5); color: #fda4af; }
+.status.loading { border-color: var(--gp-border-strong); }
+
+/* =============================================================================
+   GAMEPAD FOCUS / SELECT STATES
+   The library toggles these classes on the active element. Several pages use
+   different focusedClass/selectedClass names, so all common variants are
+   covered here for a consistent highlight.
+   ========================================================================== */
+.gamepad-focused,
+.menu-focused,
+.nav-focused {
+    border-color: var(--gp-focus) !important;
+    box-shadow: var(--gp-glow-focus) !important;
+    transform: translateY(-2px) scale(1.03) !important;
+    z-index: 50 !important;
+    position: relative;
+    transition: all 0.18s var(--gp-ease) !important;
+}
+
+.gamepad-selected,
+.menu-selected,
+.nav-selected {
+    border-color: var(--gp-select) !important;
+    box-shadow: var(--gp-glow-select) !important;
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.22), rgba(34, 197, 94, 0.1)) !important;
+    transform: scale(0.99) !important;
+}
+
+/* ---- Controller-type theming (body class set by the demos) -------------- */
+body.controller-xbox {
+    --gp-focus: #2ea043;
+    --gp-glow-focus: 0 0 0 3px rgba(46, 160, 67, 0.35), 0 0 24px rgba(46, 160, 67, 0.45);
+}
+body.controller-playstation {
+    --gp-focus: #2b6df6;
+    --gp-glow-focus: 0 0 0 3px rgba(43, 109, 246, 0.35), 0 0 24px rgba(43, 109, 246, 0.45);
+}
+body.controller-nintendo {
+    --gp-focus: #e60012;
+    --gp-glow-focus: 0 0 0 3px rgba(230, 0, 18, 0.35), 0 0 24px rgba(230, 0, 18, 0.45);
+}
+
+/* ---- Dual-context indicators (home / gamepad-index pages) ---------------- */
+.menu-context-active .nav-menu,
+.menu-context-active #navigation-menu {
+    box-shadow: 0 0 0 2px var(--gp-select), var(--gp-shadow-lg) !important;
+}
+.content-context-active .container,
+.content-context-active #item-container {
+    box-shadow: 0 0 0 2px var(--gp-accent), var(--gp-shadow-lg) !important;
+}
+
+/* ---- Accessibility: reduced motion -------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    .gamepad-focused,
+    .gamepad-selected,
+    .menu-focused,
+    .menu-selected {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+}
+
+/* ---- Responsive ---------------------------------------------------------- */
+@media (max-width: 640px) {
+    body { padding: 18px 14px 48px; }
+    .grid,
+    .card-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .status-overlay,
+    .status-info,
+    #gamepad-status.status-overlay,
+    #gamepad-status.status-info { position: static; max-width: var(--gp-maxw); width: 100%; text-align: center; }
+}

@@ -16,7 +16,7 @@ const gamepadService = new GamepadService({
     statusElementId: 'gamepad-status',
 });
 
-gamepadService.onButtonDown = (buttonIndex, gamepad) => {
+gamepadService.on('buttondown', (buttonIndex, _gamepad) => {
     if (buttonIndex === 0) {
         log('⬇️ Botón X/A/Cross presionado (índice 0)');
     } else if (buttonIndex === 1) {
@@ -24,9 +24,9 @@ gamepadService.onButtonDown = (buttonIndex, gamepad) => {
     } else {
         log(`⬇️ Botón ${buttonIndex} presionado`);
     }
-};
+});
 
-gamepadService.onButtonUp = (buttonIndex, gamepad) => {
+gamepadService.on('buttonup', (buttonIndex, _gamepad) => {
     if (buttonIndex === 0) {
         log('⬆️ Botón X/A/Cross soltado (índice 0)');
     } else if (buttonIndex === 1) {
@@ -34,6 +34,6 @@ gamepadService.onButtonUp = (buttonIndex, gamepad) => {
     } else {
         log(`⬆️ Botón ${buttonIndex} soltado`);
     }
-};
+});
 
 gamepadService.init(); 

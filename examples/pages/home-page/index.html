@@ -1,19 +1,24 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamepad Service App</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Link to external CSS file -->
+    <title>Gamepad Controller — Examples</title>
+    <link rel="stylesheet" href="../shared/theme.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Gamepad Service App</h1>
+    <header class="app-header">
+        <span class="badge">🎮 gamepad-controller</span>
+        <span class="spacer"></span>
+        <span class="badge">examples</span>
+    </header>
+
+    <h1>Gamepad Controller — Examples</h1>
+    <p class="subtitle">Spatial &amp; dual-context navigation, controller detection, multi-subscriber events, and a custom-event host mode. Pick a demo below.</p>
 
     <!-- Navigation Menu -->
-    <div id="navigation-menu" tabindex="-1" class="nav-menu mb-8">
+    <nav id="navigation-menu" tabindex="-1" class="nav-menu">
         <a href="../example-menu-page/index.html" class="nav-item" data-title="Menu Navigation">
             <div class="nav-icon">📱</div>
             <div class="nav-text">Menu Navigation</div>
@@ -26,47 +31,55 @@
             <div class="nav-icon">🎯</div>
             <div class="nav-text">Gamepad-Index Demo</div>
         </a>
+        <a href="../viewport-demo-page/index.html" class="nav-item" data-title="Viewport Demo">
+            <div class="nav-icon">🖥️</div>
+            <div class="nav-text">Viewport Demo</div>
+        </a>
+        <a href="../button-callback-demo/index.html" class="nav-item" data-title="Button Callback Demo">
+            <div class="nav-icon">🎮</div>
+            <div class="nav-text">Button Callbacks</div>
+        </a>
+        <a href="../onselect-demo/index.html" class="nav-item" data-title="onSelect Demo">
+            <div class="nav-icon">✅</div>
+            <div class="nav-text">onSelect Behaviors</div>
+        </a>
+        <a href="../events-demo/index.html" class="nav-item" data-title="Multi-subscriber Events">
+            <div class="nav-icon">📡</div>
+            <div class="nav-text">Events (.on / .off)</div>
+        </a>
+        <a href="../custom-events-demo/index.html" class="nav-item" data-title="Custom Events / WinUI">
+            <div class="nav-icon">🪟</div>
+            <div class="nav-text">Custom Events (WinUI)</div>
+        </a>
         <a href="../debug-page/index.html" class="nav-item" data-title="Debug Test">
             <div class="nav-icon">🔧</div>
             <div class="nav-text">Debug Test</div>
         </a>
-        <a href="../viewport-demo-page/index.html" class="nav-item" data-title="Viewport Demo Page">
-            <div class="nav-icon">🖥️</div>
-            <div class="nav-text">Viewport Demo Page</div>
-        </a>
-        <a href="../button-callback-demo/index.html" class="nav-item" data-title="Button Callback Demo">
-            <div class="nav-icon">🎮</div>
-            <div class="nav-text">Button Callback Demo</div>
-        </a>
-        <a href="../onselect-demo/index.html" class="nav-item" data-title="onSelect Method Demo">
-            <div class="nav-icon">🎯</div>
-            <div class="nav-text">onSelect Method Demo</div>
-        </a>
-    </div>
+    </nav>
 
-    <div class="instructions mb-4">
-        <p class="text-sm text-gray-600">
-            Use <strong>D-pad</strong> or <strong>analog stick</strong> to navigate • Press <strong>A/X/Cross</strong> to select • Press <strong>B/Circle</strong> to go back • Press <strong>R1/L1</strong> for page navigation
+    <div class="instructions">
+        <p style="margin:0;text-align:center;">
+            Use <strong>D-pad</strong> or <strong>analog stick</strong> to navigate • <strong>A/X/Cross</strong> to select • <strong>B/Circle</strong> to go back • <strong>R1/L1</strong> to switch menu items
         </p>
     </div>
 
-    <div id="gamepad-status" class="mb-8">
-        Detectando gamepads...
+    <div id="gamepad-status">
+        Detecting gamepads…
     </div>
 
-    <div id="item-container" class="container">
-        <div id="item-0" class="item bg-red-500">Item 1</div>
-        <div id="item-1" class="item bg-blue-500">Item 2</div>
-        <div id="item-2" class="item bg-green-500">Item 3</div>
-        <div id="item-3" class="item bg-yellow-500">Item 4</div>
-        <div id="item-4" class="item bg-purple-500">Item 5</div>
-        <div id="item-5" class="item bg-pink-500">Item 6</div>
-        <div id="item-6" class="item bg-indigo-500">Item 7</div>
-        <div id="item-7" class="item bg-teal-500">Item 8</div>
-        <div id="item-8" class="item bg-orange-500">Item 9</div>
-        <div id="item-9" class="item bg-cyan-500">Item 10</div>
-        <div id="item-10" class="item bg-lime-500">Item 11</div>
-        <div id="item-11" class="item bg-fuchsia-500">Item 12</div>
+    <div id="item-container" class="container item-grid">
+        <div id="item-0" class="item" style="--item-color:#ef4444">Item 1</div>
+        <div id="item-1" class="item" style="--item-color:#3b82f6">Item 2</div>
+        <div id="item-2" class="item" style="--item-color:#22c55e">Item 3</div>
+        <div id="item-3" class="item" style="--item-color:#eab308">Item 4</div>
+        <div id="item-4" class="item" style="--item-color:#a855f7">Item 5</div>
+        <div id="item-5" class="item" style="--item-color:#ec4899">Item 6</div>
+        <div id="item-6" class="item" style="--item-color:#6366f1">Item 7</div>
+        <div id="item-7" class="item" style="--item-color:#14b8a6">Item 8</div>
+        <div id="item-8" class="item" style="--item-color:#f97316">Item 9</div>
+        <div id="item-9" class="item" style="--item-color:#06b6d4">Item 10</div>
+        <div id="item-10" class="item" style="--item-color:#84cc16">Item 11</div>
+        <div id="item-11" class="item" style="--item-color:#d946ef">Item 12</div>
     </div>
 
     <!-- Dual context gamepad initialization -->

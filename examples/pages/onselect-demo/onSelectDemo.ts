@@ -71,6 +71,17 @@ const gamepadService = new GamepadService({
     navigationMode: 'grid'
 });
 
+// The new API uses multi-subscriber `.on('select', …)` which returns an
+// unsubscribe function. To reproduce the old "swap the single onSelect" demo,
+// we track the current subscription and replace it on demand.
+type SelectListener = (element: Element, index: number) => void;
+let selectUnsub: (() => void) | null = null;
+
+function setSelectBehavior(listener: SelectListener | null) {
+    selectUnsub?.();
+    selectUnsub = listener ? gamepadService.on('select', listener) : null;
+}
+
 // Different onSelect behavior implementations
 const behaviors = {
     // Basic behavior: just log the selection
@@ -242,25 +253,25 @@ function handleModalSelection(element: Element, action: string | null) {
 document.addEventListener('DOMContentLoaded', () => {
     // Basic behavior button
     document.getElementById('basic-behavior')?.addEventListener('click', () => {
-        gamepadService.onSelect = behaviors.basic;
+        setSelectBehavior(behaviors.basic);
         logger.log('Switched to BASIC behavior', 'info');
     });
 
     // Advanced behavior button
     document.getElementById('advanced-behavior')?.addEventListener('click', () => {
-        gamepadService.onSelect = behaviors.advanced;
+        setSelectBehavior(behaviors.advanced);
         logger.log('Switched to ADVANCED behavior', 'success');
     });
 
     // Custom behavior button
     document.getElementById('custom-behavior')?.addEventListener('click', () => {
-        gamepadService.onSelect = behaviors.custom;
+        setSelectBehavior(behaviors.custom);
         logger.log('Switched to CUSTOM behavior', 'success');
     });
 
     // Clear behavior button
     document.getElementById('clear-behavior')?.addEventListener('click', () => {
-        gamepadService.onSelect = null;
+        setSelectBehavior(null);
         logger.log('Cleared onSelect behavior', 'warning');
     });
 
@@ -274,22 +285,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Set up focus callback to show current element
-    gamepadService.onFocus = (element: Element, index: number) => {
+    gamepadService.on('focus', (element: Element, index: number) => {
         const elementName = getElementName(element);
         logger.log(`Focused: ${elementName} (index: ${index})`, 'info');
-    };
+    });
 
     // Set up controller connection callbacks
-    gamepadService.onControllerConnect = (gamepad: Gamepad) => {
+    gamepadService.on('controllerconnect', (gamepad: Gamepad) => {
         logger.log(`Controller connected: ${gamepad.id}`, 'success');
-    };
+    });
 
-    gamepadService.onControllerDisconnect = (gamepad: Gamepad) => {
+    gamepadService.on('controllerdisconnect', (gamepad: Gamepad) => {
         logger.log(`Controller disconnected: ${gamepad.id}`, 'warning');
-    };
+    });
 
     // Initialize with basic behavior
-    gamepadService.onSelect = behaviors.basic;
+    setSelectBehavior(behaviors.basic);
     logger.log('Demo initialized with BASIC behavior', 'success');
     logger.log('Use the buttons above to switch between different onSelect behaviors', 'info');
     logger.log('Connect a gamepad and use the A/X button to select elements', 'info');

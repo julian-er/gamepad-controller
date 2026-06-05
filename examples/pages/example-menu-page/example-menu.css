@@ -1,83 +1,38 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    color: white;
-}
+/* example-menu-page — page-specific. Shared styles come from theme.css. */
 
 .container {
-    max-width: 800px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gp-gap);
     text-align: center;
-}
-
-h1 {
-    margin-bottom: 30px;
-    font-size: 2.5em;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
 .menu {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    max-width: 400px;
-    margin: 0 auto;
+    gap: 14px;
+    width: 100%;
+    max-width: 420px;
 }
 
 .menu-item {
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+    padding: 18px 20px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--gp-text);
+    background: linear-gradient(180deg, var(--gp-surface-2), var(--gp-surface));
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius);
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1.2em;
-    font-weight: bold;
-    backdrop-filter: blur(10px);
+    transition: all 0.22s var(--gp-ease);
 }
 
 .menu-item:hover {
-    background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
+    border-color: var(--gp-border-strong);
+    background: var(--gp-surface-3);
 }
 
-.menu-item.menu-focused {
-    background: rgba(255, 255, 255, 0.3) !important;
-    border-color: #fff !important;
-    transform: translateY(-5px) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
-}
-
-.menu-item.menu-selected {
-    background: #28a745 !important;
-    border-color: #28a745 !important;
-}
-
-.instructions {
-    margin-top: 40px;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    font-size: 1.1em;
-}
-
-.instructions h3 {
-    margin-top: 0;
-    color: #ffd700;
-}
-
-.status-overlay {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 15px;
-    border-radius: 8px;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    z-index: 1000;
-} 
+.instructions { max-width: 560px; text-align: left; }
+.instructions h3 { color: var(--gp-accent-2); }
