@@ -116,6 +116,7 @@ gamepad.on('focus', (_el, index) => log(`🎯 service: focus → card ${index + 
 gamepad.on('select', (_el, index) => log(`✅ service: select → card ${index + 1}`, 'success'));
 gamepad.on('backbutton', () => log('↩️ service: backbutton', 'warning'));
 gamepad.on('buttondown', (index) => log(`⬇️ service: buttondown → ${BUTTON_LABELS[index] ?? index}`, 'info'));
+gamepad.on('gamepaderror', (err) => log(`⚠️ service: gamepaderror — ${err.message}`, 'error'));
 
 log('Ready. Connect the simulated host, then use the D-pad / A / B buttons.', 'info');
 

@@ -21,6 +21,9 @@ function initGamepadService(onlyViewport: boolean = true) {
         useGamepadIndex: false,
         onlyViewport: onlyViewport,
         autoAddStyles: true,
+        // 'smooth' (default) animates each focus scroll; switch to 'auto' for instant jumps
+        // if rapid navigation on a long page feels janky.
+        scrollBehavior: 'smooth',
         statusElementId: 'gamepad-status'
     });
 

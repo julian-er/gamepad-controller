@@ -20,14 +20,11 @@ function log(message: string, type: 'info' | 'success' | 'warning' | 'error' = '
     while (logEl.children.length > 60) logEl.removeChild(logEl.lastChild!);
 }
 
+// Options can be passed in the new grouped shape (flat options also still work).
 const gamepad = new GamepadService({
-    containerSelector: '.events-grid',
-    navigationMode: 'spatial',
-    focusedClass: 'gamepad-focused',
-    selectedClass: 'gamepad-selected',
-    statusElementId: 'gamepad-status',
-    useDataAttributes: false,
-    autoAddStyles: false,
+    navigation: { containerSelector: '.events-grid', navigationMode: 'spatial' },
+    styling: { focusedClass: 'gamepad-focused', selectedClass: 'gamepad-selected', useDataAttributes: false },
+    status: { statusElementId: 'gamepad-status' },
 });
 
 // --- Subscriber registry --------------------------------------------------
@@ -117,6 +114,10 @@ document.querySelectorAll('.events-grid .card').forEach((card) => {
 // Connection lifecycle (single subscribers — these are not part of the add/remove demo).
 gamepad.on('controllerconnect', (gp) => log(`🎮 Controller connected: ${gp.id}`, 'success'));
 gamepad.on('controllerdisconnect', (gp) => log(`🎮 Controller disconnected: ${gp.id}`, 'warning'));
+
+// Surfaced when the Gamepad API is blocked (e.g. Permissions-Policy: gamepad). The library
+// keeps the loop alive and emits this once instead of crashing.
+gamepad.on('gamepaderror', (err) => log(`⚠️ Gamepad API blocked: ${err.message}`, 'error'));
 
 gamepad.init();
 
