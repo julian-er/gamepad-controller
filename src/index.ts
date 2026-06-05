@@ -18,7 +18,7 @@ export {
 } from './factory.js';
 
 // --- Dual-context classes (returned by public GamepadService methods) ---
-export { GamepadContextManager, GamepadNavigationContext } from './gamepadContextManager.js';
+export { GamepadContextManager, GamepadNavigationContext } from './contexts/GamepadContextManager.js';
 
 // --- Controller mapping helpers ---
 export {
@@ -29,7 +29,7 @@ export {
     getBackButtonIndex,
     getShoulderIndices,
     getDpadIndices,
-} from './controllerMappings.js';
+} from './mappings/controllerMappings.js';
 
 // --- Optional styling utilities (also exposed via gamepadUtils) ---
 export {
@@ -45,18 +45,29 @@ export type { NavigationStyleOptions } from './utils/cssUtils.js';
 export { logger, Logger, LOG_PREFIX } from './utils/logger.js';
 export type { LogLevel } from './utils/logger.js';
 
+// --- Options normalizer (flat + grouped → flat) ---
+export { normalizeOptions } from './core/normalizeOptions.js';
+
 // --- Public types ---
 export type {
     GamepadServiceOptions,
+    GamepadServiceConfig,
+    NavigationOptionsGroup,
+    InputOptionsGroup,
+    StylingOptionsGroup,
+    StatusOptionsGroup,
+    ScrollingOptionsGroup,
+    ContextOptionsGroup,
+    CustomEventsOptionsGroup,
     GamepadNavigationContextOptions,
     NavigationState,
     GridDimensions,
     GamepadContextManagerCallback,
-} from './Interfaces/index.js';
+} from './interfaces/index.js';
 export type {
     ControllerType,
     ControllerMapping,
     ControllerMappings,
     ControllerValidation,
-} from './Interfaces/ControllerMappings.js';
-export type { GamepadEvent } from './Interfaces/GamepadEvents.js';
+} from './interfaces/ControllerMappings.js';
+export type { GamepadEvent } from './interfaces/GamepadEvents.js';

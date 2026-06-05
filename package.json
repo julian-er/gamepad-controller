@@ -1,6 +1,6 @@
 {
   "name": "gamepad-controller",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "description": "Gamepad navigation controller for the web — spatial/grid navigation, dual-context (menu vs content), controller detection, and a custom-event mode for WinUI/host integrations. TypeScript-first.",
   "type": "module",
   "main": "dist/index.cjs.js",
@@ -18,6 +18,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "BUILDING.md",
     "USAGE_REACT.md",
     "USAGE_ANGULAR.md",
@@ -56,6 +57,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
@@ -67,6 +69,7 @@
     "@eslint/js": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "eslint": "^9.0.0",
     "http-server": "^14.1.1",
     "jsdom": "^25.0.0",

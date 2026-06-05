@@ -1,8 +1,18 @@
-// Interfaces/index.ts
+// interfaces/index.ts
 // Central export point for all TypeScript interfaces
 
-// Main service options interface
-export type { GamepadServiceOptions } from './GamepadServiceOptions';
+// Main service options interface + grouped config shape
+export type {
+    GamepadServiceOptions,
+    GamepadServiceConfig,
+    NavigationOptionsGroup,
+    InputOptionsGroup,
+    StylingOptionsGroup,
+    StatusOptionsGroup,
+    ScrollingOptionsGroup,
+    ContextOptionsGroup,
+    CustomEventsOptionsGroup,
+} from './GamepadServiceOptions';
 
 // Navigation context options interface
 export type { GamepadNavigationContextOptions } from './GamepadNavigationContextOptions';

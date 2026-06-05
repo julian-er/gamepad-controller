@@ -15,19 +15,20 @@ import { navigateToIndex } from './gamepadNavigation.js';
 import {
     calculateGridDimensions,
     getFocusableElements,
-    addGamepadDataAttributes,
-    removeGamepadDataAttributes,
     ensureStatusElement,
     setGamepadContext,
+    invalidateFocusableElementsCache,
 } from '../utils/domUtils.js';
+import { applyFocusStyling, clearFocusStyling, scrollElementIntoView } from './focusView.js';
 import { addNavigationStyles } from '../utils/cssUtils.js';
 import { debounce } from '../utils/navigationUtils.js';
 import { getConnectedControllerTypes } from '../utils/controllerUtils.js';
 import { logger } from '../utils/logger.js';
-import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
-import type { GamepadEventState, GamepadEvent } from '../Interfaces/GamepadEvents.js';
-import { GamepadContextManager, GamepadNavigationContext } from '../gamepadContextManager.js';
-import type { NavigationState } from '../Interfaces/NavigationState.js';
+import type { GamepadServiceOptions, GamepadServiceConfig } from '../interfaces/GamepadServiceOptions.js';
+import { normalizeOptions } from './normalizeOptions.js';
+import type { GamepadEventState, GamepadEvent } from '../interfaces/GamepadEvents.js';
+import { GamepadContextManager, GamepadNavigationContext } from '../contexts/GamepadContextManager.js';
+import type { NavigationState } from '../interfaces/NavigationState.js';
 
 /**
  * Strongly-typed map of events emitted by {@link GamepadService}. Each consumer can
@@ -43,6 +44,12 @@ export interface GamepadServiceEventMap {
     buttondown: (buttonIndex: number, gamepad: Gamepad) => void;
     buttonup: (buttonIndex: number, gamepad: Gamepad) => void;
     contextswitch: (newContext: GamepadNavigationContext, oldContext: GamepadNavigationContext | null) => void;
+    /**
+     * Emitted when the Gamepad API is blocked at runtime — e.g. `navigator.getGamepads()`
+     * throws `SecurityError` under `Permissions-Policy: gamepad`. Fires once per block; the
+     * polling loop keeps running in case access is granted later.
+     */
+    gamepaderror: (error: Error) => void;
 }
 
 type EventName = keyof GamepadServiceEventMap;
@@ -76,8 +83,13 @@ export class GamepadService {
     private handleGamepadConnected: (event: GamepadEvent) => void;
     private handleGamepadDisconnected: (event: GamepadEvent) => void;
     private handleResize: (() => void) & { cancel: () => void };
+    // Invalidates the focusable-element memo when the observed DOM subtree changes, so the
+    // cache can safely be read through on every detectElements() without going stale.
+    private mutationObserver: MutationObserver | null = null;
 
-    constructor(options: GamepadServiceOptions = {}) {
+    constructor(config: GamepadServiceConfig = {}) {
+        // Accept both the flat options and the grouped shape; collapse to flat (groups win).
+        const options = normalizeOptions(config);
         this.options = {
             debounceTime: 150,
             deadzone: 0.1,
@@ -125,6 +137,7 @@ export class GamepadService {
             onBackButton: null,
             onButtonDown: undefined,
             onButtonUp: undefined,
+            onError: undefined,
             customListeners: null,
         };
 
@@ -146,6 +159,7 @@ export class GamepadService {
         this.eventState.onNavigationMenuOpen = (button) => this.emit('navigationmenuopen', button);
         this.eventState.onButtonDown = (i, gamepad) => this.emit('buttondown', i, gamepad);
         this.eventState.onButtonUp = (i, gamepad) => this.emit('buttonup', i, gamepad);
+        this.eventState.onError = (error) => this.emit('gamepaderror', error);
         this.eventState.onBackButton = () => {
             // Emit when subscribers exist, otherwise fall back to browser history.
             const set = this.listeners.get('backbutton');
@@ -170,8 +184,10 @@ export class GamepadService {
         this.handleGamepadConnected = (event: GamepadEvent) => handleConnected(this.eventState, event);
         this.handleGamepadDisconnected = (event: GamepadEvent) => handleDisconnected(this.eventState, event);
 
-        // Create debounced resize handler with cancel capability
+        // Create debounced resize handler with cancel capability. A resize can change which
+        // elements are in-viewport/visible, so drop the focusable memo before re-detecting.
         this.handleResize = debounce(() => {
+            invalidateFocusableElementsCache();
             if (this.options.enableDualContext) {
                 this.contextManager.refresh();
             } else {
@@ -229,6 +245,7 @@ export class GamepadService {
 
         setupEventListeners(this.eventState, this.handleGamepadConnected, this.handleGamepadDisconnected, this.options);
         window.addEventListener('resize', this.handleResize);
+        this.observeDomMutations();
 
         if (this.options.enableDualContext) {
             this.setupDualContextMode();
@@ -268,6 +285,29 @@ export class GamepadService {
         const modeText = this.options.enableDualContext ? 'dual context' : 'single context';
         const eventText = this.options.useCustomEvents ? 'custom events' : 'native browser APIs';
         logger.info(`GamepadService initialized with ${modeText} navigation support using ${eventText}`);
+    }
+
+    /**
+     * Observes the navigation container for DOM changes and drops the focusable-element memo
+     * when the subtree mutates. This keeps {@link detectElements} cheap (read-through cache)
+     * while guaranteeing it never returns a stale list after the app adds/removes elements.
+     * @private
+     */
+    private observeDomMutations(): void {
+        if (typeof MutationObserver === 'undefined') return;
+
+        const target = this.options.containerSelector
+            ? document.querySelector(this.options.containerSelector)
+            : document.body;
+        if (!target) return;
+
+        this.mutationObserver = new MutationObserver(() => invalidateFocusableElementsCache());
+        this.mutationObserver.observe(target, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['disabled', 'hidden', 'tabindex', 'gamepad-index', 'style', 'class'],
+        });
     }
 
     /**
@@ -337,8 +377,11 @@ export class GamepadService {
             window.removeEventListener('resize', this.handleResize);
         }
         this.handleResize.cancel();
+        this.mutationObserver?.disconnect();
+        this.mutationObserver = null;
 
         this.clearFocus();
+        invalidateFocusableElementsCache();
         this.eventState.gamepads = {};
         this.eventState.padInputStates = {};
 
@@ -350,6 +393,7 @@ export class GamepadService {
         this.eventState.onBackButton = null;
         this.eventState.onButtonDown = undefined;
         this.eventState.onButtonUp = undefined;
+        this.eventState.onError = undefined;
         this.navState.onFocus = null;
         this.navState.onSelect = null;
         this.navState.elements = [];
@@ -395,6 +439,9 @@ export class GamepadService {
 
     // Set elements manually
     setElements(elements: Element[]) {
+        // Manual element control bypasses the scan; drop the memo so a later detectElements()
+        // doesn't resurrect a now-irrelevant cached list.
+        invalidateFocusableElementsCache();
         this.navState.elements = elements;
 
         const container = this.options.containerSelector
@@ -414,25 +461,20 @@ export class GamepadService {
     updateFocus() {
         if (this.options.enableDualContext) return;
 
+        // Clear focused styling everywhere (without touching the selected class — historical
+        // behavior of updateFocus only cleared the focused state).
         this.navState.elements.forEach((element) => {
             if (this.options.useDataAttributes) {
-                removeGamepadDataAttributes(element);
-            } else {
-                element.classList.remove(this.options.focusedClass ?? '');
+                clearFocusStyling([element], this.options);
+            } else if (this.options.focusedClass) {
+                element.classList.remove(this.options.focusedClass);
             }
         });
 
         const focusedElement = this.navState.elements[this.navState.focusedElementIndex];
         if (focusedElement) {
-            if (this.options.useDataAttributes) {
-                addGamepadDataAttributes(focusedElement, 'focused');
-            } else {
-                focusedElement.classList.add(this.options.focusedClass ?? '');
-            }
-
-            if (typeof focusedElement.scrollIntoView === 'function') {
-                focusedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-            }
+            applyFocusStyling(focusedElement, this.options);
+            scrollElementIntoView(focusedElement, this.options.scrollBehavior ?? 'smooth');
 
             if (this.navState.onFocus) {
                 this.navState.onFocus(focusedElement, this.navState.focusedElementIndex);
@@ -442,14 +484,7 @@ export class GamepadService {
 
     // Clear focus from all elements
     clearFocus() {
-        this.navState.elements.forEach((element) => {
-            if (this.options.useDataAttributes) {
-                removeGamepadDataAttributes(element);
-            } else {
-                element.classList.remove(this.options.focusedClass ?? '');
-                element.classList.remove(this.options.selectedClass ?? '');
-            }
-        });
+        clearFocusStyling(this.navState.elements, this.options);
     }
 
     // Navigate to specific index
@@ -504,6 +539,8 @@ export class GamepadService {
     }
 
     refresh() {
+        // Explicit refresh implies the DOM may have changed — drop the focusable memo.
+        invalidateFocusableElementsCache();
         if (this.options.enableDualContext) {
             this.contextManager.refresh();
         } else {

@@ -2,11 +2,10 @@
 
 A TypeScript library for advanced gamepad navigation and UI control in web applications. Supports dual context navigation, custom mapping, and is compatible with Xbox, PlayStation, Nintendo, and generic controllers.
 
-> **Heads up (v0.1.0):** the event API changed from single-slot setters
-> (`service.onFocus = fn`) to a **multi-subscriber** `service.on('focus', fn)` API, and the
-> public surface was locked down (internal functions are no longer exported). If you used
-> `1.0.0`, read the **[Migration Guide](MIGRATION.md)** — it's a short, mostly find-and-replace
-> change.
+> **Heads up (1.0):** the event API uses a **multi-subscriber** `service.on('focus', fn)` API
+> (not single-slot `service.onFocus = fn` setters), options can now be passed in a **grouped**
+> shape (flat options still work), and a few internal modules moved. If you're upgrading from a
+> `0.x`/`1.0.0` build, read the **[Migration Guide](MIGRATION.md)** — most of it is find-and-replace.
 
 ## 📚 Guides
 
@@ -22,13 +21,14 @@ A TypeScript library for advanced gamepad navigation and UI control in web appli
 - **Background tabs:** the input loop uses `requestAnimationFrame`, which browsers pause for
   hidden/backgrounded tabs — input is not read while the tab is not visible.
 - **SSR-safe:** `init()` no-ops in non-browser environments; call it on the client only.
+- **Permissions-Policy:** the Gamepad API can be disabled by `Permissions-Policy: gamepad`
+  or inside a cross-origin iframe without `allow="gamepad"`. When that happens
+  `navigator.getGamepads()` throws `SecurityError`; the library catches it, keeps the input
+  loop alive (in case access is granted later), and surfaces it once via the `gamepaderror`
+  event — subscribe to it if you want to show a fallback UI.
 - **`color-mix` styling:** the optional injected default styles use `color-mix(in srgb, …)`
   (Chromium 111+, Firefox 113+, Safari 16.2+). This affects only the opt-in stylesheet.
 - **Logging:** quiet by default (`logLevel: 'error'`). Set `logLevel: 'debug'` while developing.
-
-> Several older code snippets below still show the legacy `service.onX = fn` setters. The
-> current API is `service.on('event', fn)` — see **[Event Handlers](#event-handlers)** and the
-> [Migration Guide](MIGRATION.md).
 
 ## 🎮 Features
 
@@ -200,7 +200,7 @@ window.dispatchEvent(new CustomEvent('hubgamepaddisconnected', {
 ### Custom Events API Compatibility
 
 The custom events mode maintains **full API compatibility** with the native mode:
-- Same callback functions (`onFocus`, `onSelect`, `onBackButton`, etc.)
+- Same events via `on(event, cb)` (`'focus'`, `'select'`, `'backbutton'`, etc.)
 - Same navigation modes (spatial, grid, horizontal)
 - Same configuration options
 - Same TypeScript interfaces
@@ -273,8 +273,8 @@ const handleControllerConnect = (gamepad: Gamepad): void => {
 
 // Type your service instance
 const gamepadInstance: GamepadService = gamepadService('.container', options);
-gamepadInstance.onFocus = handleFocus;
-gamepadInstance.onControllerConnect = handleControllerConnect;
+gamepadInstance.on('focus', handleFocus);
+gamepadInstance.on('controllerconnect', handleControllerConnect);
 ```
 
 ### Available Interfaces
@@ -343,10 +343,10 @@ const config: GamepadServiceOptions = {
 
 // Service instance with full typing
 const service: GamepadService = gamepadService('.container', config);
-service.onFocus = (element, index) => {
+service.on('focus', (element, index) => {
     // TypeScript knows element is Element and index is number
     console.log(`Focused element ${index}:`, element.tagName);
-};
+});
 ```
 
 ### Main Functions
@@ -404,6 +404,10 @@ interface GamepadServiceOptions {
     enableRightStickScroll?: boolean;    // Enable right stick for window scrolling (default: true)
     scrollSpeed?: number;                // Multiplier for scroll speed (default: 1)
     scrollDebounceTime?: number;         // Debounce time for scrolling (default: 50ms)
+
+    // Focus scrolling
+    scrollBehavior?: 'smooth' | 'auto';  // scrollIntoView behavior on focus (default: 'smooth';
+                                         // use 'auto' to avoid animation churn on dense UIs)
     
     // Dual Context
     enableDualContext?: boolean;         // Enable dual context mode
@@ -424,6 +428,24 @@ interface GamepadServiceOptions {
     onlyViewport?: boolean;             // Only include elements visible in viewport (default: false)
 }
 ```
+
+#### Grouped options (optional)
+
+Every flat option above keeps working. You can also pass a **grouped** shape for readability —
+where a value appears in both, the nested group wins:
+
+```ts
+const gamepad = gamepadService('.app', {
+    navigation: { navigationMode: 'spatial', deadzone: 0.15 },
+    input: { enableBackButton: true, backButtonCooldown: 300 },
+    styling: { focusedClass: 'app-focused', scrollBehavior: 'auto' },
+    scrolling: { enableRightStickScroll: true, scrollSpeed: 1.5 },
+    context: { enableDualContext: true, menuContextSelector: '.nav' },
+    customEvents: { useCustomEvents: true },
+});
+```
+
+Groups: `navigation`, `input`, `styling`, `status`, `scrolling`, `context`, `customEvents`.
 
 ### Event Handlers
 
@@ -453,13 +475,16 @@ gamepad.on('contextswitch', (newContext, oldContext) => console.log('Context swi
 gamepad.on('buttondown', (index, pad) => console.log('button down', index));
 gamepad.on('buttonup', (index, pad) => console.log('button up', index));
 
+// Runtime error (e.g. Gamepad API blocked by Permissions-Policy)
+gamepad.on('gamepaderror', (err) => console.warn('gamepad blocked:', err.message));
+
 // Unsubscribe when done
 offFocus();
 // or: gamepad.off('focus', handler);
 ```
 
 **Event names:** `focus`, `select`, `controllerconnect`, `controllerdisconnect`, `backbutton`,
-`navigationmenuopen`, `buttondown`, `buttonup`, `contextswitch`.
+`navigationmenuopen`, `buttondown`, `buttonup`, `contextswitch`, `gamepaderror`.
 
 > If you do **not** subscribe to `'backbutton'`, the default behavior (`window.history.back()`)
 > still runs. Subscribe to override it.
@@ -806,9 +831,9 @@ const gamepad = gamepadService('.container', {
 });
 
 // Test navigation responsiveness
-gamepad.onFocus = (element, index) => {
+gamepad.on('focus', (element, index) => {
     console.log(`Focused element ${index}: ${element.tagName}`);
-};
+});
 
 // If navigation is too sensitive: increase deadzone
 // If navigation is unresponsive: decrease deadzone
@@ -942,13 +967,13 @@ const gamepad = initDualContextGamepad({
 });
 
 // Custom menu selection handler
-gamepad.onSelect = (element) => {
+gamepad.on('select', (element) => {
     if (element.classList.contains('nav-item')) {
         // Handle menu navigation
         const href = element.getAttribute('href');
         if (href) window.location.href = href;
     }
-};
+});
 ```
 
 ```html
@@ -1034,7 +1059,8 @@ const gamepadService = new GamepadService({
   // ...options
 });
 
-gamepadService.onButtonDown = (buttonIndex, gamepad) => {
+// Subscribe with on('buttondown'/'buttonup', cb). Each call returns an unsubscribe function.
+gamepadService.on('buttondown', (buttonIndex, gamepad) => {
   if (buttonIndex === 0) {
     // X/A/Cross pressed
     alert('Primary button pressed!');
@@ -1044,9 +1070,9 @@ gamepadService.onButtonDown = (buttonIndex, gamepad) => {
   } else {
     console.log('Button', buttonIndex, 'pressed');
   }
-};
+});
 
-gamepadService.onButtonUp = (buttonIndex, gamepad) => {
+gamepadService.on('buttonup', (buttonIndex, gamepad) => {
   if (buttonIndex === 0) {
     console.log('Primary button released!');
   } else if (buttonIndex === 1) {
@@ -1054,7 +1080,7 @@ gamepadService.onButtonUp = (buttonIndex, gamepad) => {
   } else {
     console.log('Button', buttonIndex, 'released');
   }
-};
+});
 
 gamepadService.init();
 ```
@@ -1165,13 +1191,13 @@ const updateStatus = (id, message, type = '') => {
 };
 
 // Use your own status update logic
-gamepadService.onControllerConnect = (gamepad) => {
+gamepadService.on('controllerconnect', (gamepad) => {
     updateStatus('my-status', `🎮 Controller connected: ${gamepad.id}`, 'success');
-};
+});
 
-gamepadService.onControllerDisconnect = (gamepad) => {
+gamepadService.on('controllerdisconnect', (gamepad) => {
     updateStatus('my-status', '🎮 Controller disconnected', 'warning');
-};
+});
 ```
 
 > **💡 Pro Tip**: Use the bypass approach when you need complete control over styling and status updates, or when integrating with existing UI frameworks that manage their own status elements.

@@ -214,14 +214,14 @@ const gamepad = initCustomEventGamepad({
     focusedClass: 'gamepad-focused'
 });
 
-// Same callback API as native mode
-gamepad.onSelect = (element, index) => {
+// Same event API as native mode
+gamepad.on('select', (element, index) => {
     console.log('Selected:', element.textContent);
-};
+});
 
-gamepad.onControllerConnect = (gamepad) => {
+gamepad.on('controllerconnect', (gamepad) => {
     console.log('Controller connected via custom events');
-};
+});
 ```
 
 ## 1. Browser API Foundation
@@ -671,14 +671,14 @@ const gamepadService = new GamepadService({
     deadzone: 0.1
 });
 
-// Set up callbacks
-gamepadService.onSelect = (element, index) => {
+// Subscribe to events with on(event, cb)
+gamepadService.on('select', (element, index) => {
     console.log('Selected:', element.textContent);
-};
+});
 
-gamepadService.onButtonDown = (buttonIndex, gamepad) => {
+gamepadService.on('buttondown', (buttonIndex, gamepad) => {
     console.log(`Button ${buttonIndex} pressed on ${gamepad.id}`);
-};
+});
 
 gamepadService.init();
 ```

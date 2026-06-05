@@ -6,7 +6,7 @@ import {
     getDpadIndices,
     getButtonName,
     getAxisName,
-} from '../src/controllerMappings';
+} from '../src/mappings/controllerMappings';
 
 describe('getPrimaryActionButtonIndex', () => {
     it('is 0 for xbox/playstation and 1 for nintendo', () => {

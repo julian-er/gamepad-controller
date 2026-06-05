@@ -1,9 +1,91 @@
-# Migration Guide: `1.0.0` → `0.1.0`
+# Migration Guide
 
-> The previous `1.0.0` was never a locked public release. This version re-cuts the package as
-> `0.1.0` with a small, deliberate public API. The changes below are a **clean break** — there
-> are no deprecated aliases. Most apps that used the documented factory functions need only the
-> event-handler change.
+This guide covers two upgrade paths:
+
+- **[Upgrading to `1.0`](#upgrading-to-10-from-0x)** — folder/file relocations and the new
+  grouped options (both backward-compatible for normal consumers).
+- **[`1.0.0` → `0.1.0` history](#history-100--01x)** — the earlier API lockdown (event
+  setters → `on()`, removed internal exports). Still applies to `1.0`.
+
+---
+
+## Upgrading to `1.0` (from `0.x`)
+
+**Good news for most apps:** if you import from the package root (`from 'gamepad-controller'`)
+and use the documented `GamepadService` / factory API, **no code changes are required**. The
+public entry point (`index.ts`) re-exports exactly the same symbols.
+
+### 1. Internal modules moved (only affects deep imports)
+
+A few internal files were relocated. The public barrel is unchanged, so this only matters if
+you reached *past* it into internal paths (not recommended, but documented here):
+
+| Before | After |
+|---|---|
+| `gamepad-controller/dist/.../Interfaces/*` | `.../interfaces/*` (lowercased) |
+| `src/gamepadContextManager` | `src/contexts/GamepadContextManager` |
+| `src/controllerMappings` | `src/mappings/controllerMappings` |
+
+Fix: import these from the package root instead — `import { GamepadContextManager,
+CONTROLLER_MAPPINGS } from 'gamepad-controller'`.
+
+### 2. New: grouped options (flat options still work)
+
+Options can now be passed in a nested, discoverable shape **or** the existing flat shape. Flat
+options remain fully supported — nothing to change unless you want the grouped form. Where a
+value appears in both, the **nested group wins**.
+
+```js
+// Flat (still valid)
+gamepadService('.app', { navigationMode: 'spatial', deadzone: 0.15, backButtonCooldown: 300 });
+
+// Grouped (equivalent)
+gamepadService('.app', {
+    navigation: { navigationMode: 'spatial', deadzone: 0.15 },
+    input: { backButtonCooldown: 300 },
+});
+```
+
+Flat → group mapping:
+
+| Group | Flat keys it carries |
+|---|---|
+| `navigation` | `navigationMode`, `wrapNavigation`, `deadzone`, `debounceTime`, `autoDetectElements`, `enableNavigation`, `containerSelector`, `onlyViewport`, `useGamepadIndex` |
+| `input` | `enableBackButton`, `backButtonCooldown`, `enableShoulderNavigation`, `shoulderCooldown` |
+| `styling` | `focusedClass`, `selectedClass`, `useDataAttributes`, `autoAddStyles`, `scrollBehavior` |
+| `status` | `statusElementId`, `autoCreateStatusElement`, `navigationMenuSelector`, `logLevel` |
+| `scrolling` | `enableRightStickScroll`, `scrollSpeed`, `scrollDebounceTime` |
+| `context` | `gamepadContext`, `enableDualContext`, `menuContextSelector`, `contentContextSelector` |
+| `customEvents` | `useCustomEvents`, `customConnectedEvent`, `customDisconnectedEvent`, `customStateChangedEvent` |
+
+The collapse is done by the exported `normalizeOptions(config)` helper if you need it directly.
+
+### 3. New: `scrollBehavior` option
+
+Focus now scrolls via a configurable behavior. Default is `'smooth'` (unchanged); set
+`'auto'` to avoid scroll-animation churn during rapid navigation on dense UIs:
+
+```js
+gamepadService('.app', { scrollBehavior: 'auto' });
+```
+
+### 4. New: `gamepaderror` event (Permissions-Policy hardening)
+
+If `navigator.getGamepads()` is blocked (`Permissions-Policy: gamepad` or a cross-origin
+iframe without `allow="gamepad"`), the library no longer risks crashing the input loop — it
+catches the `SecurityError`, keeps polling, and emits a `gamepaderror` event once:
+
+```js
+service.on('gamepaderror', (err) => showFallbackUI(err));
+```
+
+---
+
+## History: `1.0.0` → `0.1.x`
+
+> The previous `1.0.0` was never a locked public release. The `0.1.x` line re-cut the package
+> with a small, deliberate public API. The changes below are a **clean break** — there are no
+> deprecated aliases. They still apply in `1.0`.
 
 ## TL;DR
 

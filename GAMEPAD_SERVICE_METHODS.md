@@ -75,32 +75,32 @@ The gamepad controller library provides multiple initialization methods that app
 - Provides console logging for debugging
 - Includes helpful usage instructions
 
-**Pre-configured event handlers**:
+**Subscribe to events with `on(event, cb)`** (each `on()` returns an unsubscribe function):
 ```typescript
-instance.onFocus = (element, index) => {
-    console.log(`🎯 Focused: ${element.textContent || title || element.tagName}`);
-};
+instance.on('focus', (element, index) => {
+    console.log(`🎯 Focused: ${element.textContent || element.tagName}`);
+});
 
-instance.onSelect = (element, index) => {
-    console.log(`✅ Selected: ${element.textContent || title || element.tagName}`);
+instance.on('select', (element, index) => {
+    console.log(`✅ Selected: ${element.textContent || element.tagName}`);
     // Auto-handles navigation menu links
-};
+});
 
-instance.onControllerConnect = (gamepad) => {
-    console.log(`🎮 Controller connected`);
-};
+instance.on('controllerconnect', (gamepad) => {
+    console.log('🎮 Controller connected');
+});
 
-instance.onControllerDisconnect = (gamepad) => {
+instance.on('controllerdisconnect', (gamepad) => {
     console.log('🎮 Controller disconnected');
-};
+});
 
-instance.onBackButton = () => {
+instance.on('backbutton', () => {
     console.log('🔙 Back button pressed');
-};
+});
 
-instance.onNavigationMenuOpen = (button) => {
+instance.on('navigationmenuopen', (button) => {
     console.log(`📱 Navigation menu: ${button} pressed`);
-};
+});
 ```
 
 ### 4. `initDualContextGamepad(options?)`
@@ -121,16 +121,16 @@ instance.onNavigationMenuOpen = (button) => {
 }
 ```
 
-**Dual context event handlers**:
+**Dual context events**:
 ```typescript
-instance.onFocus = (element, index) => {
-    const context = gamepadInstance?.getActiveContext();
-    console.log(`🎯 Focused (${context?.id}): ${element.textContent || title || element.tagName}`);
-};
+instance.on('focus', (element, index) => {
+    const context = instance.getActiveContext();
+    console.log(`🎯 Focused (${context?.id}): ${element.textContent || element.tagName}`);
+});
 
-instance.onContextSwitch = (newContext, oldContext) => {
+instance.on('contextswitch', (newContext, oldContext) => {
     console.log(`🔄 Context switched from ${oldContext?.id || 'none'} to ${newContext.id}`);
-};
+});
 ```
 
 ## Can You Do Everything With Just One Method?
@@ -169,18 +169,18 @@ const customGamepad = gamepadService('.app', {
     selectedClass: 'app-selected'
 });
 
-// Set up event handlers manually
-customGamepad.onFocus = (element, index) => {
+// Subscribe to events with on(event, cb)
+customGamepad.on('focus', (element, index) => {
     console.log(`Focused: ${element.textContent}`);
-};
+});
 
-customGamepad.onSelect = (element, index) => {
+customGamepad.on('select', (element, index) => {
     console.log(`Selected: ${element.textContent}`);
-};
+});
 
-customGamepad.onContextSwitch = (newContext, oldContext) => {
+customGamepad.on('contextswitch', (newContext, oldContext) => {
     console.log(`Switched to ${newContext.id}`);
-};
+});
 ```
 
 ## Advantages of Having Multiple Methods

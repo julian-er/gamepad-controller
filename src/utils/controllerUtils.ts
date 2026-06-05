@@ -1,4 +1,4 @@
-import { CONTROLLER_MAPPINGS } from '../controllerMappings.js';
+import { CONTROLLER_MAPPINGS } from '../mappings/controllerMappings.js';
 
 /** Minimum buttons a non-standard device must report to be treated as a game controller. */
 const MIN_CONTROLLER_BUTTONS = 4;

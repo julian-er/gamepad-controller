@@ -3,11 +3,11 @@ import {
     findNearestInDirection,
     addGamepadDataAttributes,
     removeGamepadDataAttributes,
-} from './utils/index.js';
-import { logger } from './utils/logger.js';
+} from '../utils/index.js';
+import { logger } from '../utils/logger.js';
 
-import type { GamepadNavigationContextOptions } from './Interfaces/GamepadNavigationContextOptions.js';
-import type { GamepadContextManagerCallback } from './Interfaces/GamepadContextManagerCallback.js';
+import type { GamepadNavigationContextOptions } from '../interfaces/GamepadNavigationContextOptions.js';
+import type { GamepadContextManagerCallback } from '../interfaces/GamepadContextManagerCallback.js';
 
 /**
  * Individual navigation context that maintains its own state and focus tracking.

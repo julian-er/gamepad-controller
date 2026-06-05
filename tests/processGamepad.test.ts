@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { processGamepad } from '../src/core/gamepadEventHandler';
-import type { GamepadEventState } from '../src/Interfaces/GamepadEvents';
-import type { NavigationState } from '../src/Interfaces/NavigationState';
+import type { GamepadEventState } from '../src/interfaces/GamepadEvents';
+import type { NavigationState } from '../src/interfaces/NavigationState';
 
 function gamepadWith(pressed: number[]): Gamepad {
     return makePad({ pressed });

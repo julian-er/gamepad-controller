@@ -5,8 +5,8 @@ import { findNearestInDirection } from '../utils/navigationUtils.js';
 import { addGamepadDataAttributes, removeGamepadDataAttributes, updateStatusElement } from '../utils/domUtils.js';
 import { getConnectedControllerTypes } from '../utils/controllerUtils.js';
 import { logger } from '../utils/logger.js';
-import type { NavigationState } from '../Interfaces/NavigationState.js';
-import type { GamepadContextManager } from '../gamepadContextManager.js';
+import type { NavigationState } from '../interfaces/NavigationState.js';
+import type { GamepadContextManager } from '../contexts/GamepadContextManager.js';
 
 /** Human-readable display names for the controller types. */
 const CONTROLLER_LABELS: Record<string, string> = {

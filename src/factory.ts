@@ -13,7 +13,7 @@ import {
     type NavigationStyleOptions,
 } from './utils/cssUtils.js';
 import { logger } from './utils/logger.js';
-import type { GamepadServiceOptions } from './Interfaces/GamepadServiceOptions.js';
+import type { GamepadServiceConfig } from './interfaces/GamepadServiceOptions.js';
 
 // Shared instance used by the factory helpers below.
 let gamepadInstance: GamepadService | null = null;
@@ -38,7 +38,7 @@ let gamepadInstance: GamepadService | null = null;
  */
 export function gamepadService(
     containerSelector: string | null | undefined = null,
-    options: GamepadServiceOptions = {}
+    options: GamepadServiceConfig = {}
 ): GamepadService {
     // Destroy existing instance if any to prevent memory leaks
     if (gamepadInstance) {
@@ -47,7 +47,7 @@ export function gamepadService(
         gamepadInstance = null;
     }
 
-    const defaultOptions: GamepadServiceOptions = {
+    const defaultOptions: GamepadServiceConfig = {
         containerSelector: containerSelector ?? null,
         statusElementId: 'gamepad-status',
         focusedClass: 'gamepad-focused',
@@ -88,7 +88,7 @@ export function gamepadService(
  * const gamepad = initGamepadForPage();
  * gamepad.on('focus', (el) => console.log('focused', el));
  */
-export function initGamepadForPage(options: GamepadServiceOptions = {}): GamepadService {
+export function initGamepadForPage(options: GamepadServiceConfig = {}): GamepadService {
     logger.info('Initializing gamepad navigation for page...');
 
     const instance = gamepadService(null, {
@@ -124,7 +124,7 @@ export function initGamepadForPage(options: GamepadServiceOptions = {}): Gamepad
  *   contentContextSelector: '.content-container',
  * });
  */
-export function initDualContextGamepad(options: GamepadServiceOptions = {}): GamepadService {
+export function initDualContextGamepad(options: GamepadServiceConfig = {}): GamepadService {
     logger.info('🎮 Initializing dual context gamepad navigation...');
 
     const instance = gamepadService(null, {
@@ -167,7 +167,7 @@ export function initDualContextGamepad(options: GamepadServiceOptions = {}): Gam
  *   customStateChangedEvent: 'myapp-gamepad-state-changed',
  * });
  */
-export function initCustomEventGamepad(options: GamepadServiceOptions = {}): GamepadService {
+export function initCustomEventGamepad(options: GamepadServiceConfig = {}): GamepadService {
     logger.info('🎮 Initializing custom event gamepad navigation for host integration...');
 
     const instance = gamepadService(null, {

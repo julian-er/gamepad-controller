@@ -37,6 +37,7 @@ export default [
                 EventListener: 'readonly',
                 Gamepad: 'readonly',
                 GamepadEvent: 'readonly',
+                MutationObserver: 'readonly',
                 Blob: 'readonly',
                 URL: 'readonly',
                 Node: 'readonly',

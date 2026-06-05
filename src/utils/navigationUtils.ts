@@ -19,10 +19,10 @@
  * // Cancel any pending debounced calls
  * debouncedFn.cancel();
  */
-export function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T & { cancel: () => void } {
+export function debounce<T extends (...args: never[]) => void>(func: T, wait: number): T & { cancel: () => void } {
     let timeout: ReturnType<typeof setTimeout>;
 
-    const debouncedFunction = function executedFunction(this: any, ...args: any[]) {
+    const debouncedFunction = function executedFunction(this: unknown, ...args: Parameters<T>) {
         const later = () => {
             clearTimeout(timeout);
             func.apply(this, args);
@@ -57,9 +57,9 @@ export function debounce<T extends (...args: any[]) => void>(func: T, wait: numb
  * // Call the throttled function - will only execute once per 250ms
  * throttledFn();
  */
-export function throttle<T extends (...args: any[]) => void>(func: T, delay: number): T {
+export function throttle<T extends (...args: never[]) => void>(func: T, delay: number): T {
     let lastCall = 0;
-    return function (this: any, ...args: any[]) {
+    return function (this: unknown, ...args: Parameters<T>) {
         const now = Date.now();
         if (now - lastCall >= delay) {
             lastCall = now;

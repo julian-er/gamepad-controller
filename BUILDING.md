@@ -23,6 +23,7 @@ npm install
 | `npm run build:types` | Emits only the `.d.ts` declaration files (`tsc --emitDeclarationOnly`). |
 | `npm run typecheck` | Type-checks the project without emitting (`tsc --noEmit`). |
 | `npm test` | Runs the Vitest suite once. |
+| `npm run test:coverage` | Runs the suite with V8 coverage and enforces the coverage thresholds. |
 | `npm run test:watch` | Runs Vitest in watch mode. |
 | `npm run lint` | Lints `src/` with ESLint. |
 | `npm run format` | Formats `src/` with Prettier. |
@@ -69,9 +70,9 @@ Two options:
 
 ```bash
 npm run build
-npm pack                      # -> gamepad-controller-0.1.0.tgz
+npm pack                      # -> gamepad-controller-1.0.0-rc.1.tgz
 cd ../my-app
-npm install ../gamepad-controller/gamepad-controller-0.1.0.tgz
+npm install ../gamepad-controller/gamepad-controller-1.0.0-rc.1.tgz
 ```
 
 **2. `npm link` (live local development):**
@@ -100,6 +101,9 @@ npm run example-test   # build + pack, then install & run the examples dev serve
 - **Feature detection:** when the Gamepad API is absent (and custom-event mode is not used),
   the service logs a warning and stays inert rather than throwing. It also no-ops in
   non-browser environments (SSR) — call `init()` only on the client.
+- **Permissions-Policy:** if `navigator.getGamepads()` is blocked (`Permissions-Policy: gamepad`
+  or a cross-origin iframe without `allow="gamepad"`), it throws `SecurityError`. The library
+  catches it, keeps the loop alive, and emits the error once via the `gamepaderror` event.
 - **`color-mix` styling:** the optional injected styles (`gamepadUtils.addStyles()`) use
   `color-mix(in srgb, …)`, which needs Chromium 111+, Firefox 113+, or Safari 16.2+. The
   library itself does not require this; it only affects the opt-in default stylesheet.

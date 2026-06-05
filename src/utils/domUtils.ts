@@ -1,5 +1,24 @@
-import type { GridDimensions } from '../Interfaces/GridDimensions.js';
+import type { GridDimensions } from '../interfaces/GridDimensions.js';
 import { logger } from './logger.js';
+
+/**
+ * Default focusable selectors, joined once at module load instead of being re-allocated on
+ * every {@link getFocusableElements} call (which runs on each refresh/resize).
+ */
+const FOCUSABLE_SELECTORS = [
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    'a[href]',
+    '[tabindex]:not([tabindex="-1"])',
+    '.gamepad-focusable',
+    '.nav-item',
+    '.menu-item',
+    '.item',
+    '[onclick]', // Add elements with onclick
+];
+const FOCUSABLE_SELECTOR_STRING = FOCUSABLE_SELECTORS.join(', ');
 
 // Check if element is in viewport
 /**
@@ -21,7 +40,26 @@ export function isElementInViewport(element: Element, rootMargin: number = 0): b
 }
 
 /**
- * Gets all focusable elements within a container, with optional viewport filtering
+ * Memoizes the (relatively expensive) focusable-element scan. The scan walks the DOM and
+ * calls `getComputedStyle` per candidate, so on dense UIs it is worth avoiding redundant
+ * runs. The cache is intentionally conservative: it is keyed by the full lookup tuple and is
+ * cleared via {@link invalidateFocusableElementsCache} on any state change that could alter
+ * the result (resize, explicit refresh, manual element changes, teardown), so a stale list
+ * is never returned.
+ */
+let focusableCache: { key: string; elements: Element[] } | null = null;
+
+/**
+ * Clears the {@link getFocusableElements} memo. Call after anything that can change which
+ * elements are focusable or visible (resize, DOM refresh, manual `setElements`, destroy).
+ */
+export function invalidateFocusableElementsCache(): void {
+    focusableCache = null;
+}
+
+/**
+ * Gets all focusable elements within a container, with optional viewport filtering.
+ * Results are memoized; see {@link invalidateFocusableElementsCache}.
  * @param containerSelector - The selector for the container element (default: document.body)
  * @param useGamepadIndex - Whether to filter elements based on gamepad-index attribute (default: false)
  * @param onlyViewport - Whether to filter elements based on viewport visibility (default: false)
@@ -32,6 +70,13 @@ export function getFocusableElements(
     useGamepadIndex: boolean = false,
     onlyViewport: boolean = false
 ): Element[] {
+    const cacheKey = `${containerSelector ?? ''}|${useGamepadIndex}|${onlyViewport}`;
+    if (focusableCache && focusableCache.key === cacheKey) {
+        // Return a copy so callers that mutate the array (e.g. filtering in place) can't
+        // corrupt the cached list.
+        return focusableCache.elements.slice();
+    }
+
     const container = containerSelector ? document.querySelector(containerSelector) : document.body;
 
     if (!container) {
@@ -39,28 +84,13 @@ export function getFocusableElements(
         return [];
     }
 
-    // Common focusable selectors
-    const focusableSelectors = [
-        'button:not([disabled])',
-        'input:not([disabled])',
-        'select:not([disabled])',
-        'textarea:not([disabled])',
-        'a[href]',
-        '[tabindex]:not([tabindex="-1"])',
-        '.gamepad-focusable',
-        '.nav-item',
-        '.menu-item',
-        '.item',
-        '[onclick]', // Add elements with onclick
-    ];
-
     let elements: NodeListOf<Element>;
 
     // If gamepad-index is enabled, only look for elements with gamepad-index="true"
     if (useGamepadIndex) {
         elements = container.querySelectorAll('[gamepad-index="true"]');
     } else {
-        elements = container.querySelectorAll(focusableSelectors.join(', '));
+        elements = container.querySelectorAll(FOCUSABLE_SELECTOR_STRING);
     }
 
     const filteredElements = Array.from(elements).filter((element) => {
@@ -73,6 +103,7 @@ export function getFocusableElements(
         return isVisible && inViewport;
     });
 
+    focusableCache = { key: cacheKey, elements: filteredElements.slice() };
     return filteredElements;
 }
 

@@ -48,6 +48,17 @@ export interface GamepadEventState {
     // New: generic button event handlers
     onButtonDown?: (buttonIndex: number, gamepad: Gamepad) => void;
     onButtonUp?: (buttonIndex: number, gamepad: Gamepad) => void;
+    /**
+     * Invoked when the Gamepad API is blocked at runtime (e.g. `navigator.getGamepads()`
+     * throws `SecurityError` under `Permissions-Policy: gamepad`). Surfaced to consumers
+     * via the `gamepaderror` service event.
+     */
+    onError?: (error: Error) => void;
+    /**
+     * Set once `navigator.getGamepads()` has thrown so the polling loop warns/emits a single
+     * time instead of every frame. The rAF loop keeps running — policy may be granted later.
+     */
+    hasWarnedPolicyBlocked?: boolean;
     // Custom-event mode: stored listener references so they can be removed on destroy().
     // Without these the window listeners leak across destroy()/re-init() cycles.
     customListeners?: {

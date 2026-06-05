@@ -1,4 +1,4 @@
-import type { ControllerType, ControllerMappings } from './Interfaces/ControllerMappings.js';
+import type { ControllerType, ControllerMappings } from '../interfaces/ControllerMappings.js';
 
 export const CONTROLLER_MAPPINGS: ControllerMappings = {
     xbox: {
