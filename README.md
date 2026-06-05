@@ -822,6 +822,50 @@ gamepad.onFocus = (element, index) => {
 | PlayStation | D-pad / Left Stick | X | Circle | R1 / L1 | Right Stick |
 | Nintendo | D-pad / Left Stick | B | A | R / L | Right Stick |
 
+## 🎮🎮 Multiple Controllers
+
+Every connected controller drives the **same shared navigation cursor** (a couch / hand-off
+model): any player can pick up any pad and move the focus, without one pad clobbering another.
+
+- **Per-pad input state.** Each controller keeps its own edge-detection flags and cooldown
+  timestamps (keyed by `gamepad.index`), so processing several pads in the same frame can't
+  interfere — an idle pad can't reset the active pad's back-button edge.
+- **Per-pad button mapping.** Each pad is mapped by its **own** detected type, so a mixed
+  setup works correctly — e.g. Nintendo's swapped A/B is honored on the Nintendo pad even
+  while an Xbox pad is also connected.
+- **Status reflects all of them.** The status element lists every connected controller, e.g.
+  `🎮 Xbox + PlayStation controller connected`.
+
+```ts
+const gamepad = gamepadService('.container');
+
+// The most-recently-active controller's type (back-compat).
+gamepad.getControllerType();   // e.g. 'xbox'
+
+// Every connected controller type, de-duplicated.
+gamepad.getControllerTypes();  // e.g. ['xbox', 'playstation']
+```
+
+> Stale slots are pruned automatically: if a `gamepaddisconnected` event is missed, a pad that
+> vanishes from `navigator.getGamepads()` is dropped on the next frame so the type list and
+> per-pad state stay accurate.
+
+### Controller Detection (vendor-ID fallbacks)
+
+Detection matches `gamepad.id` against per-type regex patterns, with a minimum button/axis
+gate to keep non-controller HID devices out. Because browsers don't always include a readable
+name (Chrome often reports only a USB vendor code, e.g. `Wireless Controller (... Vendor: 054c ...)`),
+the patterns also match known **vendor IDs** as a fallback:
+
+| Type | Vendor ID | Notes |
+| ---- | --------- | ----- |
+| Xbox | `045e` | Microsoft (also matches `xbox`, `microsoft`, `x-input`) |
+| PlayStation | `054c` | Sony — DualShock / DualSense (also `playstation`, `dualsense`, `dualshock`, `ps3`–`ps5`) |
+| Nintendo | `057e` | Switch Pro Controller / Joy-Con (also `nintendo`, `switch`, `pro controller`) |
+
+The `minButtons`/`minAxes` validation gate keeps non-controller devices that share a vendor ID
+(headsets, keyboards) from being mis-detected as gamepads.
+
 ## 📋 Usage Examples
 
 ### Grid Navigation Example
