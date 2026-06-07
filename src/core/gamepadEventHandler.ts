@@ -179,8 +179,6 @@ export function detectExistingGamepads(state: GamepadEventState) {
             if (state.onControllerConnect) {
                 state.onControllerConnect(gamepad);
             }
-
-            break; // Handle the first one
         }
     }
 }
@@ -363,7 +361,7 @@ export function processGamepad(
     // (Primary/back/shoulder edges intentionally do NOT count here — only generic button
     // presses, directional moves, and scroll input do, matching the original behavior.)
     let hadInput = processButtonEdges(gp, pad, eventState);
-    processPrimaryAction(gp, pad, navState, currentTimestamp, controllerType, contextManager);
+    processPrimaryAction(gp, pad, navState, eventState, currentTimestamp, controllerType, contextManager);
     processBackAction(gp, pad, navState, eventState, currentTimestamp, controllerType);
     processShoulderAction(gp, pad, navState, eventState, currentTimestamp, controllerType, contextManager);
     if (
@@ -375,7 +373,7 @@ export function processGamepad(
     // --- Most-recently-active controller (drives status label / getControllerType) ---
     if (hadInput && controllerType !== eventState.currentControllerType) {
         eventState.currentControllerType = controllerType;
-        updateStatus(navState, eventState.gamepads, eventState.currentControllerType);
+        updateStatus(navState, eventState.gamepads);
     }
 }
 
@@ -409,6 +407,7 @@ export function processPrimaryAction(
     gp: Gamepad,
     pad: PadInputState,
     navState: NavigationState,
+    eventState: GamepadEventState,
     currentTimestamp: number,
     controllerType: ControllerType,
     contextManager?: GamepadContextManager
@@ -417,7 +416,7 @@ export function processPrimaryAction(
     const primaryButtonIndex = getPrimaryActionButtonIndex(controllerType);
     if (gp.buttons[primaryButtonIndex]?.pressed) {
         if (currentTimestamp - pad.lastButtonPress > debounceTime) {
-            handleSelection(navState, contextManager);
+            handleSelection(navState, contextManager, eventState.onNavigationRequest);
             pad.lastButtonPress = currentTimestamp;
         }
     }
@@ -477,8 +476,7 @@ export function processShoulderAction(
         if (currentTimestamp - pad.lastShoulderTime > shoulderCooldown) {
             // r1 takes priority if both edges fire on the same frame.
             const button = r1Edge ? 'R1' : 'L1';
-            // Correct argument order: (state, button, contextManager, onNavigationMenuOpen).
-            handleShoulderNavigation(navState, button, contextManager, eventState.onNavigationMenuOpen);
+            handleShoulderNavigation(navState, button, contextManager, eventState.onNavigationMenuOpen, eventState.onNavigationRequest);
             pad.lastShoulderTime = currentTimestamp;
         }
     }
@@ -604,7 +602,7 @@ export function gameLoop(
         // Prune slots that vanished from getGamepads() (e.g. a missed disconnect event) so
         // the connected-types list and per-pad state stay accurate.
         if (pruneDisconnectedPads(eventState, seen)) {
-            updateStatus(navState, eventState.gamepads, eventState.currentControllerType);
+            updateStatus(navState, eventState.gamepads);
         }
 
         eventState.animationFrameId = requestAnimationFrame(gameLoopImpl);
@@ -637,11 +635,18 @@ export function createCustomEventGameLoop(
 
         // Process every valid gamepad snapshot so multiple host-fed controllers all drive
         // the shared cursor, consistent with the native loop. Per-pad state keeps them apart.
+        const seen = new Set<number>();
         for (const gamepadIndex in eventState.gamepads) {
             const gp = eventState.gamepads[gamepadIndex];
             if (gp && isValidGamepad(gp)) {
+                seen.add(gp.index);
                 processGamepad(gp, eventState, navState, currentTimestamp, contextManager, updateFocusCallback);
             }
+        }
+
+        // Remove any entries that are no longer valid (mirrors native loop prune behavior).
+        if (pruneDisconnectedPads(eventState, seen)) {
+            updateStatus(navState, eventState.gamepads);
         }
 
         eventState.animationFrameId = requestAnimationFrame(customEventGameLoopImpl);

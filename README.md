@@ -247,7 +247,9 @@ import type {
     NavigationState,
     ControllerMappings,
     GridDimensions,
-    GamepadContextManagerCallback
+    GamepadContextManagerCallback,
+    Direction,
+    ShoulderButton,
 } from 'gamepad-controller';
 ```
 
@@ -287,6 +289,8 @@ gamepadInstance.on('controllerconnect', handleControllerConnect);
 | `ControllerMappings` | Controller button mappings | Custom controller support |
 | `GridDimensions` | Grid layout dimensions | Grid navigation |
 | `GamepadContextManagerCallback` | Context switch callback | Dual context events |
+| `Direction` | `'up' \| 'down' \| 'left' \| 'right'` union | Type navigation handler parameters |
+| `ShoulderButton` | `'L1' \| 'R1'` union | Type shoulder-button handler parameters |
 
 ### Custom Controller Configuration
 
@@ -471,6 +475,10 @@ gamepad.on('controllerdisconnect', (pad: Gamepad) => console.log('Controller dis
 gamepad.on('backbutton', () => console.log('Back button pressed'));
 gamepad.on('contextswitch', (newContext, oldContext) => console.log('Context switched'));
 
+// SPA router integration — intercept link navigation instead of letting the library
+// mutate window.location.href directly. Falls back to href assignment if no subscriber.
+gamepad.on('navigationrequest', (href, element) => router.push(href));
+
 // Generic per-button events
 gamepad.on('buttondown', (index, pad) => console.log('button down', index));
 gamepad.on('buttonup', (index, pad) => console.log('button up', index));
@@ -484,7 +492,8 @@ offFocus();
 ```
 
 **Event names:** `focus`, `select`, `controllerconnect`, `controllerdisconnect`, `backbutton`,
-`navigationmenuopen`, `buttondown`, `buttonup`, `contextswitch`, `gamepaderror`.
+`navigationmenuopen`, `buttondown`, `buttonup`, `contextswitch`, `gamepaderror`,
+`navigationrequest`.
 
 > If you do **not** subscribe to `'backbutton'`, the default behavior (`window.history.back()`)
 > still runs. Subscribe to override it.

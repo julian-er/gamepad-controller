@@ -8,6 +8,7 @@ import { logger } from '../utils/logger.js';
 
 import type { GamepadNavigationContextOptions } from '../interfaces/GamepadNavigationContextOptions.js';
 import type { GamepadContextManagerCallback } from '../interfaces/GamepadContextManagerCallback.js';
+import type { Direction, ShoulderButton } from '../interfaces/NavigationTypes.js';
 
 /**
  * Individual navigation context that maintains its own state and focus tracking.
@@ -35,10 +36,8 @@ export class GamepadNavigationContext {
     focusedElementIndex: number;
     isActive: boolean;
     lastFocusedElement: Element | null;
-    onFocus: ((element: Element, index: number) => void) | null;
-    onSelect: ((element: Element, index: number) => void) | null;
-    onActivate: ((ctx: GamepadNavigationContext) => void) | null;
-    onDeactivate: ((ctx: GamepadNavigationContext) => void) | null;
+
+    private _listeners: Map<string, Set<(...args: never[]) => void>> = new Map();
 
     constructor(
         id: string,
@@ -60,12 +59,28 @@ export class GamepadNavigationContext {
         this.focusedElementIndex = 0;
         this.isActive = false;
         this.lastFocusedElement = null;
+    }
 
-        // Event callbacks
-        this.onFocus = null;
-        this.onSelect = null;
-        this.onActivate = null;
-        this.onDeactivate = null;
+    /**
+     * Subscribe to a context event. Returns an unsubscribe function.
+     * Multiple subscribers per event are supported.
+     */
+    on(event: 'focus', listener: (element: Element, index: number) => void): () => void;
+    on(event: 'select', listener: (element: Element, index: number) => void): () => void;
+    on(event: 'activate', listener: (ctx: GamepadNavigationContext) => void): () => void;
+    on(event: 'deactivate', listener: (ctx: GamepadNavigationContext) => void): () => void;
+    on(event: string, listener: (...args: never[]) => void): () => void {
+        if (!this._listeners.has(event)) this._listeners.set(event, new Set());
+        this._listeners.get(event)!.add(listener);
+        return () => this._listeners.get(event)?.delete(listener);
+    }
+
+    private _emit(event: string, ...args: unknown[]): void {
+        this._listeners.get(event)?.forEach((fn) => (fn as (...a: unknown[]) => void)(...args));
+    }
+
+    _clearListeners(): void {
+        this._listeners.clear();
     }
 
     /**
@@ -111,9 +126,7 @@ export class GamepadNavigationContext {
         this.isActive = true;
         this.updateFocus();
 
-        if (this.onActivate) {
-            this.onActivate(this);
-        }
+        this._emit('activate', this);
 
         logger.info(`Context ${this.id} activated`);
     }
@@ -133,9 +146,7 @@ export class GamepadNavigationContext {
         this.isActive = false;
         this.clearFocus();
 
-        if (this.onDeactivate) {
-            this.onDeactivate(this);
-        }
+        this._emit('deactivate', this);
 
         logger.info(`Context ${this.id} deactivated`);
     }
@@ -182,9 +193,7 @@ export class GamepadNavigationContext {
 
             this.lastFocusedElement = focusedElement;
 
-            if (this.onFocus) {
-                this.onFocus(focusedElement, this.focusedElementIndex);
-            }
+            this._emit('focus', focusedElement, this.focusedElementIndex);
         }
     }
 
@@ -214,7 +223,7 @@ export class GamepadNavigationContext {
      * - Only navigates if active and has elements
      * - Delegates to navigateHorizontal or navigateSpatial based on navigationMode
      */
-    navigate(direction: string) {
+    navigate(direction: Direction) {
         if (!this.isActive || this.elements.length === 0) return false;
 
         if (this.options.navigationMode === 'horizontal') {
@@ -232,7 +241,7 @@ export class GamepadNavigationContext {
      * - Wraps navigation if wrapNavigation is true
      * - Returns false if direction is not left/right
      */
-    navigateHorizontal(direction: string) {
+    navigateHorizontal(direction: Direction) {
         let newIndex = this.focusedElementIndex;
 
         if (direction === 'left') {
@@ -265,7 +274,7 @@ export class GamepadNavigationContext {
      * - Wraps navigation if wrapNavigation is true
      * - Returns false if no element found
      */
-    navigateSpatial(direction: string) {
+    navigateSpatial(direction: Direction) {
         const currentElement = this.elements[this.focusedElementIndex];
         if (!currentElement) return false;
 
@@ -305,7 +314,7 @@ export class GamepadNavigationContext {
      * - Fires onSelect callback if set
      * - Handles navigation menu links
      */
-    select() {
+    select(onNavigationRequest?: ((href: string, element: Element) => void) | null) {
         if (!this.isActive) return false;
 
         const focusedElement = this.elements[this.focusedElementIndex];
@@ -325,9 +334,7 @@ export class GamepadNavigationContext {
         }
 
         // Fire callback
-        if (this.onSelect) {
-            this.onSelect(focusedElement, this.focusedElementIndex);
-        }
+        this._emit('select', focusedElement, this.focusedElementIndex);
 
         // Handle navigation menu links
         if (
@@ -335,8 +342,13 @@ export class GamepadNavigationContext {
             'href' in focusedElement &&
             (focusedElement as HTMLAnchorElement).href
         ) {
-            logger.debug(`🔗 Navigating to: ${(focusedElement as HTMLAnchorElement).href}`);
-            window.location.href = (focusedElement as HTMLAnchorElement).href;
+            const href = (focusedElement as HTMLAnchorElement).href;
+            logger.debug(`🔗 Navigating to: ${href}`);
+            if (onNavigationRequest) {
+                onNavigationRequest(href, focusedElement);
+            } else if (typeof window !== 'undefined') {
+                window.location.href = href;
+            }
             return true;
         }
 
@@ -449,13 +461,18 @@ export class GamepadContextManager {
     contexts: Map<string, GamepadNavigationContext>;
     activeContext: GamepadNavigationContext | null;
     lastActiveContext: GamepadNavigationContext | null;
-    onContextSwitch: GamepadContextManagerCallback | null;
+    private _onContextSwitch: GamepadContextManagerCallback | null;
 
     constructor() {
         this.contexts = new Map();
         this.activeContext = null;
         this.lastActiveContext = null;
-        this.onContextSwitch = null;
+        this._onContextSwitch = null;
+    }
+
+    /** Register a callback that fires whenever the active context changes. */
+    setContextSwitchCallback(fn: GamepadContextManagerCallback | null): void {
+        this._onContextSwitch = fn;
     }
 
     /**
@@ -480,14 +497,14 @@ export class GamepadContextManager {
         };
         const context = new GamepadNavigationContext(id, opts);
         this.contexts.set(id, context);
-        context.onActivate = (ctx) => {
+        context.on('activate', (ctx) => {
             this.setActiveContext(ctx.id);
-        };
-        context.onDeactivate = (ctx) => {
+        });
+        context.on('deactivate', (ctx) => {
             if (this.activeContext === ctx) {
                 this.activeContext = null;
             }
-        };
+        });
         logger.info(`Registered context: ${id}`);
         return context;
     }
@@ -536,8 +553,8 @@ export class GamepadContextManager {
         }
         this.activeContext = context;
         context.activate();
-        if (this.onContextSwitch) {
-            this.onContextSwitch(context, this.lastActiveContext);
+        if (this._onContextSwitch) {
+            this._onContextSwitch(context, this.lastActiveContext);
         }
         return true;
     }
@@ -562,7 +579,7 @@ export class GamepadContextManager {
      * @param direction - The direction of navigation ('up', 'down', 'left', 'right')
      * @returns {boolean} True if navigation was handled successfully, false otherwise
      */
-    handleNavigation(direction: string): boolean {
+    handleNavigation(direction: Direction): boolean {
         if (!this.activeContext) return false;
         return this.activeContext.navigate(direction);
     }
@@ -571,9 +588,9 @@ export class GamepadContextManager {
      * Handles selection by activating the current context and delegating selection within it.
      * @returns {boolean} True if selection was handled successfully, false otherwise
      */
-    handleSelection(): boolean {
+    handleSelection(onNavigationRequest?: ((href: string, element: Element) => void) | null): boolean {
         if (!this.activeContext) return false;
-        return this.activeContext.select();
+        return this.activeContext.select(onNavigationRequest);
     }
 
     /**
@@ -581,10 +598,10 @@ export class GamepadContextManager {
      * @param button - The button pressed ('R1' or 'L1')
      * @returns {boolean} True if navigation was handled successfully, false otherwise
      */
-    handleShoulderNavigation(button: string): boolean {
-        // Find menu/navigation context
+    handleShoulderNavigation(button: ShoulderButton): boolean {
+        // Find menu/navigation context — prefer explicit role, fall back to navigationMode.
         const menuContext = Array.from(this.contexts.values()).find(
-            (ctx) => ctx.options.navigationMode === 'horizontal' || ctx.id.includes('menu') || ctx.id.includes('nav')
+            (ctx) => ctx.options.role === 'menu' || ctx.options.navigationMode === 'horizontal'
         );
 
         if (!menuContext) return false;
@@ -605,10 +622,10 @@ export class GamepadContextManager {
      * @param direction - The direction of navigation ('up', 'down', 'left', 'right')
      * @returns {boolean} True if navigation was handled successfully, false otherwise
      */
-    handleStickNavigation(direction: string): boolean {
-        // Find main content context
+    handleStickNavigation(direction: Direction): boolean {
+        // Find main content context — prefer explicit role, fall back to navigationMode.
         const mainContext = Array.from(this.contexts.values()).find(
-            (ctx) => ctx.options.navigationMode === 'spatial' || ctx.id.includes('main') || ctx.id.includes('content')
+            (ctx) => ctx.options.role === 'content' || ctx.options.navigationMode === 'spatial'
         );
 
         if (!mainContext) return this.handleNavigation(direction);
@@ -643,11 +660,7 @@ export class GamepadContextManager {
         // Deactivate all contexts first
         this.contexts.forEach((context) => {
             context.deactivate();
-            // Clear all callback references for each context
-            context.onFocus = null;
-            context.onSelect = null;
-            context.onActivate = null;
-            context.onDeactivate = null;
+            context._clearListeners();
             // Clear element references
             context.elements = [];
             context.lastFocusedElement = null;
@@ -661,7 +674,7 @@ export class GamepadContextManager {
         this.lastActiveContext = null;
 
         // Clear context switch callback
-        this.onContextSwitch = null;
+        this._onContextSwitch = null;
 
         logger.info('GamepadContextManager destroyed and cleaned up');
     }

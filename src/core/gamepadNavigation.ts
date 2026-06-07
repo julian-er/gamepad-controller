@@ -7,6 +7,7 @@ import { getConnectedControllerTypes } from '../utils/controllerUtils.js';
 import { logger } from '../utils/logger.js';
 import type { NavigationState } from '../interfaces/NavigationState.js';
 import type { GamepadContextManager } from '../contexts/GamepadContextManager.js';
+import type { Direction, ShoulderButton } from '../interfaces/NavigationTypes.js';
 
 /** Human-readable display names for the controller types. */
 const CONTROLLER_LABELS: Record<string, string> = {
@@ -40,17 +41,11 @@ export function updateGamepadStatus(statusElementId: string | null, gamepads: { 
 // Update status display
 /**
  * Updates the status display element with current gamepad connection information.
- * Lists every connected controller; the `currentControllerType` argument is retained
- * for call-site compatibility but the label is derived from the live gamepad set.
+ * The label is derived from the live gamepad set.
  * @param state - The current navigation state object
  * @param gamepads - Object containing connected gamepads indexed by id
- * @param _currentControllerType - (unused) the most-recently-active controller type
  */
-export function updateStatus(
-    state: NavigationState,
-    gamepads: { [key: string]: Gamepad },
-    _currentControllerType?: string
-) {
+export function updateStatus(state: NavigationState, gamepads: { [key: string]: Gamepad }) {
     updateGamepadStatus(state.options.statusElementId ?? null, gamepads);
 }
 
@@ -76,7 +71,7 @@ export function navigateToIndex(state: NavigationState, index: number, updateFoc
  * @param direction - The direction to navigate ('up', 'down', 'left', 'right')
  * @param updateFocusCallback - Callback function to update the focused element
  */
-export function navigateGrid(state: NavigationState, direction: string, updateFocusCallback: () => void) {
+export function navigateGrid(state: NavigationState, direction: Direction, updateFocusCallback: () => void) {
     const { cols } = state.gridDimensions;
     let newIndex = state.focusedElementIndex;
 
@@ -124,7 +119,7 @@ export function navigateGrid(state: NavigationState, direction: string, updateFo
  * @param direction - The direction to navigate ('up', 'down', 'left', 'right')
  * @param updateFocusCallback - Callback function to update the focused element
  */
-export function navigateSpatial(state: NavigationState, direction: string, updateFocusCallback: () => void) {
+export function navigateSpatial(state: NavigationState, direction: Direction, updateFocusCallback: () => void) {
     const currentElement = state.elements[state.focusedElementIndex];
     if (!currentElement) return;
 
@@ -149,7 +144,7 @@ export function navigateSpatial(state: NavigationState, direction: string, updat
  */
 export function handleNavigation(
     navState: NavigationState,
-    direction: string,
+    direction: Direction,
     contextManager?: GamepadContextManager,
     updateFocusCallback?: () => void
 ) {
@@ -167,10 +162,14 @@ export function handleNavigation(
  * @param state - The current navigation state object
  * @param contextManager - Optional context manager for dual context navigation mode
  */
-export function handleSelection(state: NavigationState, contextManager?: GamepadContextManager) {
+export function handleSelection(
+    state: NavigationState,
+    contextManager?: GamepadContextManager,
+    onNavigationRequest?: ((href: string, element: Element) => void) | null
+) {
     if (state.options.enableDualContext && contextManager) {
         // In dual context mode, use context manager
-        contextManager.handleSelection();
+        contextManager.handleSelection(onNavigationRequest);
     } else {
         // Single context mode
         const focusedElement = state.elements[state.focusedElementIndex];
@@ -195,9 +194,14 @@ export function handleSelection(state: NavigationState, contextManager?: Gamepad
         }
 
         // Handle navigation menu links specially
-        if (focusedElement.classList.contains('nav-item') && (focusedElement as HTMLAnchorElement).href) {
-            logger.debug(`🔗 Navigating to: ${(focusedElement as HTMLAnchorElement).href}`);
-            window.location.href = (focusedElement as HTMLAnchorElement).href;
+        const anchor = focusedElement as HTMLAnchorElement;
+        if (focusedElement.classList.contains('nav-item') && anchor.href) {
+            logger.debug(`🔗 Navigating to: ${anchor.href}`);
+            if (onNavigationRequest) {
+                onNavigationRequest(anchor.href, focusedElement);
+            } else if (typeof window !== 'undefined') {
+                window.location.href = anchor.href;
+            }
             return;
         }
 
@@ -235,60 +239,42 @@ export function handleBackButton(onBackButton: (() => void) | null) {
  */
 export function handleShoulderNavigation(
     state: NavigationState,
-    button: string,
+    button: ShoulderButton,
     contextManager?: GamepadContextManager,
-    onNavigationMenuOpen?: ((button: string) => void) | null
+    onNavigationMenuOpen?: ((button: string) => void) | null,
+    onNavigationRequest?: ((href: string, element: Element) => void) | null
 ) {
     if (state.options.enableDualContext && contextManager) {
         // In dual context mode, use context manager
         contextManager.handleShoulderNavigation(button);
     } else {
         // Single context mode - navigate between pages
-        if (button === 'R1') {
-            logger.info('Shoulder Navigation - ⏭️ R1 pressed - next section');
+        const navItems = document.querySelectorAll(
+            `${state.options.navigationMenuSelector || ''} .nav-item, ${state.options.navigationMenuSelector || ''} a`
+        );
+        const currentNavItem = state.elements[state.focusedElementIndex];
 
-            const navItems = document.querySelectorAll(
-                `${state.options.navigationMenuSelector || ''} .nav-item, ${state.options.navigationMenuSelector || ''} a`
-            );
-            const currentNavItem = state.elements[state.focusedElementIndex];
+        if (navItems.length > 1 && currentNavItem) {
+            const currentIndex = Array.from(navItems).indexOf(currentNavItem);
+            if (currentIndex !== -1) {
+                const isNext = button === 'R1';
+                logger.info(isNext ? 'Shoulder Navigation - ⏭️ R1 pressed - next section' : 'Shoulder Navigation - ⏮️ L1 pressed - previous section');
+                const targetIndex = isNext
+                    ? (currentIndex + 1) % navItems.length
+                    : currentIndex === 0 ? navItems.length - 1 : currentIndex - 1;
+                const targetItem = navItems[targetIndex];
 
-            if (navItems.length > 1 && currentNavItem) {
-                const currentIndex = Array.from(navItems).indexOf(currentNavItem);
-                if (currentIndex !== -1) {
-                    const nextIndex = (currentIndex + 1) % navItems.length;
-                    const nextItem = navItems[nextIndex];
-
-                    if (
-                        nextItem &&
-                        'href' in nextItem &&
-                        typeof (nextItem as HTMLAnchorElement).href === 'string' &&
-                        (nextItem as HTMLAnchorElement).href
-                    ) {
-                        window.location.href = (nextItem as HTMLAnchorElement).href;
-                    }
-                }
-            }
-        } else if (button === 'L1') {
-            logger.info('Shoulder Navigation - ⏮️ L1 pressed - previous section');
-
-            const navItems = document.querySelectorAll(
-                `${state.options.navigationMenuSelector || ''} .nav-item, ${state.options.navigationMenuSelector || ''} a`
-            );
-            const currentNavItem = state.elements[state.focusedElementIndex];
-
-            if (navItems.length > 1 && currentNavItem) {
-                const currentIndex = Array.from(navItems).indexOf(currentNavItem);
-                if (currentIndex !== -1) {
-                    const prevIndex = currentIndex === 0 ? navItems.length - 1 : currentIndex - 1;
-                    const prevItem = navItems[prevIndex];
-
-                    if (
-                        prevItem &&
-                        'href' in prevItem &&
-                        typeof (prevItem as HTMLAnchorElement).href === 'string' &&
-                        (prevItem as HTMLAnchorElement).href
-                    ) {
-                        window.location.href = (prevItem as HTMLAnchorElement).href;
+                if (
+                    targetItem &&
+                    'href' in targetItem &&
+                    typeof (targetItem as HTMLAnchorElement).href === 'string' &&
+                    (targetItem as HTMLAnchorElement).href
+                ) {
+                    const href = (targetItem as HTMLAnchorElement).href;
+                    if (onNavigationRequest) {
+                        onNavigationRequest(href, targetItem);
+                    } else if (typeof window !== 'undefined') {
+                        window.location.href = href;
                     }
                 }
             }

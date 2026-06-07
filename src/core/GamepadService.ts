@@ -40,6 +40,12 @@ export interface GamepadServiceEventMap {
     controllerconnect: (gamepad: Gamepad) => void;
     controllerdisconnect: (gamepad: Gamepad) => void;
     backbutton: () => void;
+    /**
+     * Emitted when a navigation-menu link or shoulder-button page transition is triggered.
+     * If no listener is registered the library falls back to `window.location.href` assignment,
+     * which allows zero-config HTML pages to work while SPA frameworks can intercept cleanly.
+     */
+    navigationrequest: (href: string, element: Element) => void;
     navigationmenuopen: (button: string) => void;
     buttondown: (buttonIndex: number, gamepad: Gamepad) => void;
     buttonup: (buttonIndex: number, gamepad: Gamepad) => void;
@@ -67,9 +73,8 @@ type EventName = keyof GamepadServiceEventMap;
  * ```
  */
 export class GamepadService {
-    options: GamepadServiceOptions;
+    readonly options: Readonly<GamepadServiceOptions>;
     contextManager: GamepadContextManager;
-    singleContextMode: boolean;
 
     // Private state
     private eventState: GamepadEventState;
@@ -135,6 +140,7 @@ export class GamepadService {
             onControllerDisconnect: null,
             onNavigationMenuOpen: null,
             onBackButton: null,
+            onNavigationRequest: null,
             onButtonDown: undefined,
             onButtonUp: undefined,
             onError: undefined,
@@ -169,10 +175,18 @@ export class GamepadService {
                 window.history.back();
             }
         };
+        this.eventState.onNavigationRequest = (href, element) => {
+            // Emit when subscribers exist (e.g. SPA router), otherwise fall back to direct nav.
+            const set = this.listeners.get('navigationrequest');
+            if (set && set.size > 0) {
+                this.emit('navigationrequest', href, element);
+            } else if (typeof window !== 'undefined') {
+                window.location.href = href;
+            }
+        };
 
         // Context manager for dual context mode
         this.contextManager = new GamepadContextManager();
-        this.singleContextMode = !this.options.enableDualContext;
 
         // Bind methods to ensure proper 'this' context and enable cleanup
         this.gameLoopFn = createGameLoop(
@@ -181,8 +195,20 @@ export class GamepadService {
             this.contextManager,
             this.updateFocus.bind(this)
         );
-        this.handleGamepadConnected = (event: GamepadEvent) => handleConnected(this.eventState, event);
-        this.handleGamepadDisconnected = (event: GamepadEvent) => handleDisconnected(this.eventState, event);
+        this.handleGamepadConnected = (event: GamepadEvent) => {
+            handleConnected(this.eventState, event);
+            // Resume the loop when the first controller connects after a pause.
+            if (!this.eventState.isRunning && this.eventState.gameLoopFn) {
+                startGameLoop(this.eventState, this.eventState.gameLoopFn);
+            }
+        };
+        this.handleGamepadDisconnected = (event: GamepadEvent) => {
+            handleDisconnected(this.eventState, event);
+            // Pause the loop when no controllers remain — saves ~60fps of idle CPU.
+            if (Object.keys(this.eventState.gamepads).length === 0) {
+                stopGameLoop(this.eventState);
+            }
+        };
 
         // Create debounced resize handler with cancel capability. A resize can change which
         // elements are in-viewport/visible, so drop the focusable memo before re-detecting.
@@ -262,7 +288,8 @@ export class GamepadService {
             ensureStatusElement(this.options.statusElementId);
         } else if (this.options.autoCreateStatusElement) {
             const defaultStatusId = 'gamepad-status';
-            this.options.statusElementId = defaultStatusId;
+            // Write back into options so later reads of this.options.statusElementId are consistent.
+            (this.options as GamepadServiceOptions).statusElementId = defaultStatusId;
             this.eventState.statusElementId = defaultStatusId;
             ensureStatusElement(defaultStatusId);
         }
@@ -276,9 +303,11 @@ export class GamepadService {
                 this.options.enableDualContext ? this.contextManager : undefined,
                 this.updateFocus.bind(this)
             );
+            this.eventState.gameLoopFn = customGameLoopFn;
             startGameLoop(this.eventState, customGameLoopFn);
             logger.info('Using custom events mode for WinUI integration');
         } else {
+            this.eventState.gameLoopFn = this.gameLoopFn;
             startGameLoop(this.eventState, this.gameLoopFn);
         }
 
@@ -306,7 +335,7 @@ export class GamepadService {
             childList: true,
             subtree: true,
             attributes: true,
-            attributeFilter: ['disabled', 'hidden', 'tabindex', 'gamepad-index', 'style', 'class'],
+            attributeFilter: ['disabled', 'hidden', 'tabindex', 'gamepad-index'],
         });
     }
 
@@ -320,6 +349,7 @@ export class GamepadService {
         const menuContext = this.contextManager.registerContext('menu', {
             containerSelector: this.options.menuContextSelector ?? null,
             navigationMode: 'horizontal',
+            role: 'menu',
             focusedClass: this.options.focusedClass,
             selectedClass: this.options.selectedClass,
             useDataAttributes: this.options.useDataAttributes,
@@ -332,6 +362,7 @@ export class GamepadService {
         const contentContext = this.contextManager.registerContext('content', {
             containerSelector: this.options.contentContextSelector ?? null,
             navigationMode: 'spatial',
+            role: 'content',
             focusedClass: this.options.focusedClass,
             selectedClass: this.options.selectedClass,
             useDataAttributes: this.options.useDataAttributes,
@@ -342,15 +373,15 @@ export class GamepadService {
         });
 
         // Forward context focus/select to the service-level event emitter.
-        menuContext.onFocus = (element, index) => this.emit('focus', element, index);
-        menuContext.onSelect = (element, index) => this.emit('select', element, index);
-        contentContext.onFocus = (element, index) => this.emit('focus', element, index);
-        contentContext.onSelect = (element, index) => this.emit('select', element, index);
+        menuContext.on('focus', (element, index) => this.emit('focus', element, index));
+        menuContext.on('select', (element, index) => this.emit('select', element, index));
+        contentContext.on('focus', (element, index) => this.emit('focus', element, index));
+        contentContext.on('select', (element, index) => this.emit('select', element, index));
 
-        this.contextManager.onContextSwitch = (newContext, oldContext) => {
+        this.contextManager.setContextSwitchCallback((newContext, oldContext) => {
             logger.info(`Context switched from ${oldContext?.id || 'none'} to ${newContext.id}`);
             this.emit('contextswitch', newContext, oldContext);
-        };
+        });
 
         menuContext.detectElements();
         contentContext.detectElements();

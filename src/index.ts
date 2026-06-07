@@ -42,11 +42,8 @@ export {
 export type { NavigationStyleOptions } from './utils/cssUtils.js';
 
 // --- Leveled logger ---
-export { logger, Logger, LOG_PREFIX } from './utils/logger.js';
+export { logger, Logger } from './utils/logger.js';
 export type { LogLevel } from './utils/logger.js';
-
-// --- Options normalizer (flat + grouped → flat) ---
-export { normalizeOptions } from './core/normalizeOptions.js';
 
 // --- Public types ---
 export type {
@@ -63,6 +60,8 @@ export type {
     NavigationState,
     GridDimensions,
     GamepadContextManagerCallback,
+    Direction,
+    ShoulderButton,
 } from './interfaces/index.js';
 export type {
     ControllerType,

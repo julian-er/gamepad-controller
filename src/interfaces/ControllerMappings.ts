@@ -3,20 +3,20 @@
 export type ControllerType = 'xbox' | 'playstation' | 'nintendo' | 'unknown';
 
 export interface ControllerValidation {
-    minButtons: number;
-    minAxes: number;
-    idPatterns?: RegExp[];
+    readonly minButtons: number;
+    readonly minAxes: number;
+    readonly idPatterns?: readonly RegExp[];
 }
 
 export interface ControllerMapping {
-    buttons: string[];
-    axes: string[];
-    validation: ControllerValidation;
+    readonly buttons: readonly string[];
+    readonly axes: readonly string[];
+    readonly validation: ControllerValidation;
 }
 
 export interface ControllerMappings {
-    xbox: ControllerMapping;
-    playstation: ControllerMapping;
-    nintendo: ControllerMapping;
-    unknown: ControllerMapping;
+    readonly xbox: ControllerMapping;
+    readonly playstation: ControllerMapping;
+    readonly nintendo: ControllerMapping;
+    readonly unknown: ControllerMapping;
 }

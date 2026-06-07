@@ -4,6 +4,60 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-06-07
+
+### Added
+
+- **`navigationrequest` event** — emitted when a link or shoulder-nav triggers navigation.
+  SPA frameworks (React Router, Angular Router, etc.) can subscribe instead of letting the
+  library mutate `window.location.href` directly:
+  ```js
+  service.on('navigationrequest', (href, element) => router.push(href));
+  ```
+  Falls back to a direct `window.location.href` assignment only when no subscriber is
+  registered, so zero-config HTML pages continue to work unchanged.
+- **`Direction` and `ShoulderButton` union types** exported from the package.
+  TypeScript consumers can now import these for their own navigation handlers:
+  ```ts
+  import type { Direction, ShoulderButton } from 'gamepad-controller';
+  ```
+
+### Changed
+
+- **Game loop pauses when no controller is connected** and resumes automatically on the
+  first connect — eliminates idle 60 fps CPU burn when the page has no active gamepad.
+- **All controllers registered at startup** — `detectExistingGamepads` now registers every
+  already-connected pad, not just the first one found. Pages loaded with multiple controllers
+  plugged in now behave identically to connecting them after load.
+- **`MutationObserver` no longer fires on `style`/`class` mutations** — removes spurious
+  focusable-element cache invalidations caused by CSS animations and style transitions.
+- **Custom-event game loop now prunes stale pads** — mirrors the native loop's behavior;
+  disconnected pad entries no longer persist in the internal gamepad map.
+- **`CONTROLLER_MAPPINGS` is now frozen** — `Object.freeze()` applied at declaration.
+  The `ControllerMappings` interface uses `readonly` arrays. Runtime and compile-time
+  mutations are both rejected.
+- **`GamepadService.options` is `readonly Readonly<…>`** — the options object can no longer
+  be mutated from outside the service.
+- **Navigation parameters are now union-typed** — all `direction: string` parameters across
+  the navigation pipeline use `Direction`; shoulder-button parameters use `ShoulderButton`.
+  TypeScript catches invalid values at compile time instead of silently no-opping at runtime.
+
+### Removed
+
+- **`normalizeOptions` removed from public API** — it was an internal config-pipeline helper
+  that leaked through the exports. Use the documented flat or grouped options shapes directly.
+- **`LOG_PREFIX` removed from public API** — internal constant, not useful to consumers.
+  `logger` and `Logger` are still exported for log-level control.
+- **Dead `singleContextMode` field removed** from `GamepadService` — the value is
+  always derivable as `!options.enableDualContext` if needed.
+
+### Fixed
+
+- Multi-controller setups: all pads connected before page load are now fully tracked.
+- Custom-event mode: stale pad entries are now pruned on the same schedule as native mode.
+
+---
+
 ## [1.0.0-rc.1] - 2026-06-05
 
 First release candidate for a stable `1.0`. Focus: runtime resilience, internal

@@ -45,6 +45,7 @@ export interface GamepadEventState {
     onControllerDisconnect: ((gamepad: Gamepad) => void) | null;
     onNavigationMenuOpen: ((button: string) => void) | null;
     onBackButton: (() => void) | null;
+    onNavigationRequest: ((href: string, element: Element) => void) | null;
     // New: generic button event handlers
     onButtonDown?: (buttonIndex: number, gamepad: Gamepad) => void;
     onButtonUp?: (buttonIndex: number, gamepad: Gamepad) => void;
@@ -59,6 +60,8 @@ export interface GamepadEventState {
      * time instead of every frame. The rAF loop keeps running — policy may be granted later.
      */
     hasWarnedPolicyBlocked?: boolean;
+    /** The rAF game-loop function; stored here so connect/disconnect handlers can restart it. */
+    gameLoopFn?: (() => void) | null;
     // Custom-event mode: stored listener references so they can be removed on destroy().
     // Without these the window listeners leak across destroy()/re-init() cycles.
     customListeners?: {

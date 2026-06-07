@@ -28,3 +28,6 @@ export type { GridDimensions } from './GridDimensions';
 
 // Callback types
 export type { GamepadContextManagerCallback } from './GamepadContextManagerCallback';
+
+// Navigation literal types
+export type { Direction, ShoulderButton } from './NavigationTypes';

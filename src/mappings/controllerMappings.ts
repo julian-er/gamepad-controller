@@ -1,6 +1,6 @@
 import type { ControllerType, ControllerMappings } from '../interfaces/ControllerMappings.js';
 
-export const CONTROLLER_MAPPINGS: ControllerMappings = {
+export const CONTROLLER_MAPPINGS: ControllerMappings = Object.freeze({
     xbox: {
         buttons: [
             'A',
@@ -102,7 +102,7 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = {
             minAxes: 2,
         },
     },
-};
+}) as ControllerMappings;
 
 /**
  * Gets the primary action button index based on controller type
@@ -139,9 +139,9 @@ export function getBackButtonIndex(controllerType: ControllerType): number {
  * @param controllerType - The type of controller
  * @returns An object with the `l1` and `r1` button indices
  */
-export function getShoulderIndices(controllerType: ControllerType): { l1: number; r1: number } {
+// TODO: add per-controller table before removing the unused controllerType parameter (breaking change).
+export function getShoulderIndices(_controllerType: ControllerType): { l1: number; r1: number } {
     // Standard mapping: L1/LB = 4, R1/RB = 5 for all supported controllers.
-    void controllerType;
     return { l1: 4, r1: 5 };
 }
 
@@ -150,7 +150,8 @@ export function getShoulderIndices(controllerType: ControllerType): { l1: number
  * @param controllerType - The type of controller ('xbox', 'playstation', 'nintendo', or 'unknown')
  * @returns An object containing the indices for the D-pad buttons
  */
-export function getDpadIndices(controllerType: ControllerType): {
+// TODO: add per-controller table before removing the unused _controllerType parameter (breaking change).
+export function getDpadIndices(_controllerType: ControllerType): {
     up: number;
     down: number;
     left: number;
@@ -158,7 +159,6 @@ export function getDpadIndices(controllerType: ControllerType): {
 } {
     // The standard gamepad mapping places the D-pad at indices 12-15 for all
     // supported controller types.
-    void controllerType;
     return {
         up: 12,
         down: 13,

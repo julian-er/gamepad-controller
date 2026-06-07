@@ -1,3 +1,5 @@
+import type { Direction } from '../interfaces/NavigationTypes.js';
+
 /**
  * Creates a debounced version of a function that delays invoking the function until after `wait` milliseconds
  * have elapsed since the last time it was invoked.
@@ -106,7 +108,7 @@ export function getElementDistance(el1: Element, el2: Element): number {
 export function findNearestInDirection(
     currentElement: Element,
     allElements: Element[],
-    direction: string
+    direction: Direction
 ): Element | null {
     const currentRect = currentElement.getBoundingClientRect();
     const currentX = currentRect.left + currentRect.width / 2;

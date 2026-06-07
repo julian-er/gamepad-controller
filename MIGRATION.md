@@ -58,7 +58,7 @@ Flat → group mapping:
 | `context` | `gamepadContext`, `enableDualContext`, `menuContextSelector`, `contentContextSelector` |
 | `customEvents` | `useCustomEvents`, `customConnectedEvent`, `customDisconnectedEvent`, `customStateChangedEvent` |
 
-The collapse is done by the exported `normalizeOptions(config)` helper if you need it directly.
+The collapse is handled internally — `normalizeOptions` is no longer exported.
 
 ### 3. New: `scrollBehavior` option
 
@@ -78,6 +78,34 @@ catches the `SecurityError`, keeps polling, and emits a `gamepaderror` event onc
 ```js
 service.on('gamepaderror', (err) => showFallbackUI(err));
 ```
+
+### 5. New: `navigationrequest` event (SPA router integration)
+
+The library no longer mutates `window.location.href` directly when a link element is
+selected or shoulder-nav follows an anchor. Instead it emits `navigationrequest` and only
+falls back to direct href assignment when no subscriber is registered.
+
+**If you use a SPA router**, subscribe to intercept navigations:
+
+```js
+service.on('navigationrequest', (href, element) => {
+    router.push(href); // React Router, Angular Router, Vue Router, etc.
+});
+```
+
+**If you don't use a SPA router**, nothing changes — the library falls back to
+`window.location.href = href` automatically.
+
+### 6. Removed: `normalizeOptions` and `LOG_PREFIX` exports
+
+`normalizeOptions` was an internal config-pipeline helper that leaked into the public API.
+`LOG_PREFIX` was an internal string constant. Both are removed in `1.0.0`.
+
+```diff
+- import { normalizeOptions, LOG_PREFIX } from 'gamepad-controller'; // no longer available
+```
+
+`logger` and `Logger` are still exported if you need log-level control at runtime.
 
 ---
 
@@ -128,6 +156,7 @@ Event name map (all lowercase):
 | `onButtonDown` | `'buttondown'` |
 | `onButtonUp` | `'buttonup'` |
 | `onContextSwitch` | `'contextswitch'` |
+| *(none — new in 1.0)* | `'navigationrequest'` |
 
 **Back button default unchanged:** if you do **not** subscribe to `'backbutton'`, the library
 still calls `window.history.back()`. Subscribe to override that behavior.

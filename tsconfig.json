@@ -5,6 +5,8 @@
     "lib": ["ES2017", "DOM", "DOM.Iterable"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "declaration": true,
     "declarationDir": "dist/types",

@@ -26,7 +26,7 @@ describe('GamepadContextManager', () => {
         cm.registerContext('content', { navigationMode: 'spatial', containerSelector: null });
 
         const onSwitch = vi.fn();
-        cm.onContextSwitch = onSwitch;
+        cm.setContextSwitchCallback(onSwitch);
 
         expect(cm.setActiveContext('content')).toBe(true);
         expect(cm.getActiveContext()?.id).toBe('content');
