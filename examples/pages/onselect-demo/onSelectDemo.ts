@@ -92,7 +92,7 @@ const behaviors = {
     },
 
     // Advanced behavior: handle different element types
-    advanced: (element: Element, index: number) => {
+    advanced: (element: Element, _index: number) => {
         const elementName = getElementName(element);
         const elementType = element.getAttribute('data-type');
         const elementAction = element.getAttribute('data-action');
@@ -126,7 +126,7 @@ const behaviors = {
     },
 
     // Custom behavior: complex interaction patterns
-    custom: (element: Element, index: number) => {
+    custom: (element: Element, _index: number) => {
         const elementName = getElementName(element);
         const elementType = element.getAttribute('data-type');
         
@@ -202,7 +202,7 @@ function handleLinkSelection(element: Element, action: string | null) {
     addSelectionFeedback(element);
 }
 
-function handleToggleSelection(element: Element, action: string | null) {
+function handleToggleSelection(element: Element, _action: string | null) {
     const elementName = getElementName(element);
     const indicator = element.querySelector('.toggle-indicator') as HTMLElement;
     
@@ -218,7 +218,7 @@ function handleToggleSelection(element: Element, action: string | null) {
     }
 }
 
-function handleCounterSelection(element: Element, action: string | null) {
+function handleCounterSelection(element: Element, _action: string | null) {
     const elementName = getElementName(element);
     const display = element.querySelector('.counter-display') as HTMLElement;
     
@@ -233,7 +233,7 @@ function handleCounterSelection(element: Element, action: string | null) {
     }
 }
 
-function handleInputSelection(element: Element, action: string | null) {
+function handleInputSelection(element: Element, _action: string | null) {
     const input = element.querySelector('.demo-input') as HTMLInputElement;
     if (input) {
         input.focus();
@@ -241,7 +241,7 @@ function handleInputSelection(element: Element, action: string | null) {
     }
 }
 
-function handleModalSelection(element: Element, action: string | null) {
+function handleModalSelection(_element: Element, _action: string | null) {
     const modal = document.getElementById('demo-modal');
     if (modal) {
         modal.classList.add('show');
