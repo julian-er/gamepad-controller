@@ -20,6 +20,7 @@ import type { NavigationState } from '../interfaces/NavigationState.js';
 import type { GamepadEventState, GamepadEvent, PadInputState } from '../interfaces/GamepadEvents.js';
 import type { GamepadServiceOptions } from '../interfaces/GamepadServiceOptions.js';
 import type { GamepadContextManager } from '../contexts/GamepadContextManager.js';
+import type { PlatformAdapter, WindowEventListener } from './platform/PlatformAdapter.js';
 
 /** Default cooldown (ms) for back/shoulder edge-triggered actions. */
 const DEFAULT_ACTION_COOLDOWN = 300;
@@ -33,12 +34,13 @@ const DEFAULT_ACTION_COOLDOWN = 300;
  * @param eventState - Shared event state (holds the one-shot warn flag + error callback)
  * @returns The live gamepads array, or an empty array if access is blocked/unavailable
  */
-function safeGetGamepads(eventState: GamepadEventState): ReturnType<Navigator['getGamepads']> | [] {
-    if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') {
-        return [];
-    }
+function safeGetGamepads(
+    eventState: GamepadEventState,
+    platform: PlatformAdapter
+): ReturnType<Navigator['getGamepads']> | [] {
     try {
-        return navigator.getGamepads();
+        // Returns [] when the Gamepad API is absent; throws SecurityError when policy-blocked.
+        return platform.getGamepads();
     } catch (err) {
         if (!eventState.hasWarnedPolicyBlocked) {
             eventState.hasWarnedPolicyBlocked = true;
@@ -66,11 +68,12 @@ export function setupEventListeners(
     state: GamepadEventState,
     handleGamepadConnected: (event: GamepadEvent) => void,
     handleGamepadDisconnected: (event: GamepadEvent) => void,
+    platform: PlatformAdapter,
     options?: GamepadServiceOptions
 ) {
     if (options?.useCustomEvents) {
         // Setup custom event listeners for WinUI integration
-        setupCustomEventListeners(state, handleGamepadConnected, handleGamepadDisconnected, options);
+        setupCustomEventListeners(state, handleGamepadConnected, handleGamepadDisconnected, platform, options);
     } else {
         // Native browser gamepad API requires the Gamepad API to be present.
         if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') {
@@ -78,11 +81,11 @@ export function setupEventListeners(
             return;
         }
         // Setup native browser gamepad event listeners
-        window.addEventListener('gamepadconnected', handleGamepadConnected as EventListener);
-        window.addEventListener('gamepaddisconnected', handleGamepadDisconnected as EventListener);
+        platform.addWindowListener('gamepadconnected', handleGamepadConnected as WindowEventListener);
+        platform.addWindowListener('gamepaddisconnected', handleGamepadDisconnected as WindowEventListener);
 
         // Check for already connected gamepads
-        detectExistingGamepads(state);
+        detectExistingGamepads(state, platform);
     }
 }
 
@@ -102,6 +105,7 @@ export function setupCustomEventListeners(
     state: GamepadEventState,
     handleGamepadConnected: (event: GamepadEvent) => void,
     handleGamepadDisconnected: (event: GamepadEvent) => void,
+    platform: PlatformAdapter,
     options: GamepadServiceOptions
 ) {
     const connectedEvent = options.customConnectedEvent || 'hubgamepadconnected';
@@ -134,9 +138,9 @@ export function setupCustomEventListeners(
         }
     };
 
-    window.addEventListener(connectedEvent, onConnected);
-    window.addEventListener(disconnectedEvent, onDisconnected);
-    window.addEventListener(stateChangedEvent, onStateChanged);
+    platform.addWindowListener(connectedEvent, onConnected);
+    platform.addWindowListener(disconnectedEvent, onDisconnected);
+    platform.addWindowListener(stateChangedEvent, onStateChanged);
 
     // Store references so removeEventListeners() can detach them.
     state.customListeners = {
@@ -164,8 +168,8 @@ function createMockGamepadEvent(gamepad: Gamepad): GamepadEvent {
  * Detects and initializes gamepads that are already connected when the page loads
  * @param state - The current gamepad event state object to update with detected gamepads
  */
-export function detectExistingGamepads(state: GamepadEventState) {
-    const gamepads = safeGetGamepads(state);
+export function detectExistingGamepads(state: GamepadEventState, platform: PlatformAdapter) {
+    const gamepads = safeGetGamepads(state, platform);
     for (let i = 0; i < gamepads.length; i++) {
         const gamepad = gamepads[i];
         if (gamepad && isValidGamepad(gamepad)) {
@@ -193,18 +197,19 @@ export function detectExistingGamepads(state: GamepadEventState) {
 export function removeEventListeners(
     state: GamepadEventState,
     handleGamepadConnected: (event: GamepadEvent) => void,
-    handleGamepadDisconnected: (event: GamepadEvent) => void
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    platform: PlatformAdapter
 ) {
     // Native listeners
-    window.removeEventListener('gamepadconnected', handleGamepadConnected as EventListener);
-    window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected as EventListener);
+    platform.removeWindowListener('gamepadconnected', handleGamepadConnected as WindowEventListener);
+    platform.removeWindowListener('gamepaddisconnected', handleGamepadDisconnected as WindowEventListener);
 
     // Custom-event listeners (if custom mode was used)
     const custom = state.customListeners;
     if (custom) {
-        window.removeEventListener(custom.connectedEvent, custom.onConnected);
-        window.removeEventListener(custom.disconnectedEvent, custom.onDisconnected);
-        window.removeEventListener(custom.stateChangedEvent, custom.onStateChanged);
+        platform.removeWindowListener(custom.connectedEvent, custom.onConnected);
+        platform.removeWindowListener(custom.disconnectedEvent, custom.onDisconnected);
+        platform.removeWindowListener(custom.stateChangedEvent, custom.onStateChanged);
         state.customListeners = null;
     }
 }
@@ -258,9 +263,9 @@ export function handleGamepadDisconnected(state: GamepadEventState, event: Gamep
  * @param state - The current gamepad event state object
  * @param gameLoopImpl - The game loop function to execute each frame
  */
-export function startGameLoop(state: GamepadEventState, gameLoopImpl: () => void) {
+export function startGameLoop(state: GamepadEventState, gameLoopImpl: () => void, platform: PlatformAdapter) {
     // Stop any existing game loop first
-    stopGameLoop(state);
+    stopGameLoop(state, platform);
 
     state.isRunning = true;
     gameLoopImpl();
@@ -269,11 +274,12 @@ export function startGameLoop(state: GamepadEventState, gameLoopImpl: () => void
 /**
  * Stops the game loop and cleans up animation frames
  * @param state - The current gamepad event state object
+ * @param platform - Platform adapter used to cancel the scheduled frame
  */
-export function stopGameLoop(state: GamepadEventState) {
+export function stopGameLoop(state: GamepadEventState, platform: PlatformAdapter) {
     state.isRunning = false;
     if (state.animationFrameId !== null) {
-        cancelAnimationFrame(state.animationFrameId);
+        platform.cancelAnimationFrame(state.animationFrameId);
         state.animationFrameId = null;
     }
 }
@@ -572,6 +578,7 @@ export function processRightStickScroll(
 export function gameLoop(
     eventState: GamepadEventState,
     navState: NavigationState,
+    platform: PlatformAdapter,
     contextManager?: GamepadContextManager,
     updateFocusCallback?: () => void
 ): () => void {
@@ -581,10 +588,10 @@ export function gameLoop(
             return;
         }
 
-        const currentTimestamp = performance.now();
+        const currentTimestamp = platform.now();
         // Guarded read: getGamepads() can throw SecurityError under Permissions-Policy; on a
         // block this returns [] (and warns once) so the loop no-ops the frame but stays alive.
-        const connectedGamepads = safeGetGamepads(eventState);
+        const connectedGamepads = safeGetGamepads(eventState, platform);
 
         // Process EVERY valid controller so that any connected pad can drive the shared
         // navigation cursor (couch / hand-off model). Per-pad state in processGamepad keeps
@@ -605,7 +612,7 @@ export function gameLoop(
             updateStatus(navState, eventState.gamepads);
         }
 
-        eventState.animationFrameId = requestAnimationFrame(gameLoopImpl);
+        eventState.animationFrameId = platform.requestAnimationFrame(gameLoopImpl);
     };
 }
 
@@ -622,6 +629,7 @@ export function gameLoop(
 export function createCustomEventGameLoop(
     eventState: GamepadEventState,
     navState: NavigationState,
+    platform: PlatformAdapter,
     contextManager?: GamepadContextManager,
     updateFocusCallback?: () => void
 ): () => void {
@@ -631,7 +639,7 @@ export function createCustomEventGameLoop(
             return;
         }
 
-        const currentTimestamp = performance.now();
+        const currentTimestamp = platform.now();
 
         // Process every valid gamepad snapshot so multiple host-fed controllers all drive
         // the shared cursor, consistent with the native loop. Per-pad state keeps them apart.
@@ -649,6 +657,6 @@ export function createCustomEventGameLoop(
             updateStatus(navState, eventState.gamepads);
         }
 
-        eventState.animationFrameId = requestAnimationFrame(customEventGameLoopImpl);
+        eventState.animationFrameId = platform.requestAnimationFrame(customEventGameLoopImpl);
     };
 }

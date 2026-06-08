@@ -7,6 +7,10 @@
 export { GamepadService } from './core/GamepadService.js';
 export type { GamepadServiceEventMap } from './core/GamepadService.js';
 
+// --- Platform seam (injectable via GamepadServiceConfig.platform) ---
+export { BrowserPlatformAdapter, defaultPlatformAdapter } from './core/platform/PlatformAdapter.js';
+export type { PlatformAdapter, WindowEventListener } from './core/platform/PlatformAdapter.js';
+
 // --- Factory helpers & façade ---
 export {
     gamepadService,
@@ -68,5 +72,8 @@ export type {
     ControllerMapping,
     ControllerMappings,
     ControllerValidation,
+    ButtonIndices,
+    ShoulderIndices,
+    DpadIndices,
 } from './interfaces/ControllerMappings.js';
 export type { GamepadEvent } from './interfaces/GamepadEvents.js';

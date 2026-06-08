@@ -268,6 +268,82 @@ gamepad.init();
 | `autoAddStyles` | `boolean` | `false` | Auto-add default styles |
 | `autoCreateStatusElement` | `boolean` | `true` | Auto-create status element |
 
+## Singleton factory vs. direct instantiation
+
+This is the single most important distinction to understand before choosing a method.
+
+### The factory helpers share **one** instance
+
+`gamepadService()`, `initGamepadForPage()`, `initDualContextGamepad()`, and
+`initCustomEventGamepad()` all operate on a **single module-level shared `GamepadService`
+instance**. Calling any of them **destroys the previous shared instance first** and replaces it:
+
+```ts
+import { gamepadService, gamepadUtils, cleanupGamepadService } from 'gamepad-controller';
+
+const a = gamepadService('.app');      // creates shared instance #1
+const b = gamepadService('.sidebar');  // destroys #1, creates shared instance #2
+// a is now destroyed — a.getElements() reflects the torn-down instance.
+
+gamepadUtils.getInstance() === b;      // true — the façade tracks the shared instance
+cleanupGamepadService();               // destroys the shared instance and clears the slot
+```
+
+**Why a singleton?** The overwhelmingly common case is *one navigation controller per page*.
+A shared instance means:
+
+- `gamepadUtils.*` helpers and `cleanupGamepadService()` always target "the" instance with no
+  bookkeeping on your side.
+- Re-initializing (e.g. on a client-side route change) can't leak the previous loop/listeners —
+  the old instance is torn down automatically.
+
+**The trade-off:** you cannot run two factory-managed controllers at once. The second call wins.
+
+### `new GamepadService(...)` is **not** a singleton
+
+The class itself holds no shared state. Construct as many as you need; each owns its own input
+loop, listeners, focus state, and contexts. You are responsible for calling `init()` and
+`destroy()` on each:
+
+```ts
+import { GamepadService } from 'gamepad-controller';
+
+// Two independent controllers — e.g. split-screen or isolated widgets.
+const left = new GamepadService({ containerSelector: '.player-1' });
+const right = new GamepadService({ containerSelector: '.player-2' });
+left.init();
+right.init();
+
+// Clean up each one explicitly.
+left.destroy();
+right.destroy();
+```
+
+Direct instantiation is also the path for **dependency injection** — supply a custom
+[`PlatformAdapter`](API.md#platform-seam) via the `platform` option to run in a non-standard host
+or to drive the loop deterministically in tests:
+
+```ts
+const service = new GamepadService({ platform: myAdapter });
+service.init();
+```
+
+> The factory helpers do **not** expose the `platform` seam in their convenience signatures —
+> reach for `new GamepadService({ platform })` when you need it.
+
+### Which should I use?
+
+| You want… | Use |
+|---|---|
+| One controller per page, minimal setup | a factory helper (`gamepadService()` / `initGamepadForPage()`) |
+| Convenience helpers + auto-cleanup on re-init | a factory helper + `gamepadUtils` |
+| Multiple simultaneous independent controllers | `new GamepadService(...)` per controller |
+| A custom platform adapter / deterministic tests | `new GamepadService({ platform })` |
+| Full lifecycle control (`init`/`destroy` timing) | `new GamepadService(...)` |
+
+> **Note:** `initGamepadNavigation()` referenced in older docs is no longer part of the public API.
+> Use `gamepadService()` (or `new GamepadService(...)`) instead.
+
 ## Conclusion
 
 **You can absolutely do everything with just `gamepadService()`**, but the multiple methods provide significant value through:

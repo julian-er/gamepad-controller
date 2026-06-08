@@ -31,6 +31,12 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = Object.freeze({
             // gate above keeps non-controller 045e devices (headsets, keyboards) from matching.
             idPatterns: [/xbox/i, /microsoft/i, /x-?input/i, /045e/i],
         },
+        indices: {
+            primary: 0, // A
+            back: 1, // B
+            shoulder: { l1: 4, r1: 5 }, // LB / RB
+            dpad: { up: 12, down: 13, left: 14, right: 15 },
+        },
     },
     playstation: {
         buttons: [
@@ -59,6 +65,12 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = Object.freeze({
             // Chrome reports a DualShock/DualSense as "Wireless Controller (... Vendor: 054c ...)"
             // — no "playstation"/"dualshock" text. 054c is Sony's vendor id, matched as a fallback.
             idPatterns: [/playstation/i, /dualsense/i, /dualshock/i, /ps3/i, /ps4/i, /ps5/i, /054c/i],
+        },
+        indices: {
+            primary: 0, // Cross
+            back: 1, // Circle
+            shoulder: { l1: 4, r1: 5 }, // L1 / R1
+            dpad: { up: 12, down: 13, left: 14, right: 15 },
         },
     },
     nintendo: {
@@ -89,6 +101,14 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = Object.freeze({
             // 057e is Nintendo's vendor id (Switch Pro Controller / Joy-Con).
             idPatterns: [/nintendo/i, /switch/i, /pro controller/i, /057e/i],
         },
+        indices: {
+            // Nintendo's physical A/B are swapped relative to the standard mapping: A sits at
+            // index 1, B at index 0.
+            primary: 1, // A
+            back: 0, // B
+            shoulder: { l1: 4, r1: 5 }, // L / R
+            dpad: { up: 12, down: 13, left: 14, right: 15 },
+        },
     },
     unknown: {
         buttons: Array(17)
@@ -101,70 +121,58 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = Object.freeze({
             minButtons: 4,
             minAxes: 2,
         },
+        indices: {
+            // Default to the standard gamepad mapping for unidentified controllers.
+            primary: 0,
+            back: 1,
+            shoulder: { l1: 4, r1: 5 },
+            dpad: { up: 12, down: 13, left: 14, right: 15 },
+        },
     },
 }) as ControllerMappings;
 
 /**
- * Gets the primary action button index based on controller type
+ * Gets the primary action button index for a controller type, from {@link CONTROLLER_MAPPINGS}.
  * @param controllerType - The type of controller ('xbox', 'playstation', 'nintendo', or 'unknown')
  * @returns The index of the primary action button
  */
 export function getPrimaryActionButtonIndex(controllerType: ControllerType): number {
-    switch (controllerType) {
-        case 'xbox':
-            return 0; // A button
-        case 'playstation':
-            return 0; // Cross button
-        case 'nintendo':
-            return 1; // A button (Nintendo A is at index 1)
-        default:
-            return 0; // Default to first button
-    }
+    return CONTROLLER_MAPPINGS[controllerType].indices.primary;
 }
 
 /**
- * Gets the back/cancel button index (B / Circle) based on controller type.
- * Nintendo's physical "B" sits at index 0 (its "A" is index 1), so it differs
- * from the Xbox/PlayStation standard mapping where B/Circle is index 1.
+ * Gets the back/cancel button index (B / Circle) for a controller type, from
+ * {@link CONTROLLER_MAPPINGS}. Nintendo's physical "B" sits at index 0 (its "A" is index 1),
+ * so it differs from the Xbox/PlayStation standard mapping where B/Circle is index 1.
  * @param controllerType - The type of controller
  * @returns The index of the back/cancel button
  */
 export function getBackButtonIndex(controllerType: ControllerType): number {
-    return controllerType === 'nintendo' ? 0 : 1;
+    return CONTROLLER_MAPPINGS[controllerType].indices.back;
 }
 
 /**
- * Gets the left/right shoulder (L1/LB, R1/RB) button indices based on controller type.
- * These map to the standard-mapping indices 4 and 5 across supported controllers.
+ * Gets the left/right shoulder (L1/LB, R1/RB) button indices for a controller type, from
+ * {@link CONTROLLER_MAPPINGS}.
  * @param controllerType - The type of controller
- * @returns An object with the `l1` and `r1` button indices
+ * @returns A fresh object with the `l1` and `r1` button indices
  */
-// TODO: add per-controller table before removing the unused controllerType parameter (breaking change).
-export function getShoulderIndices(_controllerType: ControllerType): { l1: number; r1: number } {
-    // Standard mapping: L1/LB = 4, R1/RB = 5 for all supported controllers.
-    return { l1: 4, r1: 5 };
+export function getShoulderIndices(controllerType: ControllerType): { l1: number; r1: number } {
+    return { ...CONTROLLER_MAPPINGS[controllerType].indices.shoulder };
 }
 
 /**
- * Gets the D-pad button indices based on controller type
+ * Gets the D-pad button indices for a controller type, from {@link CONTROLLER_MAPPINGS}.
  * @param controllerType - The type of controller ('xbox', 'playstation', 'nintendo', or 'unknown')
- * @returns An object containing the indices for the D-pad buttons
+ * @returns A fresh object containing the up/down/left/right D-pad button indices
  */
-// TODO: add per-controller table before removing the unused _controllerType parameter (breaking change).
-export function getDpadIndices(_controllerType: ControllerType): {
+export function getDpadIndices(controllerType: ControllerType): {
     up: number;
     down: number;
     left: number;
     right: number;
 } {
-    // The standard gamepad mapping places the D-pad at indices 12-15 for all
-    // supported controller types.
-    return {
-        up: 12,
-        down: 13,
-        left: 14,
-        right: 15,
-    };
+    return { ...CONTROLLER_MAPPINGS[controllerType].indices.dpad };
 }
 
 /**

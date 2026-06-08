@@ -6,6 +6,7 @@ import {
     getDpadIndices,
     getButtonName,
     getAxisName,
+    CONTROLLER_MAPPINGS,
 } from '../src/mappings/controllerMappings';
 
 describe('getPrimaryActionButtonIndex', () => {
@@ -35,6 +36,23 @@ describe('getShoulderIndices', () => {
 describe('getDpadIndices', () => {
     it('maps the d-pad to indices 12-15', () => {
         expect(getDpadIndices('xbox')).toEqual({ up: 12, down: 13, left: 14, right: 15 });
+    });
+
+    it('returns a fresh object each call (mutating it does not corrupt the mapping table)', () => {
+        const a = getDpadIndices('xbox');
+        a.up = 99;
+        expect(getDpadIndices('xbox').up).toBe(12);
+        expect(CONTROLLER_MAPPINGS.xbox.indices.dpad.up).toBe(12);
+    });
+});
+
+describe('CONTROLLER_MAPPINGS.indices (single source of truth)', () => {
+    it('drives the helper functions from the per-controller table', () => {
+        // Nintendo's swapped A/B is encoded once in the table and surfaced via the helpers.
+        expect(CONTROLLER_MAPPINGS.nintendo.indices.primary).toBe(1);
+        expect(CONTROLLER_MAPPINGS.nintendo.indices.back).toBe(0);
+        expect(getPrimaryActionButtonIndex('nintendo')).toBe(CONTROLLER_MAPPINGS.nintendo.indices.primary);
+        expect(getBackButtonIndex('nintendo')).toBe(CONTROLLER_MAPPINGS.nintendo.indices.back);
     });
 });
 

@@ -1,6 +1,13 @@
 # Migration Guide
 
-This guide covers two upgrade paths:
+This is **part one** of the migration trail — the legs **up to and including `1.0`**. For the
+upgrade from `1.0` to the current architecture-refactor release (the internal decomposition and the
+injectable platform seam), continue to **[MIGRATION_1.0_TO_NEXT.md](MIGRATION_1.0_TO_NEXT.md)**.
+
+> **Full path:** `1.0.0` (original) → `0.1.x` (API lockdown) → `1.0` (runtime resilience + grouped
+> options) → **architecture-refactor release** ([part two](MIGRATION_1.0_TO_NEXT.md)).
+
+This document covers two upgrade paths:
 
 - **[Upgrading to `1.0`](#upgrading-to-10-from-0x)** — folder/file relocations and the new
   grouped options (both backward-compatible for normal consumers).

@@ -9,11 +9,15 @@ A TypeScript library for advanced gamepad navigation and UI control in web appli
 
 ## 📚 Guides
 
+- **[API.md](API.md)** — complete public API reference (functions, methods, events, options, types)
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — internal structure and the injectable platform seam
+- **[GAMEPAD_SERVICE_METHODS.md](GAMEPAD_SERVICE_METHODS.md)** — factory helpers vs direct `new GamepadService(...)`
 - **[BUILDING.md](BUILDING.md)** — build, pack, and test the library locally
 - **[USAGE_REACT.md](USAGE_REACT.md)** — React integration (`useGamepad` hook)
 - **[USAGE_ANGULAR.md](USAGE_ANGULAR.md)** — Angular integration (injectable service)
 - **[USAGE_VANILLA.md](USAGE_VANILLA.md)** — vanilla JS / CDN usage
-- **[MIGRATION.md](MIGRATION.md)** — upgrading from `1.0.0`
+- **[MIGRATION.md](MIGRATION.md)** — upgrade path part one (`0.x` → `0.1` → `1.0`)
+- **[MIGRATION_1.0_TO_NEXT.md](MIGRATION_1.0_TO_NEXT.md)** — upgrade path part two (`1.0` → architecture-refactor release)
 
 ## ⚙️ Runtime requirements
 
@@ -229,6 +233,11 @@ All other code remains unchanged, ensuring easy migration and testing across dif
 
 ## 📖 API Reference
 
+> **Looking for the full reference?** [API.md](API.md) documents every exported function, method,
+> event, option (flat **and** grouped), and type in one place — including the injectable
+> [platform seam](API.md#platform-seam). The sections below are a quick tour of the most common
+> surface.
+
 ### TypeScript Types and Interfaces
 
 The library provides comprehensive TypeScript support with full type definitions:
@@ -291,21 +300,36 @@ gamepadInstance.on('controllerconnect', handleControllerConnect);
 | `GamepadContextManagerCallback` | Context switch callback | Dual context events |
 | `Direction` | `'up' \| 'down' \| 'left' \| 'right'` union | Type navigation handler parameters |
 | `ShoulderButton` | `'L1' \| 'R1'` union | Type shoulder-button handler parameters |
+| `ButtonIndices` | `{ primary, back, shoulder, dpad }` | Per-controller button-index table (`CONTROLLER_MAPPINGS[type].indices`) |
+| `ShoulderIndices` / `DpadIndices` | `{ l1, r1 }` / `{ up, down, left, right }` | Shoulder / D-pad button indices |
+| `PlatformAdapter` | Injectable browser-globals seam | Custom host integration / deterministic tests (see [API.md](API.md#platform-seam)) |
+
+> The custom-controller snippet below shows the **runtime** `ControllerMappings` shape (`xbox` /
+> `playstation` / `nintendo` / `unknown`). For the complete type catalogue see
+> [API.md → Exported types](API.md#exported-types).
 
 ### Custom Controller Configuration
 
-```ts
-import type { ControllerMappings } from 'gamepad-controller';
+`CONTROLLER_MAPPINGS` is the frozen, per-type mapping table. Each entry exposes its button labels,
+axis labels, validation rules, and — since the architecture-refactor release — an `indices` table
+(`ButtonIndices`) that is the single source of truth for which physical button each abstract action
+maps to:
 
-const customMapping: ControllerMappings = {
-    up: 12,
-    down: 13,
-    left: 14,
-    right: 15,
-    primary: 0,
-    secondary: 1
-};
+```ts
+import { CONTROLLER_MAPPINGS } from 'gamepad-controller';
+import type { ControllerMapping, ButtonIndices } from 'gamepad-controller';
+
+// Read the indices for a connected controller type
+const nintendo: ControllerMapping = CONTROLLER_MAPPINGS.nintendo;
+const indices: ButtonIndices = nintendo.indices;
+// indices.primary / indices.back              → A / B (Nintendo's are swapped vs Xbox)
+// indices.shoulder.l1 / indices.shoulder.r1   → L1 / R1
+// indices.dpad.up / .down / .left / .right     → D-pad
 ```
+
+The helpers `getPrimaryActionButtonIndex(type)`, `getBackButtonIndex(type)`,
+`getShoulderIndices(type)`, and `getDpadIndices(type)` read from this same table — see
+[API.md → Controller mapping helpers](API.md#controller-mapping-helpers).
 
 ### Extending Service Options
 
@@ -354,6 +378,14 @@ service.on('focus', (element, index) => {
 ```
 
 ### Main Functions
+
+> **Shared instance vs. direct instantiation.** The factory helpers (`gamepadService`,
+> `initGamepadForPage`, `initDualContextGamepad`, `initCustomEventGamepad`) manage **one shared
+> `GamepadService` instance** — calling any of them destroys the previous one first. That is ideal
+> for the common "one navigation controller per page" case. For **multiple independent instances**
+> (e.g. split-screen, isolated widgets), construct `new GamepadService(options)` directly and call
+> `init()` yourself — the class is **not** a singleton. Full comparison:
+> [GAMEPAD_SERVICE_METHODS.md](GAMEPAD_SERVICE_METHODS.md#singleton-factory-vs-direct-instantiation).
 
 #### `gamepadService(containerSelector?, options?)`
 Creates a gamepad navigation service for a specific container or the entire page.
@@ -450,6 +482,23 @@ const gamepad = gamepadService('.app', {
 ```
 
 Groups: `navigation`, `input`, `styling`, `status`, `scrolling`, `context`, `customEvents`.
+
+#### Platform seam (advanced)
+
+`GamepadServiceConfig` also accepts an optional `platform` field — an injectable
+[`PlatformAdapter`](API.md#platform-seam) over the browser globals the library touches at runtime
+(timing, the Gamepad API, window events, navigation fallbacks, DOM-mutation observation). It
+defaults to a browser-backed adapter, so you only need it to run in a non-standard host or to drive
+the input loop deterministically in tests:
+
+```ts
+import { GamepadService, defaultPlatformAdapter } from 'gamepad-controller';
+
+new GamepadService({ platform: defaultPlatformAdapter }); // explicit default
+new GamepadService({ platform: myFakeAdapter });          // tests / custom host
+```
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for how the seam fits the internal collaborators.
 
 ### Event Handlers
 

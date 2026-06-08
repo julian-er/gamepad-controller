@@ -1,6 +1,7 @@
 // Options for GamepadService
 
 import type { LogLevel } from '../utils/logger.js';
+import type { PlatformAdapter } from '../core/platform/PlatformAdapter.js';
 
 export interface GamepadServiceOptions {
     debounceTime?: number;
@@ -166,4 +167,11 @@ export interface GamepadServiceConfig extends GamepadServiceOptions {
     scrolling?: ScrollingOptionsGroup;
     context?: ContextOptionsGroup;
     customEvents?: CustomEventsOptionsGroup;
+    /**
+     * Injectable seam over browser globals (timing, the Gamepad API, window events, navigation
+     * fallbacks, and DOM-mutation observation). Defaults to a browser-backed adapter; supply a
+     * fake in tests or a custom implementation in non-standard hosts. This is a runtime
+     * dependency, not a serializable option — it is stripped before option normalization.
+     */
+    platform?: PlatformAdapter;
 }

@@ -4,6 +4,66 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Internal architecture refactor. The public `GamepadService` API (methods, events, options) is
+unchanged; the orchestrator was decomposed into focused collaborators and browser side-effects
+were moved behind an injectable seam.
+
+### Added
+
+- **`PlatformAdapter` seam** — an injectable abstraction over the browser globals the library
+  touches at runtime (timing, the Gamepad API, window events, navigation fallbacks, and
+  DOM-mutation observation). Supply your own via the new `platform` config option to run in a
+  non-standard host or to drive the input loop deterministically in tests; defaults to a
+  browser-backed adapter, so existing usage is unaffected:
+  ```ts
+  new GamepadService({ platform: myAdapter });
+  ```
+  `PlatformAdapter`, `BrowserPlatformAdapter`, `defaultPlatformAdapter`, and `WindowEventListener`
+  are exported from the package.
+- **Per-controller button-index table** — `CONTROLLER_MAPPINGS[type].indices` is now the single
+  source of truth for the primary/back/shoulder/D-pad button indices (previously hardcoded in the
+  mapping helper functions). New exported types: `ButtonIndices`, `ShoulderIndices`, `DpadIndices`.
+
+### Changed
+
+- **Internal decomposition (no public API change)** — `GamepadService` is now a thin facade over
+  `InputPipeline` (polling loop + connected pads), `FocusRenderer` (single-context element
+  discovery and focus presentation), `StatusReporter`, and `NavigationPolicy` (the emit-or-fall-back
+  navigation/back policy). The multi-subscriber event registry is now a single shared
+  `TypedEmitter` used by both the service and each `GamepadNavigationContext`.
+- **`getShoulderIndices` / `getDpadIndices` now read from `CONTROLLER_MAPPINGS`** and use their
+  `controllerType` argument (previously ignored). Return values are unchanged for all built-in
+  controller types; the functions now return a fresh object each call.
+
+### Breaking
+
+- **`GamepadNavigationContext.select()` no longer falls back to `window.location.href`** when used
+  standalone without an `onNavigationRequest` handler — it now delegates navigation solely through
+  the provided handler. The `GamepadService` flow is unaffected (it always supplies a handler,
+  routed through `NavigationPolicy`, which still falls back to `window.location` when no
+  `navigationrequest` subscriber is registered). Direct `GamepadNavigationContext` consumers that
+  relied on the implicit fallback must pass an `onNavigationRequest` callback.
+
+### Docs
+
+- **New [API.md](API.md)** — a complete reference for the public surface: every exported function,
+  `GamepadService` method, event, flat/grouped option, the platform seam, and the type catalogue.
+- **New [ARCHITECTURE.md](ARCHITECTURE.md)** — documents the facade/collaborator decomposition
+  (`InputPipeline`, `FocusRenderer`, `StatusReporter`, `NavigationPolicy`, `TypedEmitter`) and the
+  injectable `PlatformAdapter` seam.
+- **New [MIGRATION_1.0_TO_NEXT.md](MIGRATION_1.0_TO_NEXT.md)** — part two of the migration trail,
+  covering `1.0` → this release (the additive `platform` option / index table and the one breaking
+  `GamepadNavigationContext.select()` change). [MIGRATION.md](MIGRATION.md) now links to it as the
+  continuation.
+- **GAMEPAD_SERVICE_METHODS.md** — added a *Singleton factory vs. direct instantiation* section
+  clarifying the shared-instance factory behavior versus `new GamepadService(...)`, and noting the
+  removal of `initGamepadNavigation` from the public API.
+- **README** — added an API.md/ARCHITECTURE.md guide index, the platform-seam option, the new
+  `ButtonIndices`/`ShoulderIndices`/`DpadIndices` types, a singleton callout, and corrected the
+  stale custom-controller `ControllerMappings` snippet to the real per-type shape.
+
 ## [1.0.0] - 2026-06-07
 
 ### Added

@@ -13,8 +13,10 @@ import type { GamepadServiceConfig, GamepadServiceOptions } from '../interfaces/
  * @returns A flat options object with grouped values merged in (groups win)
  */
 export function normalizeOptions(config: GamepadServiceConfig = {}): GamepadServiceOptions {
-    // Start from the flat fields, then strip the group containers off the copy.
-    const { navigation, input, styling, status, scrolling, context, customEvents, ...flat } = config;
+    // Start from the flat fields, then strip the group containers and the (non-serializable)
+    // platform dependency off the copy so they never land in the flat runtime options.
+    const { navigation, input, styling, status, scrolling, context, customEvents, platform, ...flat } = config;
+    void platform;
 
     const groups = [navigation, input, styling, status, scrolling, context, customEvents];
     for (const group of groups) {

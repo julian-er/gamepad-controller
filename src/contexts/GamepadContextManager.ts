@@ -5,10 +5,19 @@ import {
     removeGamepadDataAttributes,
 } from '../utils/index.js';
 import { logger } from '../utils/logger.js';
+import { TypedEmitter } from '../core/EventEmitter.js';
 
 import type { GamepadNavigationContextOptions } from '../interfaces/GamepadNavigationContextOptions.js';
 import type { GamepadContextManagerCallback } from '../interfaces/GamepadContextManagerCallback.js';
 import type { Direction, ShoulderButton } from '../interfaces/NavigationTypes.js';
+
+/** Events emitted by a {@link GamepadNavigationContext}. */
+interface GamepadNavigationContextEventMap {
+    focus: (element: Element, index: number) => void;
+    select: (element: Element, index: number) => void;
+    activate: (ctx: GamepadNavigationContext) => void;
+    deactivate: (ctx: GamepadNavigationContext) => void;
+}
 
 /**
  * Individual navigation context that maintains its own state and focus tracking.
@@ -37,7 +46,7 @@ export class GamepadNavigationContext {
     isActive: boolean;
     lastFocusedElement: Element | null;
 
-    private _listeners: Map<string, Set<(...args: never[]) => void>> = new Map();
+    private _emitter = new TypedEmitter<GamepadNavigationContextEventMap>();
 
     constructor(
         id: string,
@@ -65,22 +74,22 @@ export class GamepadNavigationContext {
      * Subscribe to a context event. Returns an unsubscribe function.
      * Multiple subscribers per event are supported.
      */
-    on(event: 'focus', listener: (element: Element, index: number) => void): () => void;
-    on(event: 'select', listener: (element: Element, index: number) => void): () => void;
-    on(event: 'activate', listener: (ctx: GamepadNavigationContext) => void): () => void;
-    on(event: 'deactivate', listener: (ctx: GamepadNavigationContext) => void): () => void;
-    on(event: string, listener: (...args: never[]) => void): () => void {
-        if (!this._listeners.has(event)) this._listeners.set(event, new Set());
-        this._listeners.get(event)!.add(listener);
-        return () => this._listeners.get(event)?.delete(listener);
+    on<K extends keyof GamepadNavigationContextEventMap>(
+        event: K,
+        listener: GamepadNavigationContextEventMap[K]
+    ): () => void {
+        return this._emitter.on(event, listener);
     }
 
-    private _emit(event: string, ...args: unknown[]): void {
-        this._listeners.get(event)?.forEach((fn) => (fn as (...a: unknown[]) => void)(...args));
+    private _emit<K extends keyof GamepadNavigationContextEventMap>(
+        event: K,
+        ...args: Parameters<GamepadNavigationContextEventMap[K]>
+    ): void {
+        this._emitter.emit(event, ...args);
     }
 
     _clearListeners(): void {
-        this._listeners.clear();
+        this._emitter.clear();
     }
 
     /**
@@ -344,10 +353,11 @@ export class GamepadNavigationContext {
         ) {
             const href = (focusedElement as HTMLAnchorElement).href;
             logger.debug(`🔗 Navigating to: ${href}`);
+            // Delegate navigation to the injected handler (the service routes this through
+            // NavigationPolicy). A context used standalone without a handler performs no
+            // navigation side-effect of its own.
             if (onNavigationRequest) {
                 onNavigationRequest(href, focusedElement);
-            } else if (typeof window !== 'undefined') {
-                window.location.href = href;
             }
             return true;
         }
