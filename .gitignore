@@ -1,6 +1,12 @@
 # Ignore output of TypeScript
 /dist/
 
+# Packed tarballs (build artifacts; should never be committed)
+*.tgz
+
+# Test coverage
+/coverage/
+
 # Documentation output
 /docs/
 

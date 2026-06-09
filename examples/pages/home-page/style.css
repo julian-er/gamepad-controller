@@ -1,276 +1,75 @@
-/* style.css */
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-    box-sizing: border-box;
-}
-.container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 16px;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    max-width: 900px;
-    width: 100%;
-}
-.item {
-    width: 100px;
-    height: 100px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: white;
-    transition: transform 0.2s ease-in-out, border 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    border: 3px solid transparent; /* Default transparent border */
-}
-.item.focused {
-    transform: scale(1.05);
-    border: 3px solid #3b82f6; /* Blue border for focused item */
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-}
-.item.selected {
-    background-color: #10b981 !important; /* Green for selected item */
-    border: 3px solid #059669;
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
-}
-#gamepad-status {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #e2e8f0;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 900px;
+/* home-page — page-specific styling. Shared tokens/components come from theme.css. */
+
+.subtitle {
+    max-width: 680px;
     text-align: center;
-    font-size: 1.1em;
-    color: #334155;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    color: var(--gp-text-dim);
+    margin-top: -4px;
 }
 
-/* Navigation Menu Styles */
+/* ---- Navigation menu (the dual-context "menu" region) ------------------- */
 .nav-menu {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    width: 100%;
-    max-width: 900px;
-    padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
     flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    max-width: var(--gp-maxw);
+    padding: 18px;
+    background: linear-gradient(135deg, rgba(124, 140, 255, 0.18), rgba(56, 224, 255, 0.1));
+    border: 1px solid var(--gp-border-strong);
+    border-radius: var(--gp-radius-lg);
+    box-shadow: var(--gp-shadow);
 }
 
 .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 15px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
+    gap: 8px;
+    min-width: 124px;
+    padding: 18px 14px;
+    color: var(--gp-text);
+    background: var(--gp-surface);
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius);
     text-decoration: none;
-    color: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(5px);
-    min-width: 120px;
-    position: relative;
+    transition: all 0.25s var(--gp-ease);
 }
 
 .nav-item:hover {
+    text-decoration: none;
     transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: var(--gp-border-strong);
+    background: var(--gp-surface-2);
+    box-shadow: var(--gp-shadow);
 }
 
-.nav-item.nav-focused {
-    transform: translateY(-5px) scale(1.05);
-    background: rgba(255, 255, 255, 0.3) !important;
-    border-color: #fff !important;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3) !important;
-    z-index: 10;
+.nav-icon { font-size: 1.9rem; }
+.nav-text { font-size: 0.86rem; font-weight: 600; text-align: center; line-height: 1.2; }
+
+/* ---- Content item grid (the dual-context "content" region) -------------- */
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 14px;
+    padding: 20px;
+    background: var(--gp-surface);
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius);
+    box-shadow: var(--gp-shadow);
 }
 
-.nav-item.nav-selected {
-    background: rgba(40, 167, 69, 0.8) !important;
-    border-color: #28a745 !important;
-    transform: translateY(-2px) scale(0.98);
-}
-
-.nav-icon {
-    font-size: 2rem;
-    margin-bottom: 8px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.nav-text {
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.2;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-/* Instructions */
-.instructions {
-    text-align: center;
-    max-width: 600px;
-    width: 100%;
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-    .nav-menu {
-        gap: 15px;
-        padding: 15px;
-    }
-    
-    .nav-item {
-        min-width: 100px;
-        padding: 15px 10px;
-    }
-    
-    .nav-icon {
-        font-size: 1.5rem;
-    }
-    
-    .nav-text {
-        font-size: 0.8rem;
-    }
-}
-
-/* Default Gamepad Focus Styles */
-.gamepad-focused {
-    outline: 3px solid #007bff !important;
-    outline-offset: 2px !important;
-    box-shadow: 0 0 15px rgba(0, 123, 255, 0.5) !important;
-    transform: scale(1.05) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    position: relative !important;
-    z-index: 100 !important;
-}
-
-.gamepad-selected {
-    background-color: #28a745 !important;
-    color: white !important;
-    border-color: #28a745 !important;
-    box-shadow: 0 0 20px rgba(40, 167, 69, 0.7) !important;
-    transform: scale(0.98) !important;
-}
-
-/* Controller-specific focus styles */
-body.controller-xbox .gamepad-focused {
-    outline-color: #107c10 !important;
-    box-shadow: 0 0 15px rgba(16, 124, 16, 0.5) !important;
-}
-
-body.controller-playstation .gamepad-focused {
-    outline-color: #003087 !important;
-    box-shadow: 0 0 15px rgba(0, 48, 135, 0.5) !important;
-}
-
-body.controller-nintendo .gamepad-focused {
-    outline-color: #e60012 !important;
-    box-shadow: 0 0 15px rgba(230, 0, 18, 0.5) !important;
-}
-
-/* Accessibility: Reduce motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-    .gamepad-focused,
-    .gamepad-selected {
-        animation: none !important;
-        transition: none !important;
-        transform: none !important;
-    }
-}
-
-/* Dual Context Visual Feedback */
-.menu-context-active #navigation-menu {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3) !important;
-    border: 2px solid #10b981 !important;
-}
-
-.content-context-active #item-container {
-    background-color: #f0f9ff !important;
-    border: 2px solid #3b82f6 !important;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2) !important;
-}
-
-/* Context indicators */
-.menu-context-active #navigation-menu::before,
-.content-context-active #item-container::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    z-index: 200;
-}
-
-.menu-context-active #navigation-menu::before {
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid #10b981;
-}
-
-.content-context-active #item-container::before {
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid #3b82f6;
-}
-
-/* Position indicators */
-#navigation-menu,
-#item-container {
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Enhanced instructions for dual context */
-.instructions {
-    position: relative;
-}
-
-.instructions::after {
-    content: '🎮 Content Context Active - Use left stick to navigate content';
-    display: block;
-    margin-top: 10px;
-    padding: 10px;
-    border-left: 4px solid #3b82f6;
-    border-right: 4px solid #3b82f6;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border-radius: 8px;
-    font-size: 0.75rem;
-    color: #1e40af
-}
-
-.menu-context-active .instructions::after {
-    content: '🎮 Menu Context Active - Use R1/L1 to navigate menu items';
-    border-left-color: #10b981;
-    border-right-color: #10b981;
-    background: linear-gradient(135deg, #ecfdf5 0%, #dcfce7 100%);
-    color: #065f46;
-}
-
-.content-context-active .instructions::after {
-    content: '🎮 Content Context Active - Use left stick to navigate content';
-    border-left-color: #3b82f6;
-    border-right-color: #3b82f6;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    color: #1e40af;
+.item {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
+    border: 2px solid transparent;
+    border-radius: var(--gp-radius-sm);
+    background: var(--item-color, var(--gp-surface-2));
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.25);
+    transition: transform 0.18s var(--gp-ease), box-shadow 0.18s var(--gp-ease), border-color 0.18s var(--gp-ease);
 }

@@ -1,5 +1,4 @@
-import { initGamepadNavigation } from 'gamepad-controller';
-import * as gamepadUtils from 'gamepad-controller';
+import { initGamepadForPage, gamepadUtils, addNavigationStyles } from 'gamepad-controller';
 
 console.log('🔧 Debug Test Started');
 
@@ -18,7 +17,7 @@ let gamepadInstance: any = null;
         updateStatus('test-status', '1️⃣ Testing module imports...', 'warning');
         updateStatus('module-status', '✅ All modules loaded successfully!', 'success');
         updateStatus('test-status', '2️⃣ Initializing gamepad service...', 'warning');
-        gamepadInstance = initGamepadNavigation({
+        gamepadInstance = initGamepadForPage({
             containerSelector: '.test-grid',
             navigationMode: 'grid',
             focusedClass: 'gamepad-focused',
@@ -29,15 +28,15 @@ let gamepadInstance: any = null;
             useDataAttributes: false,
             gamepadContext: 'grid'
         });
-        gamepadUtils.onFocus((element: Element, index: number) => {
+        gamepadInstance.on('focus', (element: Element, index: number) => {
             updateStatus('gamepad-debug', `🎯 Focused on item ${index + 1}`, 'success');
             console.log('Focus:', element, index);
         });
-        gamepadUtils.onSelect((element: Element, index: number) => {
+        gamepadInstance.on('select', (element: Element, index: number) => {
             updateStatus('gamepad-debug', `✅ Selected item ${index + 1}`, 'success');
             console.log('Select:', element, index);
         });
-        gamepadUtils.onControllerConnect((gamepad: any) => {
+        gamepadInstance.on('controllerconnect', (gamepad: Gamepad) => {
             updateStatus('gamepad-debug', `🎮 Controller connected`, 'success');
             console.log('Controller connected:', gamepad);
         });
@@ -61,7 +60,7 @@ let gamepadInstance: any = null;
         }
     };
     (window as any).debugInfo = function() {
-        const info = (window as any).gamepadUtils.getNavigationInfo();
+        const info = gamepadUtils.getNavigationInfo();
         if (info) {
             const debugText = `
                 Connected: ${info.isConnected ? '✅' : '❌'}
@@ -79,15 +78,13 @@ let gamepadInstance: any = null;
         }
     };
     (window as any).debugElements = function() {
-        const elements = (window as any).gamepadUtils.getElements();
+        const elements = gamepadUtils.getElements();
         console.log('Detected elements:', elements);
         updateStatus('gamepad-debug', `📋 Found ${elements.length} elements (check console)`, 'success');
     };
     (window as any).debugStyles = function() {
-        if (gamepadUtils.addNavigationStyles) {
-            gamepadUtils.addNavigationStyles();
-            updateStatus('gamepad-debug', '🎨 Example styles added', 'success');
-        }
+        addNavigationStyles();
+        updateStatus('gamepad-debug', '🎨 Example styles added', 'success');
     };
     (window as any).debugCSSExamples = function() {
         if (gamepadUtils.printCSSExamples) {

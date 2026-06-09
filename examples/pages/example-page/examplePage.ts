@@ -1,8 +1,7 @@
-import { gamepadService } from 'gamepad-controller';
-import * as gamepadUtils from 'gamepad-controller';
+import { gamepadService, gamepadUtils } from 'gamepad-controller';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const gamepad = gamepadService('.container', {
+    gamepadService('.container', {
         navigationMode: 'grid',
         focusedClass: 'gamepad-focused',
         selectedClass: 'gamepad-selected',
@@ -10,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         useDataAttributes: false
     });
 
-    gamepadUtils.addDefaultStyles();
+    gamepadUtils.addStyles();
 
     document.querySelectorAll('.card').forEach(card => {
         card.addEventListener('keydown', (e) => {

@@ -1,5 +1,4 @@
-import { gamepadService } from 'gamepad-controller';
-import * as gamepadUtils from 'gamepad-controller';
+import { gamepadService, gamepadUtils } from 'gamepad-controller';
 
 const gamepad = gamepadService('.container', {
     navigationMode: 'spatial',
@@ -43,24 +42,23 @@ const gamepad = gamepadService('.container', {
     }
 };
 
-gamepadUtils.onFocus((element: Element, index: number) => {
+gamepad.on('focus', (_element: Element, index: number) => {
     console.log(`Focused on menu item ${index + 1}`);
 });
 
-gamepadUtils.onSelect((element: Element, index: number) => {
+gamepad.on('select', (element: Element, index: number) => {
     console.log(`Selected menu item ${index + 1}`);
     (element as HTMLElement).click();
 });
 
-gamepadUtils.onControllerConnect((gamepad: any, controllerType: string) => {
+gamepad.on('controllerconnect', (_gamepad: Gamepad) => {
+    const controllerType = gamepad.getControllerType();
     console.log(`Controller connected: ${controllerType}`);
-    document.body.style.background = controllerType === 'xbox' ? 
-        'linear-gradient(135deg, #107c10 0%, #0e6b0e 100%)' :
-        controllerType === 'playstation' ?
-        'linear-gradient(135deg, #003087 0%, #00246b 100%)' :
-        controllerType === 'nintendo' ?
-        'linear-gradient(135deg, #e60012 0%, #cc0010 100%)' :
-        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    // Theme the page to the detected controller brand (see theme.css body.controller-*).
+    document.body.classList.remove('controller-xbox', 'controller-playstation', 'controller-nintendo');
+    if (controllerType === 'xbox' || controllerType === 'playstation' || controllerType === 'nintendo') {
+        document.body.classList.add(`controller-${controllerType}`);
+    }
 });
 
-gamepadUtils.addDefaultStyles(); 
+gamepadUtils.addStyles(); 

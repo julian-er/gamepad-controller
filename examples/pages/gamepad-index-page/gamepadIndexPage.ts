@@ -1,5 +1,4 @@
-import { initDualContextGamepad } from "gamepad-controller";
-import * as gamepadUtils from "gamepad-controller";
+import { initDualContextGamepad, gamepadUtils } from "gamepad-controller";
 
 // Global gamepad service instance
 let gamepad: any = null;
@@ -7,7 +6,7 @@ let useGamepadIndexEnabled = true;
 
 document.addEventListener("DOMContentLoaded", () => {
   initializeGamepad();
-  gamepadUtils.addDefaultStyles();
+  gamepadUtils.addStyles();
   setupEventListeners();
 
   console.log("🎯 Gamepad-Index Boolean Demo initialized");

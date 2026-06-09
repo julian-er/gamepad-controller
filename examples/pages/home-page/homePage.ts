@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         deadzone: 0.1,
     });
 
-    gamepadService.onContextSwitch = (newContext: any, oldContext: any) => {
+    gamepadService.on('contextswitch', (newContext, oldContext) => {
         console.log(`🔄 Context switched from ${oldContext?.id || 'none'} to ${newContext.id}`);
         if (newContext.id === 'menu') {
             document.body.classList.add('menu-context-active');
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('content-context-active');
             document.body.classList.remove('menu-context-active');
         }
-    };
+    });
 
 
     console.log('🎮 Dual context gamepad navigation ready!');

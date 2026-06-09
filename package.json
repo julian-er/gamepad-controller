@@ -1,34 +1,84 @@
 {
   "name": "gamepad-controller",
   "version": "1.0.0",
-  "description": "Gamepad navigation controller with TypeScript support.",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.es.js",
-  "types": "dist/types/index.d.ts",
+  "description": "Gamepad navigation controller for the web — spatial/grid navigation, dual-context (menu vs content), controller detection, and a custom-event mode for WinUI/host integrations. TypeScript-first.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
-    }
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
+  "sideEffects": false,
   "files": [
     "dist",
     "README.md",
-    "INTEGRATION_GUIDE.md",
-    "QUICK_REFERENCE.md",
-    "USAGE_GUIDE.md"
+    "CHANGELOG.md",
+    "BUILDING.md",
+    "USAGE_REACT.md",
+    "USAGE_ANGULAR.md",
+    "USAGE_VANILLA.md",
+    "MIGRATION.md",
+    "MIGRATION_1.0_TO_NEXT.md",
+    "API.md",
+    "ARCHITECTURE.md",
+    "GAMEPAD_ACTION_DETECTION.md",
+    "GAMEPAD_SERVICE_METHODS.md"
   ],
+  "keywords": [
+    "gamepad",
+    "controller",
+    "navigation",
+    "spatial-navigation",
+    "gamepad-api",
+    "accessibility",
+    "tv",
+    "winui",
+    "xbox",
+    "playstation",
+    "typescript"
+  ],
+  "license": "MIT",
+  "author": "julian-miracle",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/julian-miracle/gamepad-controller.git"
+  },
+  "bugs": {
+    "url": "https://github.com/julian-miracle/gamepad-controller/issues"
+  },
+  "homepage": "https://github.com/julian-miracle/gamepad-controller#readme",
   "scripts": {
-    "build": "npm i && vite build",
+    "clean": "rimraf dist",
+    "build": "rimraf dist && vite build",
     "build:types": "tsc --emitDeclarationOnly",
-    "serve": "npx http-server . -c-1 -o pages/home-page",
-    "start": "npm i && npm run build && npm run serve",
-    "example-test": "rm -rf dist && npm i && npm run build && npm pack && cd examples && npm i && npm run dev"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "serve": "http-server . -c-1 -o pages/home-page",
+    "example-test": "rimraf dist && npm run build && npm pack && cd examples && npm i && npm run dev"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
+    "eslint": "^9.0.0",
     "http-server": "^14.1.1",
-    "typescript": "^5.0.0",
+    "jsdom": "^25.0.0",
+    "prettier": "^3.3.0",
+    "rimraf": "^6.0.0",
+    "typescript": "^5.5.0",
     "vite": "^6.3.5",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^2.1.0"
   }
 }

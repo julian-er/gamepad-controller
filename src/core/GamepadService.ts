@@ -1,46 +1,99 @@
 // GamepadService.ts
-// Main GamepadService class with enhanced dual context support
+// Public facade for gamepad navigation. Composes focused collaborators — the input pipeline
+// (polling loop + connected pads), the focus renderer (single-context element discovery and
+// focus presentation), the status reporter, and the navigation policy — and owns only the
+// lifecycle orchestration (init/destroy), the dual-context wiring, and the public event API.
 
-import { gameLoop as createGameLoop, setupEventListeners, removeEventListeners, startGameLoop, stopGameLoop, handleGamepadConnected as handleConnected, handleGamepadDisconnected as handleDisconnected } from './gamepadEventHandler.js';
-import { navigateToIndex } from './gamepadNavigation.js';
-import { calculateGridDimensions, getFocusableElements } from '../utils/domUtils.js';
-import {
-    addGamepadDataAttributes,
-    removeGamepadDataAttributes,
-    ensureStatusElement,
-    setGamepadContext
-} from '../utils/domUtils.js';
+import { setGamepadContext, invalidateFocusableElementsCache } from '../utils/domUtils.js';
 import { addNavigationStyles } from '../utils/cssUtils.js';
 import { debounce } from '../utils/navigationUtils.js';
-import type { GamepadServiceOptions } from '../Interfaces/GamepadServiceOptions.js';
-import type { GamepadEventState, GamepadEvent } from '../Interfaces/GamepadEvents.js';
-import { GamepadContextManager } from '../gamepadContextManager.js';
-import type { NavigationState } from '../Interfaces/NavigationState';
+import { logger } from '../utils/logger.js';
+import type { GamepadServiceOptions, GamepadServiceConfig } from '../interfaces/GamepadServiceOptions.js';
+import { normalizeOptions } from './normalizeOptions.js';
+import { GamepadContextManager, GamepadNavigationContext } from '../contexts/GamepadContextManager.js';
+import { TypedEmitter } from './EventEmitter.js';
+import { defaultPlatformAdapter, type PlatformAdapter, type WindowEventListener } from './platform/PlatformAdapter.js';
+import { NavigationPolicy } from './NavigationPolicy.js';
+import { FocusRenderer } from './FocusRenderer.js';
+import { InputPipeline } from './InputPipeline.js';
+import { StatusReporter } from './StatusReporter.js';
 
 /**
- * GamepadService - Enhanced gamepad navigation with dual context support
+ * Strongly-typed map of events emitted by {@link GamepadService}. Each consumer can
+ * subscribe independently via {@link GamepadService.on} without clobbering others.
+ */
+export interface GamepadServiceEventMap {
+    focus: (element: Element, index: number) => void;
+    select: (element: Element, index: number) => void;
+    controllerconnect: (gamepad: Gamepad) => void;
+    controllerdisconnect: (gamepad: Gamepad) => void;
+    backbutton: () => void;
+    /**
+     * Emitted when a navigation-menu link or shoulder-button page transition is triggered.
+     * If no listener is registered the library falls back to `window.location.href` assignment,
+     * which allows zero-config HTML pages to work while SPA frameworks can intercept cleanly.
+     */
+    navigationrequest: (href: string, element: Element) => void;
+    navigationmenuopen: (button: string) => void;
+    buttondown: (buttonIndex: number, gamepad: Gamepad) => void;
+    buttonup: (buttonIndex: number, gamepad: Gamepad) => void;
+    contextswitch: (newContext: GamepadNavigationContext, oldContext: GamepadNavigationContext | null) => void;
+    /**
+     * Emitted when the Gamepad API is blocked at runtime — e.g. `navigator.getGamepads()`
+     * throws `SecurityError` under `Permissions-Policy: gamepad`. Fires once per block; the
+     * polling loop keeps running in case access is granted later.
+     */
+    gamepaderror: (error: Error) => void;
+}
+
+type EventName = keyof GamepadServiceEventMap;
+
+/**
+ * GamepadService — gamepad navigation with single- and dual-context support.
+ *
+ * Subscribe to events with {@link on} (multiple subscribers are supported):
+ * ```ts
+ * const service = new GamepadService();
+ * const off = service.on('focus', (el, i) => console.log('focused', i, el));
+ * service.init();
+ * // later
+ * off();
+ * ```
  */
 export class GamepadService {
-    options: GamepadServiceOptions;
+    readonly options: Readonly<GamepadServiceOptions>;
     contextManager: GamepadContextManager;
-    singleContextMode: boolean;
 
-    // Private properties
-    private eventState: GamepadEventState;
-    
-    // Private navigation state
-    private navState: NavigationState;
-    
-    // Private bound methods for proper cleanup
-    private gameLoopFn: () => void;
-    private handleGamepadConnected: (event: GamepadEvent) => void;
-    private handleGamepadDisconnected: (event: GamepadEvent) => void;
+    // Multi-subscriber event registry.
+    private emitter = new TypedEmitter<GamepadServiceEventMap>();
+
+    // Injectable seam over browser globals (timing, gamepads, window events, navigation, observers).
+    private platform: PlatformAdapter;
+
+    // Focused collaborators.
+    private navigationPolicy: NavigationPolicy;
+    private focus: FocusRenderer;
+    private input: InputPipeline;
+    private status: StatusReporter;
+
+    // Debounced resize handler with cancel capability (registered/removed in init/destroy).
     private handleResize: (() => void) & { cancel: () => void };
+    // Invalidates the focusable-element memo when the observed DOM subtree changes, so the
+    // cache can safely be read through on every detectElements() without going stale.
+    private mutationObserver: MutationObserver | null = null;
 
-    constructor(options: GamepadServiceOptions = {}) {
+    constructor(config: GamepadServiceConfig = {}) {
+        // Resolve the platform seam first so collaborators can capture it.
+        this.platform = config.platform ?? defaultPlatformAdapter;
+
+        // Accept both the flat options and the grouped shape; collapse to flat (groups win).
+        const options = normalizeOptions(config);
         this.options = {
             debounceTime: 150,
             deadzone: 0.1,
+            backButtonCooldown: 300,
+            shoulderCooldown: 300,
+            logLevel: 'error',
             containerSelector: null,
             statusElementId: null,
             focusedClass: 'gamepad-focused',
@@ -48,362 +101,269 @@ export class GamepadService {
             navigationMode: 'grid', // 'grid' or 'spatial'
             wrapNavigation: true,
             autoDetectElements: true,
-            // Navigation-specific options
             enableNavigation: true,
             enableBackButton: true,
             enableShoulderNavigation: true,
-            // Scrolling options
-            enableRightStickScroll: true, // Enable by default
+            enableRightStickScroll: true,
             scrollSpeed: 1,
-            scrollDebounceTime: 50, // Faster debounce for smooth scrolling
+            scrollDebounceTime: 50,
             navigationMenuSelector: '.nav-menu, nav, .navigation',
-            autoCreateStatusElement: false, // False by default - user must explicitly enable
-            autoAddStyles: false, // Changed default to false - styles are now opt-in
-            // Style isolation options
-            useDataAttributes: true, // Use data attributes instead of classes for better isolation
-            gamepadContext: 'default', // Set context for styling hooks
-            // Viewport filtering options
-            onlyViewport: false, // Include all elements by default, not just viewport
-            // Dual context options
-            enableDualContext: false, // Enable dual context mode
+            autoCreateStatusElement: false,
+            autoAddStyles: false,
+            useDataAttributes: true,
+            gamepadContext: 'default',
+            onlyViewport: false,
+            enableDualContext: false,
             menuContextSelector: '.nav-menu, nav, .navigation',
             contentContextSelector: null,
-            ...options
+            ...options,
         };
 
-        // Initialize event state with animation frame tracking
-        this.eventState = {
-            isRunning: false,
-            gamepads: {},
-            currentControllerType: 'unknown',
-            lastButtonPress: 0,
-            lastAxisMove: 0,
-            lastBackButtonState: false,
-            lastBackTime: 0,
-            lastR1State: false,
-            lastL1State: false,
-            lastShoulderTime: 0,
-            lastScrollTime: 0, // Initialize scroll timing
-            animationFrameId: null, // Add animation frame ID for cleanup
-            statusElementId: this.options.statusElementId ?? null, // Add statusElementId for UI updates
-            onControllerConnect: null,
-            onControllerDisconnect: null,
-            onNavigationMenuOpen: null,
-            onBackButton: null,
-            onButtonDown: undefined,
-            onButtonUp: undefined
-        };
+        if (this.options.logLevel) logger.setLevel(this.options.logLevel);
 
-        // Initialize navigation state
-        this.navState = {
-            focusedElementIndex: 0,
-            elements: [],
-            gridDimensions: { rows: 0, cols: 0 },
-            options: this.options,
-            onFocus: null,
-            onSelect: null
-        };
-
-        // Context manager for dual context mode
+        // Context manager for dual-context mode.
         this.contextManager = new GamepadContextManager();
-        this.singleContextMode = !this.options.enableDualContext;
 
-        // Bind methods to ensure proper 'this' context and enable cleanup
-        this.gameLoopFn = createGameLoop(this.eventState, this.navState, this.contextManager, this.updateFocus.bind(this));
-        this.handleGamepadConnected = (event: GamepadEvent) => handleConnected(this.eventState, event);
-        this.handleGamepadDisconnected = (event: GamepadEvent) => handleDisconnected(this.eventState, event);
+        // Compose collaborators. FocusRenderer owns the single-context navigation state; the
+        // InputPipeline drives that same state from the polling loop; StatusReporter manages the
+        // status-element lifecycle bound to the input event state.
+        this.focus = new FocusRenderer(this.options);
+        this.input = new InputPipeline(
+            this.focus.state,
+            this.contextManager,
+            this.platform,
+            () => this.focus.updateFocus(),
+            this.options.statusElementId ?? null
+        );
+        this.status = new StatusReporter(this.input.state);
+        this.navigationPolicy = new NavigationPolicy(this.emitter, this.platform);
 
-        // Create debounced resize handler with cancel capability
+        // Bridge the collaborators' single-slot callbacks to the multi-subscriber emitter.
+        this.focus.state.onFocus = (element, index) => this.emit('focus', element, index);
+        this.focus.state.onSelect = (element, index) => this.emit('select', element, index);
+        this.input.state.onControllerConnect = (gamepad) => this.emit('controllerconnect', gamepad);
+        this.input.state.onControllerDisconnect = (gamepad) => this.emit('controllerdisconnect', gamepad);
+        this.input.state.onNavigationMenuOpen = (button) => this.emit('navigationmenuopen', button);
+        this.input.state.onButtonDown = (i, gamepad) => this.emit('buttondown', i, gamepad);
+        this.input.state.onButtonUp = (i, gamepad) => this.emit('buttonup', i, gamepad);
+        this.input.state.onError = (error) => this.emit('gamepaderror', error);
+        this.input.state.onBackButton = () => this.navigationPolicy.requestBack();
+        this.input.state.onNavigationRequest = (href, element) =>
+            this.navigationPolicy.requestNavigation(href, element);
+
+        // Create debounced resize handler. A resize can change which elements are
+        // in-viewport/visible, so drop the focusable memo before re-detecting.
         this.handleResize = debounce(() => {
+            invalidateFocusableElementsCache();
             if (this.options.enableDualContext) {
                 this.contextManager.refresh();
             } else {
-                this.detectElements();
-                this.updateFocus();
+                this.focus.detectElements();
+                this.focus.updateFocus();
             }
         }, 100);
     }
 
     /**
-     * Initializes the GamepadService by setting up event listeners, navigation elements,
-     * styles and status indicators. Will not reinitialize if already running.
-     * 
-     * - Sets up gamepad connection/disconnection event listeners
-     * - Configures either dual context or single context navigation mode
-     * - Adds navigation styles if enabled
-     * - Creates status element if configured
-     * - Starts the gamepad input polling loop
+     * Subscribe to a service event. Returns an unsubscribe function.
+     * @param event - The event name
+     * @param listener - The callback to invoke
+     * @returns A function that removes this listener
+     */
+    on<K extends EventName>(event: K, listener: GamepadServiceEventMap[K]): () => void {
+        return this.emitter.on(event, listener);
+    }
+
+    /**
+     * Remove a previously-registered event listener.
+     * @param event - The event name
+     * @param listener - The callback to remove
+     */
+    off<K extends EventName>(event: K, listener: GamepadServiceEventMap[K]): void {
+        this.emitter.off(event, listener);
+    }
+
+    private emit<K extends EventName>(event: K, ...args: Parameters<GamepadServiceEventMap[K]>): void {
+        this.emitter.emit(event, ...args);
+    }
+
+    /**
+     * Initializes the GamepadService: event listeners, navigation elements, optional
+     * styles/status indicator, and the input polling loop. Safe to call once; re-calls
+     * while running are ignored.
      */
     init() {
-        if (this.eventState.isRunning) return;
+        if (this.input.state.isRunning) return;
 
-        setupEventListeners(this.eventState, this.handleGamepadConnected, this.handleGamepadDisconnected);
-        window.addEventListener('resize', this.handleResize);
+        if (!this.platform.isBrowser) {
+            logger.warn('GamepadService.init() called in a non-browser environment; skipping.');
+            return;
+        }
+
+        this.input.setupListeners(this.options);
+        this.platform.addWindowListener('resize', this.handleResize as WindowEventListener);
+        this.observeDomMutations();
 
         if (this.options.enableDualContext) {
             this.setupDualContextMode();
         } else {
-            this.detectElements();
-            this.updateFocus();
+            this.focus.detectElements();
+            this.focus.updateFocus();
         }
 
-        // Auto-add styles if enabled (opt-in only)
         if (this.options.autoAddStyles) {
             addNavigationStyles();
         }
 
-        // Auto-create status element only if explicitly requested
-        if (this.options.statusElementId) {
-            // User provided a statusElementId, so they want the status element
-            ensureStatusElement(this.options.statusElementId);
-        } else if (this.options.autoCreateStatusElement) {
-            // User wants auto status element with default ID
-            const defaultStatusId = 'gamepad-status';
-            this.options.statusElementId = defaultStatusId;
-            this.eventState.statusElementId = defaultStatusId;
-            ensureStatusElement(defaultStatusId);
-        }
+        this.status.setup(this.options as GamepadServiceOptions);
 
-        // Set gamepad context for styling hooks
         setGamepadContext(this.options.gamepadContext);
 
-        startGameLoop(this.eventState, this.gameLoopFn);
+        this.input.start(this.options);
 
-        console.info(`[🎮 🕹️ Gamepad Controller] - GamepadService initialized with ${this.options.enableDualContext ? 'dual context' : 'single context'} navigation support`);
+        const modeText = this.options.enableDualContext ? 'dual context' : 'single context';
+        const eventText = this.options.useCustomEvents ? 'custom events' : 'native browser APIs';
+        logger.info(`GamepadService initialized with ${modeText} navigation support using ${eventText}`);
     }
 
     /**
-     * Sets up dual context navigation mode by registering menu and content contexts
-     * with the context manager. Configures context-specific settings and event handlers
-     * for focus and selection events.
-     *
-     * Menu context handles R1/L1 navigation in horizontal mode, while content context
-     * uses spatial navigation with analog sticks. Both contexts inherit global
-     * navigation options and can trigger onFocus/onSelect callbacks.
+     * Observes the navigation container for DOM changes and drops the focusable-element memo
+     * when the subtree mutates. This keeps {@link detectElements} cheap (read-through cache)
+     * while guaranteeing it never returns a stale list after the app adds/removes elements.
+     * @private
+     */
+    private observeDomMutations(): void {
+        const target = this.options.containerSelector
+            ? document.querySelector(this.options.containerSelector)
+            : document.body;
+        if (!target) return;
+
+        this.mutationObserver = this.platform.createMutationObserver(() => invalidateFocusableElementsCache());
+        if (!this.mutationObserver) return;
+        this.mutationObserver.observe(target, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['disabled', 'hidden', 'tabindex', 'gamepad-index'],
+        });
+    }
+
+    /**
+     * Sets up dual-context navigation: a horizontal "menu" context (R1/L1) and a
+     * spatial "content" context (stick). Both forward focus/select to the service
+     * event emitter, and context switches are surfaced via the `contextswitch` event.
      * @private
      */
     setupDualContextMode() {
-        // Register menu context for R1/L1 navigation
         const menuContext = this.contextManager.registerContext('menu', {
             containerSelector: this.options.menuContextSelector ?? null,
             navigationMode: 'horizontal',
+            role: 'menu',
             focusedClass: this.options.focusedClass,
             selectedClass: this.options.selectedClass,
             useDataAttributes: this.options.useDataAttributes,
             useGamepadIndex: this.options.useGamepadIndex,
             onlyViewport: this.options.onlyViewport,
             wrapNavigation: this.options.wrapNavigation,
-            autoDetectElements: true
+            autoDetectElements: true,
         });
 
-        // Register content context for stick navigation
         const contentContext = this.contextManager.registerContext('content', {
             containerSelector: this.options.contentContextSelector ?? null,
             navigationMode: 'spatial',
+            role: 'content',
             focusedClass: this.options.focusedClass,
             selectedClass: this.options.selectedClass,
             useDataAttributes: this.options.useDataAttributes,
             useGamepadIndex: this.options.useGamepadIndex,
             onlyViewport: this.options.onlyViewport,
             wrapNavigation: this.options.wrapNavigation,
-            autoDetectElements: true
+            autoDetectElements: true,
         });
 
-        // Set up context event handlers
-        (menuContext as any).onFocus = (element: Element, index: number) => {
-            if (this.navState.onFocus) this.navState.onFocus(element, index);
-        };
-        
-        (menuContext as any).onSelect = (element: Element, index: number) => {
-            if (this.navState.onSelect) this.navState.onSelect(element, index);
-        };
+        // Forward context focus/select to the service-level event emitter.
+        menuContext.on('focus', (element, index) => this.emit('focus', element, index));
+        menuContext.on('select', (element, index) => this.emit('select', element, index));
+        contentContext.on('focus', (element, index) => this.emit('focus', element, index));
+        contentContext.on('select', (element, index) => this.emit('select', element, index));
 
-        (contentContext as any).onFocus = (element: Element, index: number) => {
-            if (this.navState.onFocus) this.navState.onFocus(element, index);
-        };
-        
-        (contentContext as any).onSelect = (element: Element, index: number) => {
-            if (this.navState.onSelect) this.navState.onSelect(element, index);
-        };
+        this.contextManager.setContextSwitchCallback((newContext, oldContext) => {
+            logger.info(`Context switched from ${oldContext?.id || 'none'} to ${newContext.id}`);
+            this.emit('contextswitch', newContext, oldContext);
+        });
 
-        // Set up context switching callback
-        (this.contextManager as any).onContextSwitch = (newContext: any, oldContext: any) => {
-            console.info(`[🎮 🕹️ Gamepad Controller] - Context switched from ${oldContext?.id || 'none'} to ${newContext.id}`);
-            if (this.onContextSwitch) {
-                this.onContextSwitch(newContext, oldContext);
-            }
-        };
-
-        // Detect elements for both contexts
         menuContext.detectElements();
         contentContext.detectElements();
 
         // Start with content context active
         this.contextManager.setActiveContext('content');
 
-        console.info('[🎮 🕹️ Gamepad Controller] - Dual context mode initialized - Menu: R1/L1, Content: Stick');
+        logger.info('Dual context mode initialized - Menu: R1/L1, Content: Stick');
     }
 
     /**
-     * Destroys the GamepadService instance and performs comprehensive cleanup.
-     * - Stops the game loop
-     * - Removes event listeners
-     * - Cancels pending operations
-     * - Clears focus and element references
-     * - Cleans up gamepad references and callbacks
-     * - Destroys the context manager
+     * Destroys the GamepadService instance and performs comprehensive cleanup:
+     * stops the loop, removes native AND custom-event listeners, cancels pending
+     * operations, clears focus/elements/callbacks, and destroys the context manager.
      */
     destroy(): void {
-        console.info('[🎮 🕹️ Gamepad Controller] - GamepadService: Starting cleanup...');
-        
-        // Stop the game loop first
-        stopGameLoop(this.eventState);
-        
-        // Remove event listeners
-        removeEventListeners(this.handleGamepadConnected, this.handleGamepadDisconnected);
-        window.removeEventListener('resize', this.handleResize);
-        
-        // Cancel any pending debounced operations
+        logger.info('GamepadService: Starting cleanup...');
+
+        this.input.stop();
+        // Removes both native and custom-event listeners (the latter via state.customListeners).
+        this.input.teardownListeners();
+
+        if (this.platform.isBrowser) {
+            this.platform.removeWindowListener('resize', this.handleResize as WindowEventListener);
+        }
         this.handleResize.cancel();
-        
-        // Clear focus and element references
-        this.clearFocus();
-        
-        // Clear gamepad references
-        this.eventState.gamepads = {};
-        
-        // Clear all callback references to prevent memory leaks
-        this.eventState.onControllerConnect = null;
-        this.eventState.onControllerDisconnect = null;
-        this.eventState.onNavigationMenuOpen = null;
-        this.eventState.onBackButton = null;
-        this.eventState.onButtonDown = undefined;
-        this.eventState.onButtonUp = undefined;
-        
-        this.navState.onFocus = null;
-        this.navState.onSelect = null;
-        
-        // Clear element references
-        this.navState.elements = [];
-        
-        // Destroy context manager
+        this.mutationObserver?.disconnect();
+        this.mutationObserver = null;
+
+        this.focus.clearFocus();
+        invalidateFocusableElementsCache();
+        this.input.clearState();
+
+        // Drop all external subscribers and internal focus callback wiring.
+        this.emitter.clear();
+        this.focus.state.onFocus = null;
+        this.focus.state.onSelect = null;
+        this.focus.state.elements = [];
+
         this.contextManager.destroy();
-        
-        // Clear context switch callback
-        this._onContextSwitch = null;
-        
-        console.info('[🎮 🕹️ Gamepad Controller] - GamepadService destroyed and cleaned up');
+
+        logger.info('GamepadService destroyed and cleaned up');
     }
 
     /**
-     * Detects and filters focusable elements for gamepad navigation.
-     * - Gets focusable elements based on container selector and viewport settings
-     * - Filters out disabled and invisible elements
-     * - Calculates grid dimensions for navigation
-     * - Ensures focused index stays within bounds
-     * - Logs summary of detected elements
+     * Detects and filters focusable elements for gamepad navigation, then computes
+     * grid dimensions and clamps the focused index.
      */
     detectElements() {
-        this.navState.elements = getFocusableElements(
-            this.options.containerSelector,
-            this.options.useGamepadIndex ?? false,
-            this.options.onlyViewport ?? false
-        );
-        
-        // Filter out disabled elements
-        this.navState.elements = this.navState.elements.filter(el => 
-            (el instanceof HTMLElement ? el.offsetParent !== null : false) && // visible
-            (!(el instanceof HTMLInputElement || el instanceof HTMLButtonElement) || !el.disabled) &&
-            (el instanceof HTMLElement ? !el.hasAttribute('disabled') : false)
-        );
-
-        // Calculate grid dimensions
-        const container = this.options.containerSelector ? 
-            document.querySelector(this.options.containerSelector) : document.body;
-        
-        this.navState.gridDimensions = calculateGridDimensions(this.navState.elements, container ?? document.body);
-
-        // Ensure focused index is within bounds
-        if (this.navState.focusedElementIndex >= this.navState.elements.length) {
-            this.navState.focusedElementIndex = Math.max(0, this.navState.elements.length - 1);
-        }
-
-        console.info(`[🎮 🕹️ Gamepad Controller] - Detected ${this.navState.elements.length} navigable elements (${this.navState.gridDimensions.rows}x${this.navState.gridDimensions.cols})`);
+        this.focus.detectElements();
     }
 
-    // Set elements manually
+    /** Set the navigable elements manually, bypassing auto-detection. */
     setElements(elements: Element[]) {
-        this.navState.elements = elements;
-        
-        // Calculate grid dimensions
-        const container = this.options.containerSelector ? 
-            document.querySelector(this.options.containerSelector) : document.body;
-        
-        this.navState.gridDimensions = calculateGridDimensions(this.navState.elements, container ?? document.body);
-        
-        // Reset focus index
-        this.navState.focusedElementIndex = 0;
-        this.updateFocus();
+        this.focus.setElements(elements);
     }
 
     /**
-     * Updates focus styling for the currently focused element.
-     * - Skips if dual context mode is enabled (handled by context manager)
-     * - Removes focus styling from all elements
-     * - Adds focus styling to currently focused element
-     * - Scrolls focused element into view
-     * - Triggers onFocus callback if defined
+     * Updates focus styling for the currently focused element (single-context mode).
+     * In dual-context mode focus is owned by the context manager.
      */
     updateFocus() {
-        if (this.options.enableDualContext) return; // Handled by context manager
-
-        // Remove focus from all elements
-        this.navState.elements.forEach((element) => {
-            if (this.options.useDataAttributes) {
-                removeGamepadDataAttributes(element);
-            } else {
-                element.classList.remove(this.options.focusedClass ?? '');
-            }
-        });
-
-        // Add focus to current element
-        if (this.navState.elements[this.navState.focusedElementIndex]) {
-            const focusedElement = this.navState.elements[this.navState.focusedElementIndex];
-
-            if (this.options.useDataAttributes) {
-                addGamepadDataAttributes(focusedElement, 'focused');
-            } else {
-                focusedElement.classList.add(this.options.focusedClass ?? '');
-            }
-
-            // Scroll into view if needed
-            focusedElement.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'nearest'
-            });
-
-            if (this.navState.onFocus) {
-                this.navState.onFocus(focusedElement, this.navState.focusedElementIndex);
-            }
-        }
+        this.focus.updateFocus();
     }
 
-    // Clear focus from all elements
+    /** Clear focus from all elements. */
     clearFocus() {
-        this.navState.elements.forEach((element) => {
-            if (this.options.useDataAttributes) {
-                removeGamepadDataAttributes(element);
-            } else {
-                element.classList.remove(this.options.focusedClass ?? '');
-                element.classList.remove(this.options.selectedClass ?? '');
-            }
-        });
+        this.focus.clearFocus();
     }
 
-    // Navigate to specific index
+    /** Navigate to a specific index (single-context mode). */
     navigateToIndex(index: number): boolean {
-        return navigateToIndex(this.navState, index, this.updateFocus.bind(this));
+        return this.focus.navigateToIndex(index);
     }
 
     // Public API methods
@@ -411,43 +371,55 @@ export class GamepadService {
         if (this.options.enableDualContext) {
             const activeContext = this.contextManager.getActiveContext();
             return activeContext ? activeContext.getCurrentElement() : null;
-        } else {
-            return (this.navState.elements && typeof this.navState.focusedElementIndex === 'number' && this.navState.elements[this.navState.focusedElementIndex]) ? this.navState.elements[this.navState.focusedElementIndex] : null;
         }
+        return this.focus.getCurrentElement();
     }
 
     getCurrentIndex(): number {
         if (this.options.enableDualContext) {
             const activeContext = this.contextManager.getActiveContext();
             return activeContext ? activeContext.getCurrentIndex() : -1;
-        } else {
-            return this.navState.focusedElementIndex;
         }
+        return this.focus.getCurrentIndex();
     }
 
     getElements(): Element[] {
         if (this.options.enableDualContext) {
             const activeContext = this.contextManager.getActiveContext();
             return activeContext ? activeContext.getElements() : [];
-        } else {
-            return this.navState.elements;
         }
+        return this.focus.getElements();
     }
 
+    /**
+     * The type of the most-recently-active controller (e.g. `'xbox'`). When several
+     * controllers are connected this reflects the last one the user touched. Use
+     * {@link getControllerTypes} to list every connected controller.
+     */
     getControllerType(): string {
-        return this.eventState.currentControllerType;
+        return this.input.getControllerType();
+    }
+
+    /**
+     * The de-duplicated list of controller types currently connected, e.g.
+     * `['xbox', 'playstation']`. Empty when no controller is connected.
+     */
+    getControllerTypes(): string[] {
+        return this.input.getControllerTypes();
     }
 
     isControllerConnected(): boolean {
-        return Object.keys(this.eventState.gamepads).length > 0;
+        return this.input.isControllerConnected();
     }
 
     refresh() {
+        // Explicit refresh implies the DOM may have changed — drop the focusable memo.
+        invalidateFocusableElementsCache();
         if (this.options.enableDualContext) {
             this.contextManager.refresh();
         } else {
-            this.detectElements();
-            this.updateFocus();
+            this.focus.detectElements();
+            this.focus.updateFocus();
         }
     }
 
@@ -467,77 +439,4 @@ export class GamepadService {
     getAllContexts() {
         return this.contextManager.getAllContexts();
     }
-
-    // Event callback setters (public API)
-    set onFocus(callback: ((element: Element, index: number) => void) | null) {
-        this.navState.onFocus = callback;
-    }
-
-    get onFocus() {
-        return this.navState.onFocus;
-    }
-
-    set onSelect(callback: ((element: Element, index: number) => void) | null) {
-        this.navState.onSelect = callback;
-    }
-
-    get onSelect() {
-        return this.navState.onSelect;
-    }
-
-    set onControllerConnect(callback: ((gamepad: Gamepad) => void) | null) {
-        this.eventState.onControllerConnect = callback;
-    }
-
-    get onControllerConnect() {
-        return this.eventState.onControllerConnect;
-    }
-
-    set onControllerDisconnect(callback: ((gamepad: Gamepad) => void) | null) {
-        this.eventState.onControllerDisconnect = callback;
-    }
-
-    get onControllerDisconnect() {
-        return this.eventState.onControllerDisconnect;
-    }
-
-    set onNavigationMenuOpen(callback: ((button: string) => void) | null) {
-        this.eventState.onNavigationMenuOpen = callback;
-    }
-
-    get onNavigationMenuOpen() {
-        return this.eventState.onNavigationMenuOpen;
-    }
-
-    set onBackButton(callback: (() => void) | null) {
-        this.eventState.onBackButton = callback;
-    }
-
-    get onBackButton() {
-        return this.eventState.onBackButton;
-    }
-
-    set onButtonDown(callback: ((buttonIndex: number, gamepad: Gamepad) => void) | undefined) {
-        this.eventState.onButtonDown = callback;
-    }
-    get onButtonDown(): ((buttonIndex: number, gamepad: Gamepad) => void) | undefined {
-        return this.eventState.onButtonDown;
-    }
-    set onButtonUp(callback: ((buttonIndex: number, gamepad: Gamepad) => void) | undefined) {
-        this.eventState.onButtonUp = callback;
-    }
-    get onButtonUp(): ((buttonIndex: number, gamepad: Gamepad) => void) | undefined {
-        return this.eventState.onButtonUp;
-    }
-
-    set onContextSwitch(callback: ((newContext: any, oldContext: any) => void) | null) {
-        // This is stored directly on the instance since it's not part of event state
-        this._onContextSwitch = callback;
-    }
-
-    get onContextSwitch() {
-        return this._onContextSwitch;
-    }
-
-    private _onContextSwitch: ((newContext: any, oldContext: any) => void) | null = null;
-} 
+}

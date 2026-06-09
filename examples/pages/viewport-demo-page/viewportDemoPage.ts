@@ -21,31 +21,34 @@ function initGamepadService(onlyViewport: boolean = true) {
         useGamepadIndex: false,
         onlyViewport: onlyViewport,
         autoAddStyles: true,
+        // 'smooth' (default) animates each focus scroll; switch to 'auto' for instant jumps
+        // if rapid navigation on a long page feels janky.
+        scrollBehavior: 'smooth',
         statusElementId: 'gamepad-status'
     });
 
-    // Set up event handlers
-    gamepadService.onFocus = (element, index) => {
+    // Set up event handlers (each new instance subscribes fresh)
+    gamepadService.on('focus', (element, index) => {
         console.log(`Focused element ${index}:`, element);
         updateElementCount();
-    };
+    });
 
-    gamepadService.onSelect = (element, index) => {
+    gamepadService.on('select', (element, index) => {
         console.log(`Selected element ${index}:`, element);
-        
+
         // Show which element was selected
         const cardTitle = element.querySelector('h3')?.textContent || 'Unknown';
         alert(`Selected: ${cardTitle}`);
-    };
+    });
 
-    gamepadService.onControllerConnect = (gamepad) => {
+    gamepadService.on('controllerconnect', (gamepad) => {
         console.log('Controller connected:', gamepad.id);
         updateElementCount();
-    };
+    });
 
-    gamepadService.onControllerDisconnect = (gamepad) => {
+    gamepadService.on('controllerdisconnect', (gamepad) => {
         console.log('Controller disconnected:', gamepad.id);
-    };
+    });
 
     // Initialize the service
     gamepadService.init();

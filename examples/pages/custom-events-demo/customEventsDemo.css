@@ -1,0 +1,54 @@
+/* custom-events-demo — page-specific. Shared styles come from theme.css. */
+
+.panel h3 { color: var(--gp-accent-2); }
+
+.host-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.dpad-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    align-items: center;
+    margin-top: 18px;
+}
+
+/* D-pad cross layout */
+.dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 56px);
+    grid-template-rows: repeat(3, 56px);
+    gap: 6px;
+}
+.dpad .up { grid-area: 1 / 2; }
+.dpad .left { grid-area: 2 / 1; }
+.dpad .center { grid-area: 2 / 2; }
+.dpad .right { grid-area: 2 / 3; }
+.dpad .down { grid-area: 3 / 2; }
+
+.dbtn {
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 0;
+    border-radius: var(--gp-radius-sm);
+}
+.dbtn.center {
+    font-size: 0.7rem;
+    color: var(--gp-text-muted);
+    background: var(--gp-bg);
+    cursor: default;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.abtn { white-space: nowrap; }
+.abtn.a { border-color: var(--gp-select); }
+.abtn.b { border-color: var(--gp-danger); }
+
+.hint { margin: 16px 0 0; color: var(--gp-text-muted); font-size: 0.88rem; }

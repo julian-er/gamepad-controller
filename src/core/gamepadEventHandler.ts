@@ -1,78 +1,219 @@
-import { navigateGrid, navigateSpatial, handleSelection, handleBackButton, handleShoulderNavigation, updateStatus, handleScrolling } from './gamepadNavigation.js';
+import {
+    handleSelection,
+    handleBackButton,
+    handleShoulderNavigation,
+    handleNavigation,
+    updateStatus,
+    updateGamepadStatus,
+    handleScrolling,
+} from './gamepadNavigation.js';
 import { isValidGamepad, detectControllerType, applyDeadzone } from '../utils/controllerUtils.js';
-import { getPrimaryActionButtonIndex, getDpadIndices } from '../controllerMappings.js';
-import { updateStatusElement } from '../utils/domUtils.js';
-import type { ControllerType } from '../Interfaces/ControllerMappings.js';
-import type { NavigationState } from '../Interfaces/NavigationState.js';
-import { GamepadEventState, GamepadEvent } from '../Interfaces/GamepadEvents.js';
+import {
+    getPrimaryActionButtonIndex,
+    getBackButtonIndex,
+    getShoulderIndices,
+    getDpadIndices,
+} from '../mappings/controllerMappings.js';
+import { logger } from '../utils/logger.js';
+import type { ControllerType } from '../interfaces/ControllerMappings.js';
+import type { NavigationState } from '../interfaces/NavigationState.js';
+import type { GamepadEventState, GamepadEvent, PadInputState } from '../interfaces/GamepadEvents.js';
+import type { GamepadServiceOptions } from '../interfaces/GamepadServiceOptions.js';
+import type { GamepadContextManager } from '../contexts/GamepadContextManager.js';
+import type { PlatformAdapter, WindowEventListener } from './platform/PlatformAdapter.js';
 
-
+/** Default cooldown (ms) for back/shoulder edge-triggered actions. */
+const DEFAULT_ACTION_COOLDOWN = 300;
 
 /**
- * Sets up event listeners for gamepad connection events and detects existing gamepads
+ * Safely reads the live gamepad set. `navigator.getGamepads()` can throw `SecurityError`
+ * when the Gamepad API is disabled by `Permissions-Policy: gamepad` (or inside a
+ * cross-origin iframe without `allow="gamepad"`). We warn/surface that exactly once and
+ * return an empty list so the caller can no-op the frame and keep the rAF loop alive —
+ * the policy can still be granted later (e.g. after a user gesture).
+ * @param eventState - Shared event state (holds the one-shot warn flag + error callback)
+ * @returns The live gamepads array, or an empty array if access is blocked/unavailable
+ */
+function safeGetGamepads(
+    eventState: GamepadEventState,
+    platform: PlatformAdapter
+): ReturnType<Navigator['getGamepads']> | [] {
+    try {
+        // Returns [] when the Gamepad API is absent; throws SecurityError when policy-blocked.
+        return platform.getGamepads();
+    } catch (err) {
+        if (!eventState.hasWarnedPolicyBlocked) {
+            eventState.hasWarnedPolicyBlocked = true;
+            const error = err instanceof Error ? err : new Error(String(err));
+            logger.warn(
+                'navigator.getGamepads() was blocked (likely Permissions-Policy: gamepad or a ' +
+                    'cross-origin iframe without allow="gamepad"). Gamepad navigation is inactive.',
+                error
+            );
+            eventState.onError?.(error);
+        }
+        return [];
+    }
+}
+
+/**
+ * Sets up event listeners for gamepad connection events and detects existing gamepads.
+ * Supports both native browser APIs and custom DOM events based on configuration.
  * @param state - The current gamepad event state object
  * @param handleGamepadConnected - The callback function for gamepad connected events
  * @param handleGamepadDisconnected - The callback function for gamepad disconnected events
+ * @param options - Optional configuration for custom events mode
  */
 export function setupEventListeners(
-    state: GamepadEventState, 
+    state: GamepadEventState,
     handleGamepadConnected: (event: GamepadEvent) => void,
-    handleGamepadDisconnected: (event: GamepadEvent) => void
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    platform: PlatformAdapter,
+    options?: GamepadServiceOptions
 ) {
-    window.addEventListener('gamepadconnected', handleGamepadConnected);
-    window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+    if (options?.useCustomEvents) {
+        // Setup custom event listeners for WinUI integration
+        setupCustomEventListeners(state, handleGamepadConnected, handleGamepadDisconnected, platform, options);
+    } else {
+        // Native browser gamepad API requires the Gamepad API to be present.
+        if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') {
+            logger.warn('Gamepad API not available in this environment; navigation will be inactive.');
+            return;
+        }
+        // Setup native browser gamepad event listeners
+        platform.addWindowListener('gamepadconnected', handleGamepadConnected as WindowEventListener);
+        platform.addWindowListener('gamepaddisconnected', handleGamepadDisconnected as WindowEventListener);
 
-    // Check for already connected gamepads
-    detectExistingGamepads(state);
+        // Check for already connected gamepads
+        detectExistingGamepads(state, platform);
+    }
+}
+
+/**
+ * Sets up custom DOM event listeners for gamepad events (WinUI integration).
+ * Listens to custom events instead of native browser gamepad APIs.
+ *
+ * Listener references are stored on `state.customListeners` so they can be removed
+ * again in {@link removeEventListeners} — anonymous listeners would otherwise leak
+ * across destroy()/re-init() cycles.
+ * @param state - The current gamepad event state object
+ * @param handleGamepadConnected - The callback function for gamepad connected events
+ * @param handleGamepadDisconnected - The callback function for gamepad disconnected events
+ * @param options - Configuration containing custom event names
+ */
+export function setupCustomEventListeners(
+    state: GamepadEventState,
+    handleGamepadConnected: (event: GamepadEvent) => void,
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    platform: PlatformAdapter,
+    options: GamepadServiceOptions
+) {
+    const connectedEvent = options.customConnectedEvent || 'hubgamepadconnected';
+    const disconnectedEvent = options.customDisconnectedEvent || 'hubgamepaddisconnected';
+    const stateChangedEvent = options.customStateChangedEvent || 'hubgamepadstatechanged';
+
+    logger.info(`Setting up custom event listeners: ${connectedEvent}, ${disconnectedEvent}, ${stateChangedEvent}`);
+
+    const onConnected = (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            handleGamepadConnected(createMockGamepadEvent(customEvent.detail.gamepad));
+        }
+    };
+
+    const onDisconnected = (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            handleGamepadDisconnected(createMockGamepadEvent(customEvent.detail.gamepad));
+        }
+    };
+
+    const onStateChanged = (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            const gamepad = customEvent.detail.gamepad;
+            if (isValidGamepad(gamepad)) {
+                state.gamepads[gamepad.index || 0] = gamepad;
+            }
+        }
+    };
+
+    platform.addWindowListener(connectedEvent, onConnected);
+    platform.addWindowListener(disconnectedEvent, onDisconnected);
+    platform.addWindowListener(stateChangedEvent, onStateChanged);
+
+    // Store references so removeEventListeners() can detach them.
+    state.customListeners = {
+        connectedEvent,
+        disconnectedEvent,
+        stateChangedEvent,
+        onConnected,
+        onDisconnected,
+        onStateChanged,
+    };
+
+    logger.info('Custom event listeners initialized for WinUI integration');
+}
+
+/**
+ * Lightweight internal event interface used by the gamepad handlers. The handlers
+ * only ever read `event.gamepad`, so we no longer fabricate a full 25-property
+ * `GamepadEvent` mock.
+ */
+function createMockGamepadEvent(gamepad: Gamepad): GamepadEvent {
+    return { gamepad } as GamepadEvent;
 }
 
 /**
  * Detects and initializes gamepads that are already connected when the page loads
  * @param state - The current gamepad event state object to update with detected gamepads
  */
-export function detectExistingGamepads(state: GamepadEventState) {
-    const gamepads = navigator.getGamepads();
+export function detectExistingGamepads(state: GamepadEventState, platform: PlatformAdapter) {
+    const gamepads = safeGetGamepads(state, platform);
     for (let i = 0; i < gamepads.length; i++) {
         const gamepad = gamepads[i];
         if (gamepad && isValidGamepad(gamepad)) {
-            console.info(`[🎮 🕹️ Gamepad Controller] - Detected already connected gamepad: ${gamepad.id}`);
+            logger.info(`Detected already connected gamepad: ${gamepad.id}`);
 
-            // Add to state
             state.gamepads[gamepad.index] = gamepad;
+            state.currentControllerType = detectControllerType(gamepad);
 
-            // Update controller type
-            const detectedType = detectControllerType(gamepad);
-            state.currentControllerType = detectedType;
+            updateGamepadStatus(state.statusElementId, state.gamepads);
 
-            // Update status element if it exists
-            if (state.statusElementId) {
-                updateStatusElement(state.statusElementId, state.currentControllerType, true);
-            }
-
-            // Call connect callback
             if (state.onControllerConnect) {
                 state.onControllerConnect(gamepad);
             }
-
-            break; // Handle the first one
         }
     }
 }
 
 /**
- * Removes event listeners for gamepad connection events
- * @param handleGamepadConnected - The callback function for gamepad connected events
- * @param handleGamepadDisconnected - The callback function for gamepad disconnected events
+ * Removes all event listeners registered by {@link setupEventListeners}, covering
+ * both the native and custom-event modes.
+ * @param state - The current gamepad event state object (holds custom listener refs)
+ * @param handleGamepadConnected - The native connected handler to detach
+ * @param handleGamepadDisconnected - The native disconnected handler to detach
  */
 export function removeEventListeners(
+    state: GamepadEventState,
     handleGamepadConnected: (event: GamepadEvent) => void,
-    handleGamepadDisconnected: (event: GamepadEvent) => void
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    platform: PlatformAdapter
 ) {
-    window.removeEventListener('gamepadconnected', handleGamepadConnected);
-    window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected);
+    // Native listeners
+    platform.removeWindowListener('gamepadconnected', handleGamepadConnected as WindowEventListener);
+    platform.removeWindowListener('gamepaddisconnected', handleGamepadDisconnected as WindowEventListener);
+
+    // Custom-event listeners (if custom mode was used)
+    const custom = state.customListeners;
+    if (custom) {
+        platform.removeWindowListener(custom.connectedEvent, custom.onConnected);
+        platform.removeWindowListener(custom.disconnectedEvent, custom.onDisconnected);
+        platform.removeWindowListener(custom.stateChangedEvent, custom.onStateChanged);
+        state.customListeners = null;
+    }
 }
 
-// Handle gamepad connected event
 /**
  * Handles a gamepad connected event by validating the gamepad, updating state, and triggering callbacks
  * @param state - The current gamepad event state object
@@ -83,23 +224,17 @@ export function handleGamepadConnected(state: GamepadEventState, event: GamepadE
 
     if (isValidGamepad(gamepad)) {
         state.gamepads[gamepad.index] = gamepad;
+        state.currentControllerType = detectControllerType(gamepad);
 
-        const detectedType = detectControllerType(gamepad);
-        state.currentControllerType = detectedType;
+        logger.info(`Gamepad connected: ${gamepad.id} (${state.currentControllerType})`);
 
-        console.info(` [🎮 🕹️ Gamepad Controller] - Gamepad connected: ${gamepad.id} (${state.currentControllerType})`);
-
-        // Update status element immediately if it exists
-        if (state.statusElementId) {
-            updateStatusElement(state.statusElementId, state.currentControllerType, true);
-        }
+        updateGamepadStatus(state.statusElementId, state.gamepads);
 
         if (state.onControllerConnect) {
             state.onControllerConnect(gamepad);
         }
     }
 }
-
 
 /**
  * Handles a gamepad disconnected event by cleaning up state and triggering callbacks
@@ -111,12 +246,11 @@ export function handleGamepadDisconnected(state: GamepadEventState, event: Gamep
 
     if (state.gamepads[gamepad.index]) {
         delete state.gamepads[gamepad.index];
-        console.info(`[🎮 🕹️ Gamepad Controller] - Gamepad disconnected: ${event.gamepad.id}`);
+        delete state.padInputStates[gamepad.index];
+        logger.info(`Gamepad disconnected: ${gamepad.id}`);
 
-        // Update status element to show disconnected state if it exists
-        if (state.statusElementId) {
-            updateStatusElement(state.statusElementId, 'unknown', false);
-        }
+        // Reflect any controllers that are still connected (or the waiting state).
+        updateGamepadStatus(state.statusElementId, state.gamepads);
 
         if (state.onControllerDisconnect) {
             state.onControllerDisconnect(gamepad);
@@ -125,237 +259,404 @@ export function handleGamepadDisconnected(state: GamepadEventState, event: Gamep
 }
 
 /**
- * Handles navigation input and updates focus based on navigation mode and context
- * @param navState - The current navigation state object
- * @param direction - The direction to navigate ('up', 'down', 'left', 'right')
- * @param contextManager - Optional context manager for dual context navigation mode
- * @param updateFocusCallback - Optional callback function to run after focus is updated
- */
-export function handleNavigation(
-    navState: NavigationState,
-    direction: string,
-    contextManager?: any,
-    updateFocusCallback?: () => void
-) {
-    if (navState.options.enableDualContext && contextManager) {
-        // In dual context mode, use context manager for stick navigation
-        contextManager.handleStickNavigation(direction);
-    } else {
-        // Single context mode
-        if (navState.options.navigationMode === 'spatial') {
-            navigateSpatial(navState, direction, updateFocusCallback || (() => {}));
-        } else {
-            navigateGrid(navState, direction, updateFocusCallback || (() => {}));
-        }
-    }
-}
-
-
-/**
  * Starts the game loop for gamepad event handling
  * @param state - The current gamepad event state object
- * @param gameLoop - The game loop function to execute each frame
+ * @param gameLoopImpl - The game loop function to execute each frame
  */
-export function startGameLoop(state: GamepadEventState, gameLoop: () => void) {
+export function startGameLoop(state: GamepadEventState, gameLoopImpl: () => void, platform: PlatformAdapter) {
     // Stop any existing game loop first
-    stopGameLoop(state);
+    stopGameLoop(state, platform);
 
     state.isRunning = true;
-    gameLoop();
+    gameLoopImpl();
 }
-
 
 /**
  * Stops the game loop and cleans up animation frames
  * @param state - The current gamepad event state object
+ * @param platform - Platform adapter used to cancel the scheduled frame
  */
-export function stopGameLoop(state: GamepadEventState) {
+export function stopGameLoop(state: GamepadEventState, platform: PlatformAdapter) {
     state.isRunning = false;
     if (state.animationFrameId !== null) {
-        cancelAnimationFrame(state.animationFrameId);
+        platform.cancelAnimationFrame(state.animationFrameId);
         state.animationFrameId = null;
     }
 }
 
 /**
- * Creates and returns the main game loop function for gamepad event handling
- * @param eventState - The current gamepad event state containing button states and callbacks
- * @param navState - The current navigation state containing focused elements and options
+ * Drops gamepads (and their per-pad state) that are no longer present in the live set.
+ * Guards against missed `gamepaddisconnected` events leaving stale entries that would
+ * skew {@link getConnectedControllerTypes}.
+ * @param eventState - The shared gamepad event state to prune
+ * @param liveIndices - Set of gamepad indices seen this frame
+ * @returns `true` if any entry was removed
+ */
+function pruneDisconnectedPads(eventState: GamepadEventState, liveIndices: Set<number>): boolean {
+    let removed = false;
+    for (const key of Object.keys(eventState.gamepads)) {
+        if (!liveIndices.has(Number(key))) {
+            delete eventState.gamepads[key];
+            delete eventState.padInputStates[Number(key)];
+            removed = true;
+        }
+    }
+    return removed;
+}
+
+/**
+ * Returns the per-gamepad input state for `gp`, creating and seeding it on first use.
+ * Each connected controller gets its own edge/cooldown record so that several pads can
+ * be processed in the same frame without clobbering one another's state.
+ * @param eventState - The shared gamepad event state
+ * @param gp - The gamepad whose per-pad state is needed
+ */
+function getPadState(eventState: GamepadEventState, gp: Gamepad): PadInputState {
+    if (!eventState.padInputStates) eventState.padInputStates = {};
+    let pad = eventState.padInputStates[gp.index];
+    if (!pad) {
+        pad = {
+            lastButtonPress: 0,
+            lastAxisMove: 0,
+            lastBackButtonState: false,
+            lastBackTime: 0,
+            lastR1State: false,
+            lastL1State: false,
+            lastShoulderTime: 0,
+            lastScrollTime: 0,
+            // Seed from the current frame so a button already held at connect time
+            // doesn't fire a spurious down-edge.
+            lastButtonStates: gp.buttons.map((b) => b.pressed),
+        };
+        eventState.padInputStates[gp.index] = pad;
+    }
+    return pad;
+}
+
+/**
+ * Processes a single gamepad's input for one frame. This is the single source of
+ * truth for input handling shared by both the native polling loop and the
+ * custom-event loop — the only difference between those modes is where `gp` comes
+ * from (live poll vs. event snapshot), not how it is interpreted.
+ *
+ * All edge-detection flags and cooldown timestamps are kept per-gamepad (keyed by
+ * `gp.index` on {@link GamepadEventState.padInputStates}), so multiple controllers can
+ * drive the same shared navigation cursor without interfering with each other. Button
+ * mapping uses each pad's own detected type (important for Nintendo's swapped A/B).
+ *
+ * @param gp - The gamepad to read this frame
+ * @param eventState - Mutable event state (per-pad timers, shared callbacks)
+ * @param navState - Navigation state (focused element, options)
+ * @param currentTimestamp - `performance.now()` for the current frame
+ * @param contextManager - Optional context manager for dual-context mode
+ * @param updateFocusCallback - Optional callback invoked after focus changes
+ */
+export function processGamepad(
+    gp: Gamepad,
+    eventState: GamepadEventState,
+    navState: NavigationState,
+    currentTimestamp: number,
+    contextManager?: GamepadContextManager,
+    updateFocusCallback?: () => void
+): void {
+    const pad = getPadState(eventState, gp);
+    // Each pad maps buttons by its own detected type (important for Nintendo's swapped A/B).
+    const controllerType = detectControllerType(gp) as ControllerType;
+
+    // Roll up "did this pad do anything this frame" to drive the most-recently-active label.
+    // (Primary/back/shoulder edges intentionally do NOT count here — only generic button
+    // presses, directional moves, and scroll input do, matching the original behavior.)
+    let hadInput = processButtonEdges(gp, pad, eventState);
+    processPrimaryAction(gp, pad, navState, eventState, currentTimestamp, controllerType, contextManager);
+    processBackAction(gp, pad, navState, eventState, currentTimestamp, controllerType);
+    processShoulderAction(gp, pad, navState, eventState, currentTimestamp, controllerType, contextManager);
+    if (
+        processDirectionalMove(gp, pad, navState, currentTimestamp, controllerType, contextManager, updateFocusCallback)
+    )
+        hadInput = true;
+    if (processRightStickScroll(gp, pad, navState, currentTimestamp)) hadInput = true;
+
+    // --- Most-recently-active controller (drives status label / getControllerType) ---
+    if (hadInput && controllerType !== eventState.currentControllerType) {
+        eventState.currentControllerType = controllerType;
+        updateStatus(navState, eventState.gamepads);
+    }
+}
+
+/**
+ * Generic per-button edge detection. Fires `onButtonDown`/`onButtonUp` on press/release
+ * transitions and records the current pressed states for the next frame.
+ * @returns `true` if any button is currently pressed (counts toward most-recently-active).
+ */
+export function processButtonEdges(gp: Gamepad, pad: PadInputState, eventState: GamepadEventState): boolean {
+    let hadInput = false;
+    const prevStates = pad.lastButtonStates;
+    for (let i = 0; i < gp.buttons.length; i++) {
+        const prev = prevStates[i] || false;
+        const curr = gp.buttons[i]?.pressed ?? false;
+        if (curr) hadInput = true;
+        if (curr && !prev && typeof eventState.onButtonDown === 'function') {
+            eventState.onButtonDown(i, gp);
+        }
+        if (!curr && prev && typeof eventState.onButtonUp === 'function') {
+            eventState.onButtonUp(i, gp);
+        }
+        prevStates[i] = curr;
+    }
+    return hadInput;
+}
+
+/**
+ * Primary action button (A / X / Cross). Debounced selection via {@link handleSelection}.
+ */
+export function processPrimaryAction(
+    gp: Gamepad,
+    pad: PadInputState,
+    navState: NavigationState,
+    eventState: GamepadEventState,
+    currentTimestamp: number,
+    controllerType: ControllerType,
+    contextManager?: GamepadContextManager
+): void {
+    const debounceTime = navState.options.debounceTime ?? 0;
+    const primaryButtonIndex = getPrimaryActionButtonIndex(controllerType);
+    if (gp.buttons[primaryButtonIndex]?.pressed) {
+        if (currentTimestamp - pad.lastButtonPress > debounceTime) {
+            handleSelection(navState, contextManager, eventState.onNavigationRequest);
+            pad.lastButtonPress = currentTimestamp;
+        }
+    }
+}
+
+/**
+ * Back button (B / Circle). Edge-triggered with a cooldown; delegates to
+ * {@link handleBackButton} (which emits or falls back to browser history).
+ */
+export function processBackAction(
+    gp: Gamepad,
+    pad: PadInputState,
+    navState: NavigationState,
+    eventState: GamepadEventState,
+    currentTimestamp: number,
+    controllerType: ControllerType
+): void {
+    const options = navState.options;
+    if (!options.enableBackButton) return;
+
+    const backCooldown = options.backButtonCooldown ?? DEFAULT_ACTION_COOLDOWN;
+    const backIndex = getBackButtonIndex(controllerType);
+    const backPressed = gp.buttons[backIndex]?.pressed ?? false;
+    if (backPressed && !pad.lastBackButtonState) {
+        if (currentTimestamp - pad.lastBackTime > backCooldown) {
+            handleBackButton(eventState.onBackButton);
+            pad.lastBackTime = currentTimestamp;
+        }
+    }
+    pad.lastBackButtonState = backPressed;
+}
+
+/**
+ * Shoulder buttons (R1 / L1). Edge-triggered with a cooldown; R1 wins if both edges fire
+ * on the same frame. Forwards to {@link handleShoulderNavigation}.
+ */
+export function processShoulderAction(
+    gp: Gamepad,
+    pad: PadInputState,
+    navState: NavigationState,
+    eventState: GamepadEventState,
+    currentTimestamp: number,
+    controllerType: ControllerType,
+    contextManager?: GamepadContextManager
+): void {
+    const options = navState.options;
+    if (!options.enableShoulderNavigation) return;
+
+    const shoulderCooldown = options.shoulderCooldown ?? DEFAULT_ACTION_COOLDOWN;
+    const { l1, r1 } = getShoulderIndices(controllerType);
+    const r1Pressed = gp.buttons[r1]?.pressed ?? false;
+    const l1Pressed = gp.buttons[l1]?.pressed ?? false;
+
+    const r1Edge = r1Pressed && !pad.lastR1State;
+    const l1Edge = l1Pressed && !pad.lastL1State;
+    if (r1Edge || l1Edge) {
+        if (currentTimestamp - pad.lastShoulderTime > shoulderCooldown) {
+            // r1 takes priority if both edges fire on the same frame.
+            const button = r1Edge ? 'R1' : 'L1';
+            handleShoulderNavigation(navState, button, contextManager, eventState.onNavigationMenuOpen, eventState.onNavigationRequest);
+            pad.lastShoulderTime = currentTimestamp;
+        }
+    }
+
+    pad.lastR1State = r1Pressed;
+    pad.lastL1State = l1Pressed;
+}
+
+/**
+ * Directional navigation: D-pad takes priority, left stick is the fallback. Debounced via
+ * `lastAxisMove`. Forwards to {@link handleNavigation}.
+ * @returns `true` if a directional move occurred this frame.
+ */
+export function processDirectionalMove(
+    gp: Gamepad,
+    pad: PadInputState,
+    navState: NavigationState,
+    currentTimestamp: number,
+    controllerType: ControllerType,
+    contextManager?: GamepadContextManager,
+    updateFocusCallback?: () => void
+): boolean {
+    const options = navState.options;
+    const debounceTime = options.debounceTime ?? 0;
+    if (currentTimestamp - pad.lastAxisMove <= debounceTime) return false;
+
+    const dpad = getDpadIndices(controllerType);
+    let direction: 'up' | 'down' | 'left' | 'right' | null = null;
+
+    if (gp.buttons[dpad.up]?.pressed) direction = 'up';
+    else if (gp.buttons[dpad.down]?.pressed) direction = 'down';
+    else if (gp.buttons[dpad.left]?.pressed) direction = 'left';
+    else if (gp.buttons[dpad.right]?.pressed) direction = 'right';
+
+    if (!direction) {
+        const leftStickX = applyDeadzone(gp.axes[0] ?? 0, options.deadzone);
+        const leftStickY = applyDeadzone(gp.axes[1] ?? 0, options.deadzone);
+        if (Math.abs(leftStickX) > 0 || Math.abs(leftStickY) > 0) {
+            direction =
+                Math.abs(leftStickX) > Math.abs(leftStickY)
+                    ? leftStickX > 0
+                        ? 'right'
+                        : 'left'
+                    : leftStickY > 0
+                      ? 'down'
+                      : 'up';
+        }
+    }
+
+    if (direction) {
+        handleNavigation(navState, direction, contextManager, updateFocusCallback);
+        pad.lastAxisMove = currentTimestamp;
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Right-stick scrolling. Debounced via `lastScrollTime`. Forwards to {@link handleScrolling}.
+ * @returns `true` if the right stick was deflected this frame (counts toward most-recently-active).
+ */
+export function processRightStickScroll(
+    gp: Gamepad,
+    pad: PadInputState,
+    navState: NavigationState,
+    currentTimestamp: number
+): boolean {
+    const options = navState.options;
+    if (!options.enableRightStickScroll) return false;
+
+    const rightStickX = applyDeadzone(gp.axes[2] ?? 0, options.deadzone);
+    const rightStickY = applyDeadzone(gp.axes[3] ?? 0, options.deadzone);
+
+    if (Math.abs(rightStickX) > 0 || Math.abs(rightStickY) > 0) {
+        if (currentTimestamp - pad.lastScrollTime > (options.scrollDebounceTime ?? 50)) {
+            handleScrolling(rightStickX, rightStickY, options.scrollSpeed ?? 1, options.containerSelector);
+            pad.lastScrollTime = currentTimestamp;
+        }
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Creates the native game loop, which polls `navigator.getGamepads()` each frame
+ * and delegates input handling to the shared {@link processGamepad}.
+ * @param eventState - The current gamepad event state
+ * @param navState - The current navigation state
  * @param contextManager - Optional context manager for dual context navigation mode
  * @param updateFocusCallback - Optional callback function to run after focus is updated
  * @returns A function that implements the game loop logic
  */
 export function gameLoop(
-    eventState: GamepadEventState, 
+    eventState: GamepadEventState,
     navState: NavigationState,
-    contextManager?: any,
+    platform: PlatformAdapter,
+    contextManager?: GamepadContextManager,
     updateFocusCallback?: () => void
 ): () => void {
-    /**
-     * The main game loop implementation function that runs each animation frame
-     * Handles gamepad input detection, button state tracking, and navigation
-     * @returns {void}
-     */
     return function gameLoopImpl(): void {
-        // Check if loop should continue running
         if (!eventState.isRunning) {
             eventState.animationFrameId = null;
             return;
         }
 
-        const currentTimestamp = performance.now();
-        const connectedGamepads = navigator.getGamepads();
+        const currentTimestamp = platform.now();
+        // Guarded read: getGamepads() can throw SecurityError under Permissions-Policy; on a
+        // block this returns [] (and warns once) so the loop no-ops the frame but stays alive.
+        const connectedGamepads = safeGetGamepads(eventState, platform);
 
+        // Process EVERY valid controller so that any connected pad can drive the shared
+        // navigation cursor (couch / hand-off model). Per-pad state in processGamepad keeps
+        // them from clobbering each other. A frozen "ghost" duplicate entry (common with
+        // Bluetooth DualShock/DualSense) reports all-buttons-unpressed, so it's a harmless
+        // no-op rather than swallowing input the way "process only the first pad" did.
+        const seen = new Set<number>();
         for (const gp of connectedGamepads) {
+            if (!gp || !isValidGamepad(gp)) continue;
+            eventState.gamepads[gp.index] = gp;
+            seen.add(gp.index);
+            processGamepad(gp, eventState, navState, currentTimestamp, contextManager, updateFocusCallback);
+        }
+
+        // Prune slots that vanished from getGamepads() (e.g. a missed disconnect event) so
+        // the connected-types list and per-pad state stay accurate.
+        if (pruneDisconnectedPads(eventState, seen)) {
+            updateStatus(navState, eventState.gamepads);
+        }
+
+        eventState.animationFrameId = platform.requestAnimationFrame(gameLoopImpl);
+    };
+}
+
+/**
+ * Creates the custom-events game loop. Instead of polling the browser, it reads
+ * the latest gamepad snapshots stored on `eventState.gamepads` (populated by the
+ * `statechanged` custom event) and delegates to the shared {@link processGamepad}.
+ * @param eventState - The current gamepad event state
+ * @param navState - The current navigation state
+ * @param contextManager - Optional context manager for dual context navigation mode
+ * @param updateFocusCallback - Optional callback function to run after focus is updated
+ * @returns A function that implements the custom events game loop logic
+ */
+export function createCustomEventGameLoop(
+    eventState: GamepadEventState,
+    navState: NavigationState,
+    platform: PlatformAdapter,
+    contextManager?: GamepadContextManager,
+    updateFocusCallback?: () => void
+): () => void {
+    return function customEventGameLoopImpl(): void {
+        if (!eventState.isRunning) {
+            eventState.animationFrameId = null;
+            return;
+        }
+
+        const currentTimestamp = platform.now();
+
+        // Process every valid gamepad snapshot so multiple host-fed controllers all drive
+        // the shared cursor, consistent with the native loop. Per-pad state keeps them apart.
+        const seen = new Set<number>();
+        for (const gamepadIndex in eventState.gamepads) {
+            const gp = eventState.gamepads[gamepadIndex];
             if (gp && isValidGamepad(gp)) {
-                eventState.gamepads[gp.index] = gp;
-
-                // --- Button event handling ---
-                if (!eventState.lastButtonStates) eventState.lastButtonStates = {};
-                if (!eventState.lastButtonStates[gp.index]) {
-                    eventState.lastButtonStates[gp.index] = gp.buttons.map(b => b.pressed);
-                }
-                const prevStates = eventState.lastButtonStates[gp.index];
-                for (let i = 0; i < gp.buttons.length; i++) {
-                    const prev = prevStates[i] || false;
-                    const curr = gp.buttons[i].pressed;
-                    if (curr && !prev && typeof eventState.onButtonDown === 'function') {
-                        eventState.onButtonDown(i, gp);
-                    }
-                    if (!curr && prev && typeof eventState.onButtonUp === 'function') {
-                        eventState.onButtonUp(i, gp);
-                    }
-                    prevStates[i] = curr;
-                }
-                // Update controller type if changed
-                const detectedType = detectControllerType(gp);
-                if (detectedType !== eventState.currentControllerType) {
-                    eventState.currentControllerType = detectedType;
-                    updateStatus(navState, eventState.gamepads, eventState.currentControllerType);
-                }
-
-                // Handle primary action button (A/X/Cross)
-                const primaryButtonIndex = getPrimaryActionButtonIndex(eventState.currentControllerType as ControllerType);
-                if (gp.buttons[primaryButtonIndex] && gp.buttons[primaryButtonIndex].pressed) {
-                    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
-                        handleSelection(navState, contextManager);
-                        eventState.lastButtonPress = currentTimestamp;
-                    }
-                }
-
-                // Handle back button (B/Circle) - Button index 1
-                if (navState.options.enableBackButton) {
-                    const backPressed = gp.buttons[1]?.pressed || false;
-                    if (backPressed && !eventState.lastBackButtonState) {
-                        if (currentTimestamp - eventState.lastBackTime > 300) {
-                            handleBackButton(eventState.onBackButton);
-                            eventState.lastBackTime = currentTimestamp;
-                        }
-                    }
-                    eventState.lastBackButtonState = backPressed;
-                }
-
-                // Handle shoulder buttons (R1/L1) - Button indices 5 and 4
-                if (navState.options.enableShoulderNavigation) {
-                    const r1Pressed = gp.buttons[5]?.pressed || false;
-                    const l1Pressed = gp.buttons[4]?.pressed || false;
-
-                    if (r1Pressed && !eventState.lastR1State) {
-                        if (currentTimestamp - eventState.lastShoulderTime > 300) {
-                            handleShoulderNavigation(navState, 'R1', contextManager, eventState.onNavigationMenuOpen);
-                            eventState.lastShoulderTime = currentTimestamp;
-                        }
-                    }
-
-                    if (l1Pressed && !eventState.lastL1State) {
-                        if (currentTimestamp - eventState.lastShoulderTime > 300) {
-                            handleShoulderNavigation(navState, 'L1', contextManager, eventState.onNavigationMenuOpen);
-                            eventState.lastShoulderTime = currentTimestamp;
-                        }
-                    }
-
-                    eventState.lastR1State = r1Pressed;
-                    eventState.lastL1State = l1Pressed;
-                }
-
-                // Handle navigation inputs
-                let moved = false;
-
-                // Analog stick navigation
-                const leftStickX = applyDeadzone(gp.axes[0], navState.options.deadzone);
-                const leftStickY = applyDeadzone(gp.axes[1], navState.options.deadzone);
-
-                if (Math.abs(leftStickX) > 0 || Math.abs(leftStickY) > 0) {
-                    if (currentTimestamp - eventState.lastAxisMove > (navState.options.debounceTime ?? 0)) {
-                        if (Math.abs(leftStickX) > Math.abs(leftStickY)) {
-                            handleNavigation(navState, leftStickX > 0 ? 'right' : 'left', contextManager, updateFocusCallback);
-                        } else {
-                            handleNavigation(navState, leftStickY > 0 ? 'down' : 'up', contextManager, updateFocusCallback);
-                        }
-                        moved = true;
-                        eventState.lastAxisMove = currentTimestamp;
-                    }
-                }
-
-                // Right stick scrolling
-                if (navState.options.enableRightStickScroll) {
-                    const rightStickX = applyDeadzone(gp.axes[2] || 0, navState.options.deadzone);
-                    const rightStickY = applyDeadzone(gp.axes[3] || 0, navState.options.deadzone);
-
-                    if (Math.abs(rightStickX) > 0 || Math.abs(rightStickY) > 0) {
-                        if (currentTimestamp - eventState.lastScrollTime > (navState.options.scrollDebounceTime ?? 50)) {
-                            const scrollSpeed = navState.options.scrollSpeed ?? 1;
-
-                            // Use the dedicated scrolling function
-                            handleScrolling(rightStickX, rightStickY, scrollSpeed);
-
-                            eventState.lastScrollTime = currentTimestamp;
-                        }
-                    }
-                }
-
-                // D-pad navigation
-                const dpadIndices = getDpadIndices(eventState.currentControllerType as ControllerType);
-
-                if (gp.buttons[dpadIndices.up] && gp.buttons[dpadIndices.up].pressed) {
-                    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
-                        handleNavigation(navState, 'up', contextManager, updateFocusCallback);
-                        moved = true;
-                        eventState.lastButtonPress = currentTimestamp;
-                    }
-                }
-
-                if (gp.buttons[dpadIndices.down] && gp.buttons[dpadIndices.down].pressed) {
-                    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
-                        handleNavigation(navState, 'down', contextManager, updateFocusCallback);
-                        moved = true;
-                        eventState.lastButtonPress = currentTimestamp;
-                    }
-                }
-
-                if (gp.buttons[dpadIndices.left] && gp.buttons[dpadIndices.left].pressed) {
-                    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
-                        handleNavigation(navState, 'left', contextManager, updateFocusCallback);
-                        moved = true;
-                        eventState.lastButtonPress = currentTimestamp;
-                    }
-                }
-
-                if (gp.buttons[dpadIndices.right] && gp.buttons[dpadIndices.right].pressed) {
-                    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
-                        handleNavigation(navState, 'right', contextManager, updateFocusCallback);
-                        moved = true;
-                        eventState.lastButtonPress = currentTimestamp;
-                    }
-                }
+                seen.add(gp.index);
+                processGamepad(gp, eventState, navState, currentTimestamp, contextManager, updateFocusCallback);
             }
         }
 
+        // Remove any entries that are no longer valid (mirrors native loop prune behavior).
+        if (pruneDisconnectedPads(eventState, seen)) {
+            updateStatus(navState, eventState.gamepads);
+        }
 
-        /**
-         * Schedule the next animation frame and store its ID for cleanup
-         * @type {number} The ID returned by requestAnimationFrame
-         */
-        eventState.animationFrameId = requestAnimationFrame(gameLoopImpl);
+        eventState.animationFrameId = platform.requestAnimationFrame(customEventGameLoopImpl);
     };
 }

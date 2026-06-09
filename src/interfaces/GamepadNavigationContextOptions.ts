@@ -3,6 +3,8 @@
 export interface GamepadNavigationContextOptions {
     navigationMode: 'spatial' | 'horizontal' | 'grid';
     containerSelector: string | null;
+    /** Explicit role used by GamepadContextManager to route shoulder/stick navigation. */
+    role?: 'menu' | 'content';
     focusedClass?: string;
     selectedClass?: string;
     useDataAttributes?: boolean;
@@ -10,4 +12,4 @@ export interface GamepadNavigationContextOptions {
     onlyViewport?: boolean; // Only include elements visible in viewport (default: false)
     wrapNavigation?: boolean;
     autoDetectElements?: boolean;
-} 
+}

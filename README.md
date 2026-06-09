@@ -2,6 +2,38 @@
 
 A TypeScript library for advanced gamepad navigation and UI control in web applications. Supports dual context navigation, custom mapping, and is compatible with Xbox, PlayStation, Nintendo, and generic controllers.
 
+> **Heads up (1.0):** the event API uses a **multi-subscriber** `service.on('focus', fn)` API
+> (not single-slot `service.onFocus = fn` setters), options can now be passed in a **grouped**
+> shape (flat options still work), and a few internal modules moved. If you're upgrading from a
+> `0.x`/`1.0.0` build, read the **[Migration Guide](MIGRATION.md)** — most of it is find-and-replace.
+
+## 📚 Guides
+
+- **[API.md](API.md)** — complete public API reference (functions, methods, events, options, types)
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — internal structure and the injectable platform seam
+- **[GAMEPAD_SERVICE_METHODS.md](GAMEPAD_SERVICE_METHODS.md)** — factory helpers vs direct `new GamepadService(...)`
+- **[BUILDING.md](BUILDING.md)** — build, pack, and test the library locally
+- **[USAGE_REACT.md](USAGE_REACT.md)** — React integration (`useGamepad` hook)
+- **[USAGE_ANGULAR.md](USAGE_ANGULAR.md)** — Angular integration (injectable service)
+- **[USAGE_VANILLA.md](USAGE_VANILLA.md)** — vanilla JS / CDN usage
+- **[MIGRATION.md](MIGRATION.md)** — upgrade path part one (`0.x` → `0.1` → `1.0`)
+- **[MIGRATION_1.0_TO_NEXT.md](MIGRATION_1.0_TO_NEXT.md)** — upgrade path part two (`1.0` → architecture-refactor release)
+
+## ⚙️ Runtime requirements
+
+- **Secure context:** the native Gamepad API only works over **HTTPS or `localhost`**.
+- **Background tabs:** the input loop uses `requestAnimationFrame`, which browsers pause for
+  hidden/backgrounded tabs — input is not read while the tab is not visible.
+- **SSR-safe:** `init()` no-ops in non-browser environments; call it on the client only.
+- **Permissions-Policy:** the Gamepad API can be disabled by `Permissions-Policy: gamepad`
+  or inside a cross-origin iframe without `allow="gamepad"`. When that happens
+  `navigator.getGamepads()` throws `SecurityError`; the library catches it, keeps the input
+  loop alive (in case access is granted later), and surfaces it once via the `gamepaderror`
+  event — subscribe to it if you want to show a fallback UI.
+- **`color-mix` styling:** the optional injected default styles use `color-mix(in srgb, …)`
+  (Chromium 111+, Firefox 113+, Safari 16.2+). This affects only the opt-in stylesheet.
+- **Logging:** quiet by default (`logLevel: 'error'`). Set `logLevel: 'debug'` while developing.
+
 ## 🎮 Features
 
 - **Dual Context Navigation**: Separate navigation for menu and content areas
@@ -27,7 +59,7 @@ A TypeScript library for advanced gamepad navigation and UI control in web appli
 
 2. Install in your project:
    ```sh
-   npm install /path/to/gamepad-controller-1.0.0.tgz
+   npm install /path/to/gamepad-controller-0.1.0.tgz
    ```
 
 ### From NPM (When Published)
@@ -75,7 +107,136 @@ const gamepad = initDualContextGamepad({
 });
 ```
 
+## 🎮 WinUI Integration & Custom Events
+
+The gamepad controller library supports **dual operation modes** to work in environments where native browser gamepad APIs are restricted, such as **WinUI applications**.
+
+### Native Browser Mode (Default)
+Uses standard Web Gamepad API:
+- `navigator.getGamepads()` for gamepad state polling
+- `gamepadconnected` and `gamepaddisconnected` events
+- Works in all modern browsers
+
+### Custom Events Mode (WinUI Integration)
+Uses custom DOM events for gamepad input:
+- `hubgamepadconnected` for controller connection
+- `hubgamepaddisconnected` for controller disconnection  
+- `hubgamepadstatechanged` for gamepad state updates
+
+### WinUI Custom Events Setup
+
+```ts
+import { initCustomEventGamepad } from 'gamepad-controller';
+
+// Initialize for WinUI with custom events
+const gamepad = initCustomEventGamepad({
+    enableNavigation: true,
+    enableBackButton: true,
+    focusedClass: 'gamepad-focused'
+});
+```
+
+### Custom Event Configuration
+
+```ts
+import { initCustomEventGamepad } from 'gamepad-controller';
+
+// Configure custom event names (optional)
+const gamepad = initCustomEventGamepad({
+    useCustomEvents: true,
+    customConnectedEvent: 'myAppGamepadConnected',
+    customDisconnectedEvent: 'myAppGamepadDisconnected', 
+    customStateChangedEvent: 'myAppGamepadStateChanged',
+    enableNavigation: true,
+    enableDualContext: true,
+    menuContextSelector: '.nav-menu',
+    contentContextSelector: '.content'
+});
+```
+
+### WinUI Event Dispatching
+
+Your WinUI application should dispatch events in this format:
+
+```ts
+// Connection event
+window.dispatchEvent(new CustomEvent('hubgamepadconnected', {
+    detail: {
+        gamepad: {
+            index: 0,
+            connected: true,
+            timestamp: performance.now(),
+            buttons: [/* button states */],
+            axes: [/* axis values */]
+        }
+    }
+}));
+
+// State change event
+window.dispatchEvent(new CustomEvent('hubgamepadstatechanged', {
+    detail: {
+        gamepad: {
+            axes: [-0.1658, 0.0557, -0.0194, 0.0200],
+            buttons: [
+                { pressed: true, value: 1 },
+                { pressed: false, value: 0 },
+                // ... more buttons
+            ],
+            connected: true,
+            index: 0,
+            timestamp: 1753294113544
+        }
+    }
+}));
+
+// Disconnection event
+window.dispatchEvent(new CustomEvent('hubgamepaddisconnected', {
+    detail: {
+        gamepad: {
+            index: 0,
+            connected: false,
+            timestamp: performance.now()
+        }
+    }
+}));
+```
+
+### Custom Events API Compatibility
+
+The custom events mode maintains **full API compatibility** with the native mode:
+- Same events via `on(event, cb)` (`'focus'`, `'select'`, `'backbutton'`, etc.)
+- Same navigation modes (spatial, grid, horizontal)
+- Same configuration options
+- Same TypeScript interfaces
+- Same dual context support
+
+### Choosing the Right Mode
+
+| Mode | Use Case | Event Source | Best For |
+|------|----------|--------------|----------|
+| **Native** | Web browsers | Browser Gamepad API | Standard web applications |
+| **Custom Events** | WinUI/Restricted environments | Custom DOM events | Desktop apps, embedded browsers |
+
+### Migration Between Modes
+
+Switching between modes requires only changing the initialization function:
+
+```ts
+// Native mode
+const gamepad = initGamepadForPage(options);
+
+// Custom events mode  
+const gamepad = initCustomEventGamepad(options);
+```
+
+All other code remains unchanged, ensuring easy migration and testing across different environments.
+
 ## 📖 API Reference
+
+> **Looking for the full reference?** [API.md](API.md) documents every exported function, method,
+> event, option (flat **and** grouped), and type in one place — including the injectable
+> [platform seam](API.md#platform-seam). The sections below are a quick tour of the most common
+> surface.
 
 ### TypeScript Types and Interfaces
 
@@ -95,7 +256,9 @@ import type {
     NavigationState,
     ControllerMappings,
     GridDimensions,
-    GamepadContextManagerCallback
+    GamepadContextManagerCallback,
+    Direction,
+    ShoulderButton,
 } from 'gamepad-controller';
 ```
 
@@ -121,8 +284,8 @@ const handleControllerConnect = (gamepad: Gamepad): void => {
 
 // Type your service instance
 const gamepadInstance: GamepadService = gamepadService('.container', options);
-gamepadInstance.onFocus = handleFocus;
-gamepadInstance.onControllerConnect = handleControllerConnect;
+gamepadInstance.on('focus', handleFocus);
+gamepadInstance.on('controllerconnect', handleControllerConnect);
 ```
 
 ### Available Interfaces
@@ -135,21 +298,38 @@ gamepadInstance.onControllerConnect = handleControllerConnect;
 | `ControllerMappings` | Controller button mappings | Custom controller support |
 | `GridDimensions` | Grid layout dimensions | Grid navigation |
 | `GamepadContextManagerCallback` | Context switch callback | Dual context events |
+| `Direction` | `'up' \| 'down' \| 'left' \| 'right'` union | Type navigation handler parameters |
+| `ShoulderButton` | `'L1' \| 'R1'` union | Type shoulder-button handler parameters |
+| `ButtonIndices` | `{ primary, back, shoulder, dpad }` | Per-controller button-index table (`CONTROLLER_MAPPINGS[type].indices`) |
+| `ShoulderIndices` / `DpadIndices` | `{ l1, r1 }` / `{ up, down, left, right }` | Shoulder / D-pad button indices |
+| `PlatformAdapter` | Injectable browser-globals seam | Custom host integration / deterministic tests (see [API.md](API.md#platform-seam)) |
+
+> The custom-controller snippet below shows the **runtime** `ControllerMappings` shape (`xbox` /
+> `playstation` / `nintendo` / `unknown`). For the complete type catalogue see
+> [API.md → Exported types](API.md#exported-types).
 
 ### Custom Controller Configuration
 
-```ts
-import type { ControllerMappings } from 'gamepad-controller';
+`CONTROLLER_MAPPINGS` is the frozen, per-type mapping table. Each entry exposes its button labels,
+axis labels, validation rules, and — since the architecture-refactor release — an `indices` table
+(`ButtonIndices`) that is the single source of truth for which physical button each abstract action
+maps to:
 
-const customMapping: ControllerMappings = {
-    up: 12,
-    down: 13,
-    left: 14,
-    right: 15,
-    primary: 0,
-    secondary: 1
-};
+```ts
+import { CONTROLLER_MAPPINGS } from 'gamepad-controller';
+import type { ControllerMapping, ButtonIndices } from 'gamepad-controller';
+
+// Read the indices for a connected controller type
+const nintendo: ControllerMapping = CONTROLLER_MAPPINGS.nintendo;
+const indices: ButtonIndices = nintendo.indices;
+// indices.primary / indices.back              → A / B (Nintendo's are swapped vs Xbox)
+// indices.shoulder.l1 / indices.shoulder.r1   → L1 / R1
+// indices.dpad.up / .down / .left / .right     → D-pad
 ```
+
+The helpers `getPrimaryActionButtonIndex(type)`, `getBackButtonIndex(type)`,
+`getShoulderIndices(type)`, and `getDpadIndices(type)` read from this same table — see
+[API.md → Controller mapping helpers](API.md#controller-mapping-helpers).
 
 ### Extending Service Options
 
@@ -191,13 +371,21 @@ const config: GamepadServiceOptions = {
 
 // Service instance with full typing
 const service: GamepadService = gamepadService('.container', config);
-service.onFocus = (element, index) => {
+service.on('focus', (element, index) => {
     // TypeScript knows element is Element and index is number
     console.log(`Focused element ${index}:`, element.tagName);
-};
+});
 ```
 
 ### Main Functions
+
+> **Shared instance vs. direct instantiation.** The factory helpers (`gamepadService`,
+> `initGamepadForPage`, `initDualContextGamepad`, `initCustomEventGamepad`) manage **one shared
+> `GamepadService` instance** — calling any of them destroys the previous one first. That is ideal
+> for the common "one navigation controller per page" case. For **multiple independent instances**
+> (e.g. split-screen, isolated widgets), construct `new GamepadService(options)` directly and call
+> `init()` yourself — the class is **not** a singleton. Full comparison:
+> [GAMEPAD_SERVICE_METHODS.md](GAMEPAD_SERVICE_METHODS.md#singleton-factory-vs-direct-instantiation).
 
 #### `gamepadService(containerSelector?, options?)`
 Creates a gamepad navigation service for a specific container or the entire page.
@@ -207,10 +395,16 @@ Creates a gamepad navigation service for a specific container or the entire page
 - `options` (GamepadServiceOptions): Configuration options
 
 #### `initGamepadForPage(options?)`
-Quick initialization with automatic setup and event handlers.
+Quick initialization with automatic setup and event handlers for standard web environments.
 
 #### `initDualContextGamepad(options?)`
-Sets up dual context navigation for menu and content areas.
+Sets up dual context navigation for menu and content areas with native gamepad APIs.
+
+#### `initCustomEventGamepad(options?)`
+Initializes gamepad service for WinUI/custom events environments. Automatically configures custom event listeners and provides the same API as native mode.
+
+**Parameters:**
+- `options` (GamepadServiceOptions): Configuration options with custom events enabled by default
 
 #### `initGamepadNavigation(options?)`
 Low-level initialization function with full control.
@@ -246,11 +440,21 @@ interface GamepadServiceOptions {
     enableRightStickScroll?: boolean;    // Enable right stick for window scrolling (default: true)
     scrollSpeed?: number;                // Multiplier for scroll speed (default: 1)
     scrollDebounceTime?: number;         // Debounce time for scrolling (default: 50ms)
+
+    // Focus scrolling
+    scrollBehavior?: 'smooth' | 'auto';  // scrollIntoView behavior on focus (default: 'smooth';
+                                         // use 'auto' to avoid animation churn on dense UIs)
     
     // Dual Context
     enableDualContext?: boolean;         // Enable dual context mode
     menuContextSelector?: string;        // Menu area selector
     contentContextSelector?: string | null; // Content area selector
+    
+    // Custom Events Support (WinUI Integration)
+    useCustomEvents?: boolean;           // Enable custom events mode (default: false)
+    customConnectedEvent?: string;       // Custom connection event name (default: 'hubgamepadconnected')
+    customDisconnectedEvent?: string;    // Custom disconnection event name (default: 'hubgamepaddisconnected')
+    customStateChangedEvent?: string;    // Custom state change event name (default: 'hubgamepadstatechanged')
     
     // Automation
     autoCreateStatusElement?: boolean;   // Auto-create status display
@@ -261,37 +465,87 @@ interface GamepadServiceOptions {
 }
 ```
 
+#### Grouped options (optional)
+
+Every flat option above keeps working. You can also pass a **grouped** shape for readability —
+where a value appears in both, the nested group wins:
+
+```ts
+const gamepad = gamepadService('.app', {
+    navigation: { navigationMode: 'spatial', deadzone: 0.15 },
+    input: { enableBackButton: true, backButtonCooldown: 300 },
+    styling: { focusedClass: 'app-focused', scrollBehavior: 'auto' },
+    scrolling: { enableRightStickScroll: true, scrollSpeed: 1.5 },
+    context: { enableDualContext: true, menuContextSelector: '.nav' },
+    customEvents: { useCustomEvents: true },
+});
+```
+
+Groups: `navigation`, `input`, `styling`, `status`, `scrolling`, `context`, `customEvents`.
+
+#### Platform seam (advanced)
+
+`GamepadServiceConfig` also accepts an optional `platform` field — an injectable
+[`PlatformAdapter`](API.md#platform-seam) over the browser globals the library touches at runtime
+(timing, the Gamepad API, window events, navigation fallbacks, DOM-mutation observation). It
+defaults to a browser-backed adapter, so you only need it to run in a non-standard host or to drive
+the input loop deterministically in tests:
+
+```ts
+import { GamepadService, defaultPlatformAdapter } from 'gamepad-controller';
+
+new GamepadService({ platform: defaultPlatformAdapter }); // explicit default
+new GamepadService({ platform: myFakeAdapter });          // tests / custom host
+```
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for how the seam fits the internal collaborators.
+
 ### Event Handlers
+
+Events use a multi-subscriber `on(event, listener)` API. Each `on()` returns an unsubscribe
+function, and multiple subscribers can listen to the same event without clobbering each other.
 
 ```ts
 // Focus events
-gamepad.onFocus = (element: Element, index: number) => {
+const offFocus = gamepad.on('focus', (element: Element, index: number) => {
     console.log('Element focused:', element);
-};
+});
 
 // Selection events
-gamepad.onSelect = (element: Element, index: number) => {
+gamepad.on('select', (element: Element, index: number) => {
     console.log('Element selected:', element);
-};
+});
 
 // Controller events
-gamepad.onControllerConnect = (gamepad: Gamepad) => {
-    console.log('Controller connected');
-};
-
-gamepad.onControllerDisconnect = (gamepad: Gamepad) => {
-    console.log('Controller disconnected');
-};
+gamepad.on('controllerconnect', (pad: Gamepad) => console.log('Controller connected', pad.id));
+gamepad.on('controllerdisconnect', (pad: Gamepad) => console.log('Controller disconnected'));
 
 // Navigation events
-gamepad.onBackButton = () => {
-    console.log('Back button pressed');
-};
+gamepad.on('backbutton', () => console.log('Back button pressed'));
+gamepad.on('contextswitch', (newContext, oldContext) => console.log('Context switched'));
 
-gamepad.onContextSwitch = (newContext: any, oldContext: any) => {
-    console.log('Context switched');
-};
+// SPA router integration — intercept link navigation instead of letting the library
+// mutate window.location.href directly. Falls back to href assignment if no subscriber.
+gamepad.on('navigationrequest', (href, element) => router.push(href));
+
+// Generic per-button events
+gamepad.on('buttondown', (index, pad) => console.log('button down', index));
+gamepad.on('buttonup', (index, pad) => console.log('button up', index));
+
+// Runtime error (e.g. Gamepad API blocked by Permissions-Policy)
+gamepad.on('gamepaderror', (err) => console.warn('gamepad blocked:', err.message));
+
+// Unsubscribe when done
+offFocus();
+// or: gamepad.off('focus', handler);
 ```
+
+**Event names:** `focus`, `select`, `controllerconnect`, `controllerdisconnect`, `backbutton`,
+`navigationmenuopen`, `buttondown`, `buttonup`, `contextswitch`, `gamepaderror`,
+`navigationrequest`.
+
+> If you do **not** subscribe to `'backbutton'`, the default behavior (`window.history.back()`)
+> still runs. Subscribe to override it.
 
 ### Memory Management
 
@@ -311,6 +565,46 @@ const gamepad = initGamepadForPage();
 // ... use gamepad
 gamepad.destroy(); // Clean up this specific instance
 ```
+
+## 🔌 Device filtering (what counts as a "gamepad")
+
+`navigator.getGamepads()` does **not** return only game controllers. Browsers surface many
+HID devices as `Gamepad` objects — webcams, headset dongles, some keyboards/mice — often with
+a few buttons but **no axes (sticks)**. You'll see them in `gamepadconnected` logs like:
+
+```
+Gamepad connected at index 1: Brio 300 (Vendor: 046d Product: 0942) with 7 buttons, 0 axes.
+Gamepad connected at index 2: Microsoft USB Link (Vendor: 045e Product: 083c) with 7 buttons, 0 axes.
+```
+
+The library filters these out via `isValidGamepad`, which only accepts a device when:
+
+1. **`gamepad.mapping === 'standard'`** — the browser matched it to the Standard Gamepad
+   layout, so it's a real controller; **or**
+2. it reports enough real inputs to plausibly be a controller: **≥ 4 buttons _and_ ≥ 2 axes**
+   (one stick). A 0-axis webcam/headset is rejected.
+
+Rejected devices never enter the service's state, are not counted by
+`isControllerConnected()`, and never drive navigation. The `gamepadconnected`/
+`gamepaddisconnected` events themselves are dispatched by the browser for every device — that
+logging is outside the library's control — but only valid controllers are acted upon.
+
+```ts
+import { GamepadService } from 'gamepad-controller';
+
+// isValidGamepad is applied internally — your real DualShock/Xbox pad is accepted,
+// while a webcam or headset reporting 0 axes is ignored.
+const service = new GamepadService();
+service.init();
+service.on('controllerconnect', (pad) => {
+    // Only fires for a device that passed validation.
+    console.log('Real controller connected:', pad.id, pad.mapping);
+});
+```
+
+> If you have a legitimate controller that reports a non-standard mapping **and** fewer than
+> 2 axes, it would be filtered out. Open an issue with its `id`/button/axis counts and we can
+> widen the heuristic or expose tuning options.
 
 ## 🔍 Viewport Filtering
 
@@ -595,9 +889,9 @@ const gamepad = gamepadService('.container', {
 });
 
 // Test navigation responsiveness
-gamepad.onFocus = (element, index) => {
+gamepad.on('focus', (element, index) => {
     console.log(`Focused element ${index}: ${element.tagName}`);
-};
+});
 
 // If navigation is too sensitive: increase deadzone
 // If navigation is unresponsive: decrease deadzone
@@ -610,6 +904,50 @@ gamepad.onFocus = (element, index) => {
 | Xbox | D-pad / Left Stick | A | B | RB / LB | Right Stick |
 | PlayStation | D-pad / Left Stick | X | Circle | R1 / L1 | Right Stick |
 | Nintendo | D-pad / Left Stick | B | A | R / L | Right Stick |
+
+## 🎮🎮 Multiple Controllers
+
+Every connected controller drives the **same shared navigation cursor** (a couch / hand-off
+model): any player can pick up any pad and move the focus, without one pad clobbering another.
+
+- **Per-pad input state.** Each controller keeps its own edge-detection flags and cooldown
+  timestamps (keyed by `gamepad.index`), so processing several pads in the same frame can't
+  interfere — an idle pad can't reset the active pad's back-button edge.
+- **Per-pad button mapping.** Each pad is mapped by its **own** detected type, so a mixed
+  setup works correctly — e.g. Nintendo's swapped A/B is honored on the Nintendo pad even
+  while an Xbox pad is also connected.
+- **Status reflects all of them.** The status element lists every connected controller, e.g.
+  `🎮 Xbox + PlayStation controller connected`.
+
+```ts
+const gamepad = gamepadService('.container');
+
+// The most-recently-active controller's type (back-compat).
+gamepad.getControllerType();   // e.g. 'xbox'
+
+// Every connected controller type, de-duplicated.
+gamepad.getControllerTypes();  // e.g. ['xbox', 'playstation']
+```
+
+> Stale slots are pruned automatically: if a `gamepaddisconnected` event is missed, a pad that
+> vanishes from `navigator.getGamepads()` is dropped on the next frame so the type list and
+> per-pad state stay accurate.
+
+### Controller Detection (vendor-ID fallbacks)
+
+Detection matches `gamepad.id` against per-type regex patterns, with a minimum button/axis
+gate to keep non-controller HID devices out. Because browsers don't always include a readable
+name (Chrome often reports only a USB vendor code, e.g. `Wireless Controller (... Vendor: 054c ...)`),
+the patterns also match known **vendor IDs** as a fallback:
+
+| Type | Vendor ID | Notes |
+| ---- | --------- | ----- |
+| Xbox | `045e` | Microsoft (also matches `xbox`, `microsoft`, `x-input`) |
+| PlayStation | `054c` | Sony — DualShock / DualSense (also `playstation`, `dualsense`, `dualshock`, `ps3`–`ps5`) |
+| Nintendo | `057e` | Switch Pro Controller / Joy-Con (also `nintendo`, `switch`, `pro controller`) |
+
+The `minButtons`/`minAxes` validation gate keeps non-controller devices that share a vendor ID
+(headsets, keyboards) from being mis-detected as gamepads.
 
 ## 📋 Usage Examples
 
@@ -687,13 +1025,13 @@ const gamepad = initDualContextGamepad({
 });
 
 // Custom menu selection handler
-gamepad.onSelect = (element) => {
+gamepad.on('select', (element) => {
     if (element.classList.contains('nav-item')) {
         // Handle menu navigation
         const href = element.getAttribute('href');
         if (href) window.location.href = href;
     }
-};
+});
 ```
 
 ```html
@@ -779,7 +1117,8 @@ const gamepadService = new GamepadService({
   // ...options
 });
 
-gamepadService.onButtonDown = (buttonIndex, gamepad) => {
+// Subscribe with on('buttondown'/'buttonup', cb). Each call returns an unsubscribe function.
+gamepadService.on('buttondown', (buttonIndex, gamepad) => {
   if (buttonIndex === 0) {
     // X/A/Cross pressed
     alert('Primary button pressed!');
@@ -789,9 +1128,9 @@ gamepadService.onButtonDown = (buttonIndex, gamepad) => {
   } else {
     console.log('Button', buttonIndex, 'pressed');
   }
-};
+});
 
-gamepadService.onButtonUp = (buttonIndex, gamepad) => {
+gamepadService.on('buttonup', (buttonIndex, gamepad) => {
   if (buttonIndex === 0) {
     console.log('Primary button released!');
   } else if (buttonIndex === 1) {
@@ -799,7 +1138,7 @@ gamepadService.onButtonUp = (buttonIndex, gamepad) => {
   } else {
     console.log('Button', buttonIndex, 'released');
   }
-};
+});
 
 gamepadService.init();
 ```
@@ -910,13 +1249,13 @@ const updateStatus = (id, message, type = '') => {
 };
 
 // Use your own status update logic
-gamepadService.onControllerConnect = (gamepad) => {
+gamepadService.on('controllerconnect', (gamepad) => {
     updateStatus('my-status', `🎮 Controller connected: ${gamepad.id}`, 'success');
-};
+});
 
-gamepadService.onControllerDisconnect = (gamepad) => {
+gamepadService.on('controllerdisconnect', (gamepad) => {
     updateStatus('my-status', '🎮 Controller disconnected', 'warning');
-};
+});
 ```
 
 > **💡 Pro Tip**: Use the bypass approach when you need complete control over styling and status updates, or when integrating with existing UI frameworks that manage their own status elements.

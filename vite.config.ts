@@ -6,8 +6,9 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       name: 'GamepadController',
-      fileName: (format) => `index.${format}.js`,
-      formats: ['es', 'cjs'],
+      // ESM-only: with "type": "module" a .js file is treated as ESM.
+      formats: ['es'],
+      fileName: () => 'index.js',
     },
     outDir: 'dist',
     emptyOutDir: true,

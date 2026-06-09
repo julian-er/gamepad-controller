@@ -4,10 +4,16 @@ This document explains how the gamepad controller library detects and processes 
 
 ## Overview
 
-The gamepad controller library uses the **Web Gamepad API** combined with a **continuous polling system** to detect and process gamepad inputs in real-time. The system operates at 60fps (or display refresh rate) using `requestAnimationFrame` to ensure responsive input handling.
+The gamepad controller library supports **dual operation modes** for gamepad input detection:
+
+1. **Native Browser Mode** (default): Uses the **Web Gamepad API** combined with a **continuous polling system** to detect and process gamepad inputs in real-time
+2. **Custom Events Mode** (WinUI integration): Uses custom DOM events dispatched by the host application instead of native browser APIs
+
+Both modes operate at 60fps (or display refresh rate) using `requestAnimationFrame` to ensure responsive input handling and maintain identical APIs for seamless integration.
 
 ## Architecture Flow
 
+### Native Browser Mode
 ```
 Browser Gamepad API
         ↓
@@ -24,6 +30,198 @@ Debouncing & Timing Logic
 Action Mapping & Callbacks
         ↓
 User-defined Behavior Execution
+```
+
+### Custom Events Mode (WinUI Integration)
+```
+Host Application (WinUI)
+        ↓
+Custom DOM Events (hubgamepad*)
+        ↓
+Custom Event Listener Setup
+        ↓
+Custom Game Loop (requestAnimationFrame)
+        ↓
+Event-based State Updates
+        ↓
+State Comparison & Change Detection
+        ↓
+Debouncing & Timing Logic
+        ↓
+Action Mapping & Callbacks
+        ↓
+User-defined Behavior Execution
+```
+
+## 0. Custom Events Mode (WinUI Integration)
+
+For environments where native browser gamepad APIs are restricted (such as WinUI applications), the library supports a **custom events mode** that receives gamepad input through DOM events instead of browser APIs.
+
+### Custom Event Types
+
+The library listens for three types of custom events:
+
+#### Connection Events
+```typescript
+// hubgamepadconnected - Controller connected
+window.dispatchEvent(new CustomEvent('hubgamepadconnected', {
+    detail: {
+        gamepad: {
+            index: 0,
+            connected: true,
+            timestamp: performance.now(),
+            buttons: [/* button states */],
+            axes: [/* axis values */]
+        }
+    }
+}));
+```
+
+#### Disconnection Events
+```typescript
+// hubgamepaddisconnected - Controller disconnected
+window.dispatchEvent(new CustomEvent('hubgamepaddisconnected', {
+    detail: {
+        gamepad: {
+            index: 0,
+            connected: false,
+            timestamp: performance.now()
+        }
+    }
+}));
+```
+
+#### State Change Events
+```typescript
+// hubgamepadstatechanged - Gamepad state updated
+window.dispatchEvent(new CustomEvent('hubgamepadstatechanged', {
+    detail: {
+        gamepad: {
+            axes: [-0.1658, 0.0557, -0.0194, 0.0200],
+            buttons: [
+                { pressed: true, value: 1 },
+                { pressed: false, value: 0 },
+                // ... more buttons
+            ],
+            connected: true,
+            index: 0,
+            timestamp: 1753294113544
+        }
+    }
+}));
+```
+
+### Custom Event Listener Setup
+
+```typescript
+// From: src/core/gamepadEventHandler.ts:52-84
+export function setupCustomEventListeners(
+    state: GamepadEventState,
+    handleGamepadConnected: (event: GamepadEvent) => void,
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    options: GamepadServiceOptions
+) {
+    const connectedEvent = options.customConnectedEvent || 'hubgamepadconnected';
+    const disconnectedEvent = options.customDisconnectedEvent || 'hubgamepaddisconnected';
+    const stateChangedEvent = options.customStateChangedEvent || 'hubgamepadstatechanged';
+
+    // Listen for custom gamepad connected events
+    window.addEventListener(connectedEvent, (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            const mockGamepadEvent = createMockGamepadEvent(customEvent.detail.gamepad);
+            handleGamepadConnected(mockGamepadEvent);
+        }
+    });
+
+    // Listen for custom gamepad state changed events
+    window.addEventListener(stateChangedEvent, (event: Event) => {
+        const customEvent = event as CustomEvent;
+        if (customEvent.detail && customEvent.detail.gamepad) {
+            const gamepad = customEvent.detail.gamepad;
+            if (isValidGamepad(gamepad)) {
+                state.gamepads[gamepad.index || 0] = gamepad;
+            }
+        }
+    });
+}
+```
+
+### Custom Event Game Loop
+
+The custom events mode uses a separate game loop that processes gamepad state from the stored event data instead of polling `navigator.getGamepads()`:
+
+```typescript
+// From: src/core/gamepadEventHandler.ts:86-170
+export function createCustomEventGameLoop(
+    eventState: GamepadEventState, 
+    navState: NavigationState,
+    contextManager?: any,
+    updateFocusCallback?: () => void
+): () => void {
+    return function customEventGameLoopImpl(): void {
+        if (!eventState.isRunning) {
+            eventState.animationFrameId = null;
+            return;
+        }
+        
+        const currentTimestamp = performance.now();
+        
+        // Process gamepads from custom events (stored in eventState.gamepads)
+        for (const gamepadIndex in eventState.gamepads) {
+            const gp = eventState.gamepads[gamepadIndex];
+            if (gp && isValidGamepad(gp)) {
+                // Same button/axis processing logic as native mode
+                // ... (processes buttons, analog sticks, D-pad, etc.)
+            }
+        }
+        
+        eventState.animationFrameId = requestAnimationFrame(customEventGameLoopImpl);
+    };
+}
+```
+
+### Event-to-API Compatibility
+
+The custom events mode maintains full compatibility with native browser APIs by:
+
+1. **Mock GamepadEvent Creation**: Converting custom events to standard `GamepadEvent` objects
+2. **State Storage**: Storing gamepad state from events in `eventState.gamepads`
+3. **Identical Processing**: Using the same button/axis processing logic as native mode
+4. **Same Callbacks**: Triggering the same callback functions as native mode
+
+### Configuration Options
+
+```typescript
+interface GamepadServiceOptions {
+    // Custom Events Support
+    useCustomEvents?: boolean;           // Enable custom events mode
+    customConnectedEvent?: string;       // Connection event name (default: 'hubgamepadconnected')
+    customDisconnectedEvent?: string;    // Disconnection event name (default: 'hubgamepaddisconnected')
+    customStateChangedEvent?: string;    // State change event name (default: 'hubgamepadstatechanged')
+}
+```
+
+### Usage Example
+
+```typescript
+import { initCustomEventGamepad } from 'gamepad-controller';
+
+// Initialize with custom events
+const gamepad = initCustomEventGamepad({
+    enableNavigation: true,
+    enableBackButton: true,
+    focusedClass: 'gamepad-focused'
+});
+
+// Same event API as native mode
+gamepad.on('select', (element, index) => {
+    console.log('Selected:', element.textContent);
+});
+
+gamepad.on('controllerconnect', (gamepad) => {
+    console.log('Controller connected via custom events');
+});
 ```
 
 ## 1. Browser API Foundation
@@ -44,31 +242,45 @@ window.addEventListener('gamepaddisconnected', ...) // Disconnection events
 
 ## 2. Event Listener Setup
 
-The system starts by setting up event listeners for gamepad connection/disconnection:
+The system sets up event listeners based on the operation mode:
+
+### Native Browser Mode
 
 ```typescript
 // From: src/core/gamepadEventHandler.ts:42-50
 export function setupEventListeners(
     state: GamepadEventState, 
     handleGamepadConnected: (event: GamepadEvent) => void,
-    handleGamepadDisconnected: (event: GamepadEvent) => void
+    handleGamepadDisconnected: (event: GamepadEvent) => void,
+    options?: GamepadServiceOptions
 ) {
-    window.addEventListener('gamepadconnected', handleGamepadConnected);
-    window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
-    
-    // Check for already connected gamepads
-    detectExistingGamepads(state);
+    if (options?.useCustomEvents) {
+        setupCustomEventListeners(state, handleGamepadConnected, handleGamepadDisconnected, options);
+    } else {
+        window.addEventListener('gamepadconnected', handleGamepadConnected);
+        window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+        
+        // Check for already connected gamepads
+        detectExistingGamepads(state);
+    }
 }
 ```
 
-### Connection Detection:
+### Connection Detection (Native Mode):
 - **`gamepadconnected`**: Fired when a gamepad is connected
 - **`gamepaddisconnected`**: Fired when a gamepad is disconnected
 - **`detectExistingGamepads`**: Checks for gamepads already connected when the page loads
 
+### Connection Detection (Custom Events Mode):
+- **Custom connected event**: Listens for WinUI-dispatched connection events
+- **Custom disconnected event**: Listens for WinUI-dispatched disconnection events
+- **Custom state change event**: Receives gamepad state updates from host application
+
 ## 3. Continuous Game Loop - The Heart of Detection
 
-The library uses `requestAnimationFrame` to create a continuous loop that polls gamepad states:
+The library uses `requestAnimationFrame` to create a continuous loop that processes gamepad inputs. The implementation varies based on the operation mode:
+
+### Native Browser Mode Game Loop
 
 ```typescript
 // From: src/core/gamepadEventHandler.ts:172-186
@@ -86,7 +298,7 @@ export function gameLoop(
         }
 
         const currentTimestamp = performance.now();
-        const connectedGamepads = navigator.getGamepads();
+        const connectedGamepads = navigator.getGamepads(); // Polls browser API
 
         for (const gp of connectedGamepads) {
             if (gp && isValidGamepad(gp)) {
@@ -100,27 +312,59 @@ export function gameLoop(
 }
 ```
 
-### Game Loop Characteristics:
+### Custom Events Mode Game Loop
+
+```typescript
+// From: src/core/gamepadEventHandler.ts:86-170
+export function createCustomEventGameLoop(
+    eventState: GamepadEventState, 
+    navState: NavigationState,
+    contextManager?: any,
+    updateFocusCallback?: () => void
+): () => void {
+    return function customEventGameLoopImpl() {
+        if (!eventState.isRunning) {
+            eventState.animationFrameId = null;
+            return;
+        }
+
+        const currentTimestamp = performance.now();
+        
+        // Process gamepads from custom events (stored in eventState.gamepads)
+        for (const gamepadIndex in eventState.gamepads) {
+            const gp = eventState.gamepads[gamepadIndex]; // Uses event-stored state
+            if (gp && isValidGamepad(gp)) {
+                // Process gamepad inputs... (same logic as native mode)
+            }
+        }
+
+        eventState.animationFrameId = requestAnimationFrame(customEventGameLoopImpl);
+    };
+}
+```
+
+### Game Loop Characteristics (Both Modes):
 - **Frequency**: Runs at display refresh rate (typically 60fps)
 - **Timing**: Uses `performance.now()` for precise timestamp tracking
 - **Cleanup**: Properly manages animation frame IDs for cleanup
 - **Validation**: Checks gamepad validity before processing
+- **Input Source**: Native mode polls `navigator.getGamepads()`, custom events mode uses stored event data
+- **Processing Logic**: Identical button/axis processing logic regardless of input source
+- **All controllers processed**: Both loops process **every** valid controller each frame (not just the first), so any connected pad can drive the shared navigation cursor. Per-pad state in `processGamepad` keeps them from interfering. The native loop also prunes pads that disappear from `getGamepads()` (e.g. a missed disconnect event)
 
 ## 4. Button State Tracking & Detection
 
 The library maintains previous button states and compares them with current states to detect press/release events:
 
 ```typescript
-// From: src/core/gamepadEventHandler.ts:193-213
-// --- Button event handling ---
-if (!eventState.lastButtonStates) eventState.lastButtonStates = {};
-if (!eventState.lastButtonStates[gp.index]) {
-    eventState.lastButtonStates[gp.index] = gp.buttons.map(b => b.pressed);
-}
-const prevStates = eventState.lastButtonStates[gp.index];
+// From: src/core/gamepadEventHandler.ts (processGamepad)
+// Per-pad state is fetched once per frame; `pad.lastButtonStates` holds the
+// previous frame's pressed state for this specific controller.
+const pad = getPadState(eventState, gp); // creates+seeds on first use
+const prevStates = pad.lastButtonStates;
 for (let i = 0; i < gp.buttons.length; i++) {
     const prev = prevStates[i] || false;
-    const curr = gp.buttons[i].pressed;
+    const curr = gp.buttons[i]?.pressed ?? false;
     if (curr && !prev && typeof eventState.onButtonDown === 'function') {
         eventState.onButtonDown(i, gp);
     }
@@ -132,135 +376,117 @@ for (let i = 0; i < gp.buttons.length; i++) {
 ```
 
 ### Button Detection Logic:
-- **State Arrays**: Maintains `lastButtonStates` for each connected gamepad
+- **Per-pad state**: Each controller's previous button states live in `pad.lastButtonStates` (under `eventState.padInputStates[gp.index]`)
 - **Edge Detection**: Detects button press (`curr && !prev`) and release (`!curr && prev`)
-- **Per-Gamepad Tracking**: Handles multiple controllers independently
+- **Per-Gamepad Tracking**: Handles multiple controllers independently — no cross-pad clobbering
+- **Seeded on connect**: New pads are seeded from the current frame so a button already held at connect time doesn't fire a spurious down-edge
 - **Callback Triggering**: Calls `onButtonDown` and `onButtonUp` callbacks
 
 ## 5. Specific Action Button Detection
 
+All of these read and write the **per-pad** state record (`pad`) rather than global
+`eventState` fields, and resolve button indices from each pad's own detected `controllerType`.
+
 ### Primary Action Button (A/X/Cross):
 ```typescript
-// From: src/core/gamepadEventHandler.ts:220-227
-// Handle primary action button (A/X/Cross)
-const primaryButtonIndex = getPrimaryActionButtonIndex(eventState.currentControllerType as ControllerType);
-if (gp.buttons[primaryButtonIndex] && gp.buttons[primaryButtonIndex].pressed) {
-    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
+// From: src/core/gamepadEventHandler.ts (processGamepad)
+const controllerType = detectControllerType(gp) as ControllerType;
+const primaryButtonIndex = getPrimaryActionButtonIndex(controllerType);
+if (gp.buttons[primaryButtonIndex]?.pressed) {
+    if (currentTimestamp - pad.lastButtonPress > debounceTime) {
         handleSelection(navState, contextManager);
-        eventState.lastButtonPress = currentTimestamp;
+        pad.lastButtonPress = currentTimestamp;
     }
 }
 ```
 
 ### Back Button (B/Circle):
 ```typescript
-// From: src/core/gamepadEventHandler.ts:229-238
-// Handle back button (B/Circle) - Button index 1
-if (navState.options.enableBackButton) {
-    const backPressed = gp.buttons[1]?.pressed || false;
-    if (backPressed && !eventState.lastBackButtonState) {
-        if (currentTimestamp - eventState.lastBackTime > 300) {
+// From: src/core/gamepadEventHandler.ts (processGamepad)
+if (options.enableBackButton) {
+    const backCooldown = options.backButtonCooldown ?? DEFAULT_ACTION_COOLDOWN;
+    const backIndex = getBackButtonIndex(controllerType);
+    const backPressed = gp.buttons[backIndex]?.pressed ?? false;
+    if (backPressed && !pad.lastBackButtonState) {
+        if (currentTimestamp - pad.lastBackTime > backCooldown) {
             handleBackButton(eventState.onBackButton);
-            eventState.lastBackTime = currentTimestamp;
+            pad.lastBackTime = currentTimestamp;
         }
     }
-    eventState.lastBackButtonState = backPressed;
+    pad.lastBackButtonState = backPressed;
 }
 ```
 
 ### Shoulder Buttons (R1/L1):
 ```typescript
-// From: src/core/gamepadEventHandler.ts:240-259
-// Handle shoulder buttons (R1/L1) - Button indices 5 and 4
-if (navState.options.enableShoulderNavigation) {
-    const r1Pressed = gp.buttons[5]?.pressed || false;
-    const l1Pressed = gp.buttons[4]?.pressed || false;
-    
-    if (r1Pressed && !eventState.lastR1State) {
-        if (currentTimestamp - eventState.lastShoulderTime > 300) {
-            handleShoulderNavigation(navState, 'R1', contextManager, eventState.onNavigationMenuOpen);
-            eventState.lastShoulderTime = currentTimestamp;
+// From: src/core/gamepadEventHandler.ts (processGamepad)
+if (options.enableShoulderNavigation) {
+    const shoulderCooldown = options.shoulderCooldown ?? DEFAULT_ACTION_COOLDOWN;
+    const { l1, r1 } = getShoulderIndices(controllerType);
+    const r1Pressed = gp.buttons[r1]?.pressed ?? false;
+    const l1Pressed = gp.buttons[l1]?.pressed ?? false;
+
+    const r1Edge = r1Pressed && !pad.lastR1State;
+    const l1Edge = l1Pressed && !pad.lastL1State;
+    if (r1Edge || l1Edge) {
+        if (currentTimestamp - pad.lastShoulderTime > shoulderCooldown) {
+            const button = r1Edge ? 'R1' : 'L1'; // r1 wins if both fire same frame
+            handleShoulderNavigation(navState, button, contextManager, eventState.onNavigationMenuOpen);
+            pad.lastShoulderTime = currentTimestamp;
         }
     }
-    
-    if (l1Pressed && !eventState.lastL1State) {
-        if (currentTimestamp - eventState.lastShoulderTime > 300) {
-            handleShoulderNavigation(navState, 'L1', contextManager, eventState.onNavigationMenuOpen);
-            eventState.lastShoulderTime = currentTimestamp;
-        }
-    }
-    
-    eventState.lastR1State = r1Pressed;
-    eventState.lastL1State = l1Pressed;
+
+    pad.lastR1State = r1Pressed;
+    pad.lastL1State = l1Pressed;
 }
 ```
 
-## 6. Analog Stick Detection
+> Button indices (back, shoulders, D-pad) are resolved through the mapping table via
+> `getBackButtonIndex`/`getShoulderIndices`/`getDpadIndices` for each pad's `controllerType`,
+> and back/shoulder cooldowns are configurable (`backButtonCooldown`, `shoulderCooldown`,
+> default `DEFAULT_ACTION_COOLDOWN`) rather than the old hard-coded `300`.
+
+## 6 & 7. Directional Navigation (D-pad priority, left stick fallback)
+
+D-pad and left-stick navigation are unified into a single per-pad directional step gated by one
+`pad.lastAxisMove` cooldown. The D-pad takes priority; the left stick is the fallback when no
+D-pad direction is pressed.
 
 ```typescript
-// From: src/core/gamepadEventHandler.ts:264-279
-// Analog stick navigation
-const leftStickX = applyDeadzone(gp.axes[0], navState.options.deadzone);
-const leftStickY = applyDeadzone(gp.axes[1], navState.options.deadzone);
+// From: src/core/gamepadEventHandler.ts (processGamepad)
+if (currentTimestamp - pad.lastAxisMove > debounceTime) {
+    const dpad = getDpadIndices(controllerType);
+    let direction: 'up' | 'down' | 'left' | 'right' | null = null;
 
-if (Math.abs(leftStickX) > 0 || Math.abs(leftStickY) > 0) {
-    if (currentTimestamp - eventState.lastAxisMove > (navState.options.debounceTime ?? 0)) {
-        if (Math.abs(leftStickX) > Math.abs(leftStickY)) {
-            handleNavigation(navState, leftStickX > 0 ? 'right' : 'left', contextManager, updateFocusCallback);
-        } else {
-            handleNavigation(navState, leftStickY > 0 ? 'down' : 'up', contextManager, updateFocusCallback);
+    // D-pad takes priority
+    if (gp.buttons[dpad.up]?.pressed) direction = 'up';
+    else if (gp.buttons[dpad.down]?.pressed) direction = 'down';
+    else if (gp.buttons[dpad.left]?.pressed) direction = 'left';
+    else if (gp.buttons[dpad.right]?.pressed) direction = 'right';
+    else {
+        // Left stick fallback — pick the dominant axis
+        const x = applyDeadzone(gp.axes[0] ?? 0, options.deadzone);
+        const y = applyDeadzone(gp.axes[1] ?? 0, options.deadzone);
+        if (Math.abs(x) > 0 || Math.abs(y) > 0) {
+            direction = Math.abs(x) > Math.abs(y)
+                ? (x > 0 ? 'right' : 'left')
+                : (y > 0 ? 'down' : 'up');
         }
-        moved = true;
-        eventState.lastAxisMove = currentTimestamp;
+    }
+
+    if (direction) {
+        handleNavigation(navState, direction, contextManager, updateFocusCallback);
+        pad.lastAxisMove = currentTimestamp;
+        hadInput = true;
     }
 }
 ```
 
-### Analog Stick Features:
-- **Deadzone**: Ignores small movements to prevent drift
-- **Direction Priority**: Determines primary movement direction based on magnitude
-- **Axis Mapping**: `axes[0]` = X-axis, `axes[1]` = Y-axis
-- **Timing**: Uses debounce to prevent rapid-fire navigation
-
-## 7. D-pad Button Detection
-
-```typescript
-// From: src/core/gamepadEventHandler.ts:301-341
-// D-pad navigation
-const dpadIndices = getDpadIndices(eventState.currentControllerType as ControllerType);
-
-if (gp.buttons[dpadIndices.up] && gp.buttons[dpadIndices.up].pressed) {
-    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
-        handleNavigation(navState, 'up', contextManager, updateFocusCallback);
-        moved = true;
-        eventState.lastButtonPress = currentTimestamp;
-    }
-}
-
-if (gp.buttons[dpadIndices.down] && gp.buttons[dpadIndices.down].pressed) {
-    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
-        handleNavigation(navState, 'down', contextManager, updateFocusCallback);
-        moved = true;
-        eventState.lastButtonPress = currentTimestamp;
-    }
-}
-
-if (gp.buttons[dpadIndices.left] && gp.buttons[dpadIndices.left].pressed) {
-    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
-        handleNavigation(navState, 'left', contextManager, updateFocusCallback);
-        moved = true;
-        eventState.lastButtonPress = currentTimestamp;
-    }
-}
-
-if (gp.buttons[dpadIndices.right] && gp.buttons[dpadIndices.right].pressed) {
-    if (currentTimestamp - eventState.lastButtonPress > (navState.options.debounceTime ?? 0)) {
-        handleNavigation(navState, 'right', contextManager, updateFocusCallback);
-        moved = true;
-        eventState.lastButtonPress = currentTimestamp;
-    }
-}
-```
+### Directional Navigation Features:
+- **D-pad priority, stick fallback**: a single resolved `direction` per frame, not four independent blocks
+- **Deadzone**: Ignores small stick movements to prevent drift (`axes[0]` = X, `axes[1]` = Y)
+- **Direction Priority**: Stick picks the dominant axis by magnitude
+- **Per-pad timing**: `pad.lastAxisMove` debounces this controller independently of others
 
 ## 8. Controller Type Detection & Button Mapping
 
@@ -282,11 +508,10 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = {
         validation: {
             minButtons: 16,
             minAxes: 4,
-            idPatterns: [
-                /xbox/i,
-                /microsoft/i,
-                /x-input/i
-            ]
+            // Vendor-ID fallback (045e = Microsoft) for browsers that don't put
+            // "xbox" in the id. The minButtons/minAxes gate keeps non-controller
+            // 045e devices (headsets, keyboards) from matching.
+            idPatterns: [/xbox/i, /microsoft/i, /x-?input/i, /045e/i]
         }
     },
     playstation: {
@@ -304,14 +529,18 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = {
         validation: {
             minButtons: 16,
             minAxes: 4,
-            idPatterns: [
-                /playstation/i,
-                /dualsense/i,
-                /dualshock/i,
-                /ps3/i,
-                /ps4/i,
-                /ps5/i
-            ]
+            // Vendor-ID fallback (054c = Sony) — Chrome reports a DualShock/DualSense
+            // as "Wireless Controller (... Vendor: 054c ...)" with no readable name.
+            idPatterns: [/playstation/i, /dualsense/i, /dualshock/i, /ps3/i, /ps4/i, /ps5/i, /054c/i]
+        }
+    },
+    nintendo: {
+        // ...
+        validation: {
+            minButtons: 16,
+            minAxes: 4,
+            // Vendor-ID fallback (057e = Nintendo) for Switch Pro Controller / Joy-Con.
+            idPatterns: [/nintendo/i, /switch/i, /pro controller/i, /057e/i]
         }
     }
     // ... more controller types
@@ -320,22 +549,26 @@ export const CONTROLLER_MAPPINGS: ControllerMappings = {
 
 ### Controller Detection:
 - **Pattern Matching**: Uses regex patterns to identify controller types
-- **Validation**: Checks minimum button/axis counts
+- **Vendor-ID fallbacks**: Matches USB vendor codes (`045e` Microsoft, `054c` Sony, `057e` Nintendo) when the browser doesn't expose a readable controller name
+- **Validation**: Checks minimum button/axis counts (also gates out non-controller devices sharing a vendor ID)
 - **Mapping**: Maps generic button indices to specific controller layouts
+- **Per-pad**: Each connected controller is detected and mapped by its own type (so Nintendo's swapped A/B is honored even alongside an Xbox pad), via `getConnectedControllerTypes()`
 
 ## 9. Debouncing & Timing System
 
 ### Timing Controls:
 - **`debounceTime`**: General input debounce (default: 150ms)
 - **`scrollDebounceTime`**: Scroll-specific debounce (default: 50ms)
-- **Fixed timings**: Back button (300ms), shoulder buttons (300ms)
+- **`backButtonCooldown`** / **`shoulderCooldown`**: Configurable cooldowns (default: `DEFAULT_ACTION_COOLDOWN`), replacing the old hard-coded 300ms
 
-### Timestamp Tracking:
-- **`lastButtonPress`**: Last general button press time
-- **`lastAxisMove`**: Last analog stick movement time
-- **`lastBackTime`**: Last back button press time
-- **`lastShoulderTime`**: Last shoulder button press time
-- **`lastScrollTime`**: Last scroll action time
+### Timestamp Tracking (per-pad, on `PadInputState`):
+Each connected controller has its own copy of these timers under `eventState.padInputStates[gp.index]`:
+
+- **`lastButtonPress`**: Last primary-button (A/X/Cross) selection time
+- **`lastAxisMove`**: Last directional navigation time (D-pad or stick)
+- **`lastBackTime`**: Last back button activation time
+- **`lastShoulderTime`**: Last shoulder button activation time
+- **`lastScrollTime`**: Last right-stick scroll step time
 
 ## 10. Event Callbacks System
 
@@ -357,32 +590,48 @@ The library provides multiple callback points for different types of events:
 
 ## 11. State Management
 
+### Per-Gamepad Input State
+
+All edge-detection flags and cooldown timestamps are tracked **per controller** (keyed by
+`gamepad.index`), not globally. This lets multiple controllers drive the same shared navigation
+cursor in the same frame without clobbering one another — for example, an idle pad can't reset
+the active pad's back-button edge.
+
+```typescript
+// From: src/Interfaces/GamepadEvents.ts
+interface PadInputState {
+    lastButtonPress: number;     // last primary-button (A/Cross/X) selection
+    lastAxisMove: number;        // last directional navigation move
+    lastBackButtonState: boolean;// back button pressed on the previous frame
+    lastBackTime: number;        // last back-button activation (cooldown)
+    lastR1State: boolean;        // R1 pressed on the previous frame
+    lastL1State: boolean;        // L1 pressed on the previous frame
+    lastShoulderTime: number;    // last shoulder activation (cooldown)
+    lastScrollTime: number;      // last right-stick scroll step
+    lastButtonStates: boolean[]; // per-button pressed state (onButtonDown/Up edges)
+}
+```
+
 ### GamepadEventState Structure:
 ```typescript
 interface GamepadEventState {
     isRunning: boolean;
     gamepads: { [key: string]: Gamepad };
+    // Type of the most-recently-active controller (for status / getControllerType back-compat).
     currentControllerType: string;
-    lastButtonPress: number;
-    lastAxisMove: number;
-    lastBackButtonState: boolean;
-    lastBackTime: number;
-    lastR1State: boolean;
-    lastL1State: boolean;
-    lastShoulderTime: number;
-    lastScrollTime: number;
+    // Per-gamepad input edge/cooldown state, keyed by gamepad.index.
+    padInputStates: { [gamepadIndex: number]: PadInputState };
     animationFrameId: number | null;
     statusElementId: string | null;
     // Callback functions...
-    lastButtonStates?: { [gamepadIndex: number]: boolean[] };
 }
 ```
 
 ### State Tracking Features:
-- **Multi-gamepad support**: Tracks multiple controllers independently
-- **Button state arrays**: Maintains previous button states for edge detection
-- **Timing state**: Tracks last action times for debouncing
-- **Controller metadata**: Stores controller type and connection status
+- **Multi-gamepad support**: Tracks each controller's input state independently in `padInputStates`
+- **Button state arrays**: Maintains per-pad previous button states for edge detection
+- **Timing state**: Tracks per-pad last action times for debouncing/cooldowns
+- **Most-recently-active**: `currentControllerType` reflects the last pad the user touched; pads are pruned when they disappear from the live set
 
 ## 12. Performance Considerations
 
@@ -422,14 +671,14 @@ const gamepadService = new GamepadService({
     deadzone: 0.1
 });
 
-// Set up callbacks
-gamepadService.onSelect = (element, index) => {
+// Subscribe to events with on(event, cb)
+gamepadService.on('select', (element, index) => {
     console.log('Selected:', element.textContent);
-};
+});
 
-gamepadService.onButtonDown = (buttonIndex, gamepad) => {
+gamepadService.on('buttondown', (buttonIndex, gamepad) => {
     console.log(`Button ${buttonIndex} pressed on ${gamepad.id}`);
-};
+});
 
 gamepadService.init();
 ```
@@ -452,15 +701,32 @@ const gamepadService = new GamepadService({
 
 ## Summary
 
-The gamepad action detection system is a sophisticated, real-time input processing system that:
+The gamepad action detection system is a sophisticated, real-time input processing system that supports **dual operation modes**:
 
-1. **Leverages native browser APIs** for gamepad access
+### Native Browser Mode
+1. **Leverages native browser APIs** (`navigator.getGamepads()`, connection events)
 2. **Uses continuous polling** at display refresh rate
-3. **Implements state tracking** for edge detection
-4. **Provides debouncing** to prevent input spam
-5. **Supports multiple controller types** with automatic detection
-6. **Offers flexible callback system** for custom behaviors
-7. **Maintains high performance** through efficient state management
-8. **Ensures proper cleanup** to prevent memory leaks
+3. **Automatic controller detection** and existing gamepad discovery
 
-This system enables responsive, cross-platform gamepad navigation for web applications while maintaining performance and providing a rich API for customization. 
+### Custom Events Mode (WinUI Integration)
+1. **Listens to custom DOM events** dispatched by host applications
+2. **Event-driven state updates** instead of API polling
+3. **Full API compatibility** with native mode
+
+### Shared Characteristics (Both Modes)
+1. **Implements state tracking** for edge detection
+2. **Provides debouncing** to prevent input spam
+3. **Supports multiple controller types** with automatic detection
+4. **Offers flexible callback system** for custom behaviors
+5. **Maintains high performance** through efficient state management
+6. **Ensures proper cleanup** to prevent memory leaks
+7. **Identical processing logic** for buttons, axes, and navigation
+8. **Same callback API** regardless of input source
+
+### Benefits
+- **Environment Flexibility**: Works in standard browsers and restricted environments like WinUI
+- **Seamless Migration**: Switch between modes with minimal code changes
+- **API Consistency**: Same interfaces and callbacks across all modes
+- **Performance**: Optimized for both polling and event-driven architectures
+
+This dual-mode system enables responsive, cross-platform gamepad navigation for web applications in any environment while maintaining performance and providing a rich, consistent API for customization. 
