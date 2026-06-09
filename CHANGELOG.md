@@ -39,6 +39,14 @@ were moved behind an injectable seam.
 
 ### Breaking
 
+- **ESM-only distribution** — the package no longer ships a CommonJS bundle. The dual `es`/`cjs`
+  Vite build is now `es`-only, the single runtime artifact is `dist/index.js`, and the
+  `exports.require` / `module` fields were removed (`exports` now resolves `types` → `import`).
+  `require('gamepad-controller')` no longer resolves — consume the package with `import` (or a
+  dynamic `import()` from CommonJS). The public API and types are otherwise unchanged. Type
+  resolution was hardened in the process: the two remaining extensionless relative imports in
+  `src/interfaces/` now carry explicit `.js` specifiers so `node16`/`nodenext` TypeScript
+  resolution of the emitted `.d.ts` files succeeds.
 - **`GamepadNavigationContext.select()` no longer falls back to `window.location.href`** when used
   standalone without an `onNavigationRequest` handler — it now delegates navigation solely through
   the provided handler. The `GamepadService` flow is unaffected (it always supplies a handler,

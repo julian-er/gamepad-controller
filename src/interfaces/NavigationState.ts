@@ -1,5 +1,5 @@
-import type { GridDimensions } from './GridDimensions';
-import type { GamepadServiceOptions } from './GamepadServiceOptions';
+import type { GridDimensions } from './GridDimensions.js';
+import type { GamepadServiceOptions } from './GamepadServiceOptions.js';
 
 export interface NavigationState {
     focusedElementIndex: number;

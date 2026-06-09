@@ -6,8 +6,7 @@ inside another project.
 ## Prerequisites
 
 - **Node.js ≥ 18** and npm.
-- The library targets **ES2017** and ships both ESM and CommonJS bundles plus type
-  declarations.
+- The library targets **ES2017** and ships an **ESM-only** bundle plus type declarations.
 
 ## Install
 
@@ -19,7 +18,7 @@ npm install
 
 | Script | What it does |
 |---|---|
-| `npm run build` | Cleans `dist/` and builds ESM + CJS bundles and `.d.ts` types via Vite. |
+| `npm run build` | Cleans `dist/` and builds the ESM bundle and `.d.ts` types via Vite. |
 | `npm run build:types` | Emits only the `.d.ts` declaration files (`tsc --emitDeclarationOnly`). |
 | `npm run typecheck` | Type-checks the project without emitting (`tsc --noEmit`). |
 | `npm test` | Runs the Vitest suite once. |
@@ -35,15 +34,16 @@ npm install
 
 ```
 dist/
-  index.es.js        # ES module build  (package "module" / "import")
-  index.cjs.js       # CommonJS build    (package "main" / "require")
+  index.js           # ES module build  (package "main" / "import")
   types/
     index.d.ts       # Public type declarations ("types")
     ...              # Internal declaration files (not re-exported by the barrel)
 ```
 
-The package `exports` map resolves `types` → `import` → `require` in that order, so modern
+The package is **ESM-only**. Its `exports` map resolves `types` → `import` in that order, so modern
 bundlers and `node16`/`nodenext` TypeScript resolution pick up the correct entry and types.
+`require('gamepad-controller')` is intentionally unsupported — consume it with `import` (or a
+dynamic `import()` from CommonJS).
 
 `"sideEffects": false` is declared, so bundlers can tree-shake any unused exports out of
 consumer bundles.

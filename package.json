@@ -3,14 +3,12 @@
   "version": "1.0.0-rc.1",
   "description": "Gamepad navigation controller for the web — spatial/grid navigation, dual-context (menu vs content), controller detection, and a custom-event mode for WinUI/host integrations. TypeScript-first.",
   "type": "module",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.es.js",
-  "types": "dist/types/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js"
+      "import": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -24,6 +22,9 @@
     "USAGE_ANGULAR.md",
     "USAGE_VANILLA.md",
     "MIGRATION.md",
+    "MIGRATION_1.0_TO_NEXT.md",
+    "API.md",
+    "ARCHITECTURE.md",
     "GAMEPAD_ACTION_DETECTION.md",
     "GAMEPAD_SERVICE_METHODS.md"
   ],
