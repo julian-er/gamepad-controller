@@ -61,7 +61,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
-    "prepublishOnly": "npm run lint && npm run test && npm run build",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run test && npm run build",
     "serve": "http-server . -c-1 -o pages/home-page",
     "example-test": "rimraf dist && npm run build && npm pack && cd examples && npm i && npm run dev"
   },
