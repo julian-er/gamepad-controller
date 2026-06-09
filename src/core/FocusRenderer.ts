@@ -86,11 +86,12 @@ export class FocusRenderer {
     updateFocus(): void {
         if (this.options.enableDualContext) return;
 
-        // Clear focused styling everywhere (without touching the selected class — historical
-        // behavior of updateFocus only cleared the focused state).
+        // Clear focused styling everywhere (without touching the selected marker — historical
+        // behavior of updateFocus only cleared the focused state). Full clearing of both markers
+        // is reserved for clearFocus()/destroy().
         this.state.elements.forEach((element) => {
             if (this.options.useDataAttributes) {
-                clearFocusStyling([element], this.options);
+                element.removeAttribute('data-gamepad-focused');
             } else if (this.options.focusedClass) {
                 element.classList.remove(this.options.focusedClass);
             }
