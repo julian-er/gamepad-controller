@@ -7,11 +7,11 @@
 # Test coverage
 /coverage/
 
-# Documentation output
-/docs/
-
 # Ignore VSCode configuration
 .vscode/
+
+# Planning files
+/.plans/
 
 # Node modules
 node_modules/
@@ -45,3 +45,7 @@ $RECYCLE.BIN/
 
 # Linux
 *~ 
+
+# IA 
+/.claude
+/verification
