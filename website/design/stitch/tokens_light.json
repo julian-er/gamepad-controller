@@ -1,0 +1,106 @@
+{
+  "name": "gamepad-controller-tokens-light",
+  "version": "1.2.0",
+  "theme": "light",
+  "design_system": "Crisp Mint Light",
+  "tokens": {
+    "color": {
+      "canvas": {
+        "base": "#F8FAFC",
+        "surface": "#FFFFFF",
+        "surface-dim": "#F1F5F9",
+        "surface-bright": "#FFFFFF",
+        "surface-container-lowest": "#FFFFFF",
+        "surface-container-low": "#F8FAFC",
+        "surface-container": "#F1F5F9",
+        "surface-container-high": "#E2E8F0",
+        "surface-container-highest": "#CBD5E1",
+        "surface-glass": "rgba(255, 255, 255, 0.9)"
+      },
+      "border": {
+        "subtle": "#F1F5F9",
+        "default": "#E2E8F0",
+        "hover": "#CBD5E1",
+        "accent": "rgba(16, 185, 129, 0.35)",
+        "accent-active": "#059669"
+      },
+      "text": {
+        "primary": "#0F172A",
+        "secondary": "#475569",
+        "muted": "#64748B",
+        "inverse": "#FFFFFF",
+        "accent": "#059669"
+      },
+      "accent": {
+        "mint": "#059669",
+        "mint-hover": "#047857",
+        "mint-subtle": "#ECFDF5",
+        "blue": "#0284C7",
+        "indigo": "#4F46E5",
+        "purple": "#9333EA",
+        "warning": "#D97706",
+        "danger": "#E11D48"
+      },
+      "code": {
+        "bg": "#0F172A",
+        "border": "#E2E8F0",
+        "comment": "#94A3B8",
+        "keyword": "#F43F5E",
+        "function": "#38BDF8",
+        "string": "#34D399",
+        "variable": "#F1F5F9",
+        "badge-bg": "#ECFDF5"
+      }
+    },
+    "typography": {
+      "font-family": {
+        "sans": "'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        "mono": "'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace"
+      },
+      "scale": {
+        "xs": { "font-size": "12px", "line-height": "16px" },
+        "sm": { "font-size": "14px", "line-height": "20px" },
+        "base": { "font-size": "16px", "line-height": "24px" },
+        "lg": { "font-size": "18px", "line-height": "28px" },
+        "xl": { "font-size": "20px", "line-height": "28px" },
+        "2xl": { "font-size": "24px", "line-height": "32px" },
+        "3xl": { "font-size": "30px", "line-height": "38px" },
+        "4xl": { "font-size": "36px", "line-height": "44px" }
+      },
+      "font-weight": {
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700
+      }
+    },
+    "spacing": {
+      "1": "4px",
+      "2": "8px",
+      "3": "12px",
+      "4": "16px",
+      "5": "20px",
+      "6": "24px",
+      "8": "32px",
+      "10": "40px",
+      "12": "48px",
+      "16": "64px"
+    },
+    "radius": {
+      "sm": "4px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "16px",
+      "pill": "9999px"
+    },
+    "elevation": {
+      "card": "0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04)",
+      "card-hover": "0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)",
+      "focus-ring": "0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 0 4px rgba(16, 185, 129, 0.15)"
+    },
+    "transitions": {
+      "fast": "150ms ease",
+      "smooth": "220ms cubic-bezier(0.4, 0, 0.2, 1)"
+    }
+  }
+}

@@ -1,0 +1,239 @@
+import { useId, useState } from 'react';
+import { getButtonName } from 'gamepad-controller';
+import { Controller, type Variant } from './components/molecules/Controller/Controller';
+import { useDemoSession, type DemoSource } from './demos/useDemoSession';
+import { Icon } from './components';
+type Mode = 'spatial' | 'grid' | 'horizontal';
+const tiles = [
+    { icon: 'pad', name: 'Cloud arcade', sub: 'Pick up where you left off' },
+    { icon: 'screen', name: 'Living room', sub: 'Made for the big screen' },
+    { icon: 'layers', name: 'Your library', sub: 'All your worlds, together' },
+    { icon: 'bolt', name: 'Quick settings', sub: 'Make yourself at home' },
+];
+export function Playground() {
+    const id = 'demo-' + useId().replace(/[^a-zA-Z0-9]/g, '');
+    const [variant, setVariant] = useState<Variant>('xbox');
+    const [mode, setMode] = useState<Mode>('spatial');
+    const [source, setSource] = useState<DemoSource>('simulation');
+    const [selected, setSelected] = useState('');
+    const { running, device, pressed, axes, focused, log, error, start, stop, press, release, releaseAll, logEvent } =
+        useDemoSession({ containerId: id, variant, mode, source, stopOnSuspend: false });
+    const simulatedButton = (index: number, label: string) => (
+        <button
+            key={index}
+            className="pad-key"
+            disabled={!running || source !== 'simulation'}
+            aria-label={'Simulate ' + label}
+            onPointerDown={(e) => {
+                e.preventDefault();
+                e.currentTarget.setPointerCapture(e.pointerId);
+                press(index);
+            }}
+            onPointerUp={() => release(index)}
+            onPointerCancel={() => release(index)}
+            onLostPointerCapture={() => release(index)}
+            onKeyDown={(e) => {
+                if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) {
+                    e.preventDefault();
+                    press(index);
+                }
+            }}
+            onKeyUp={(e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    release(index);
+                }
+            }}
+            onBlur={() => release(index)}
+        >
+            {label}
+        </button>
+    );
+    return (
+        <div className="playground">
+            <div className="playground-toolbar">
+                <div className="preview-title">
+                    <span className={'status-dot ' + (running && device ? 'on' : '')} />
+                    <strong>Interactive preview</strong>
+                    <span className="mono live-label">
+                        {running
+                            ? source === 'simulation'
+                                ? 'SIMULATED INPUT'
+                                : device
+                                  ? 'HARDWARE CONNECTED'
+                                  : 'AWAITING CONTROLLER'
+                            : 'READY TO EXPLORE'}
+                    </span>
+                </div>
+                <button
+                    className={'button small ' + (running ? 'secondary' : 'primary')}
+                    onClick={() => {
+                        if (running) stop();
+                        else {
+                            setSelected('');
+                            start();
+                        }
+                    }}
+                >
+                    {running ? 'Stop demo' : 'Start demo'}
+                    <Icon name={running ? 'close' : 'arrow'} size={14} />
+                </button>
+            </div>
+            <div className="playground-controls">
+                <div className="segmented" aria-label="Controller preview">
+                    {(['xbox', 'playstation', 'unknown'] as Variant[]).map((v) => (
+                        <button key={v} aria-pressed={variant === v} onClick={() => setVariant(v)}>
+                            {v === 'unknown' ? 'Arcade' : v === 'xbox' ? 'Xbox' : 'PlayStation'}
+                        </button>
+                    ))}
+                </div>
+                <label>
+                    Input{' '}
+                    <select value={source} onChange={(e) => setSource(e.target.value as DemoSource)}>
+                        <option value="simulation">Simulated input</option>
+                        <option value="native">Native controller</option>
+                    </select>
+                </label>
+                <label>
+                    Mode{' '}
+                    <select value={mode} onChange={(e) => setMode(e.target.value as Mode)}>
+                        <option value="spatial">Spatial</option>
+                        <option value="grid">Grid</option>
+                        <option value="horizontal">Horizontal</option>
+                    </select>
+                </label>
+            </div>
+            <div className="playground-body">
+                <div className="hardware-preview">
+                    <div className="panel-eyebrow">
+                        <span>CONTROLLER INPUT</span>
+                        <span>{variant === 'unknown' ? 'GENERIC' : variant.toUpperCase()}</span>
+                    </div>
+                    <Controller variant={variant} pressed={pressed} axes={axes} />
+                    <div className="axis-readouts">
+                        <span>
+                            LX <b>{(axes[0] || 0).toFixed(2)}</b>
+                        </span>
+                        <span>
+                            LY <b>{(axes[1] || 0).toFixed(2)}</b>
+                        </span>
+                        <span>
+                            RX <b>{(axes[2] || 0).toFixed(2)}</b>
+                        </span>
+                        <span>
+                            RY <b>{(axes[3] || 0).toFixed(2)}</b>
+                        </span>
+                    </div>
+                    <p className="device-label">
+                        {running
+                            ? device || 'Connect a controller and press any button.'
+                            : 'Start a session to see input in real time.'}
+                    </p>
+                </div>
+                <div className="navigation-preview">
+                    <div className="panel-eyebrow">
+                        <span>NAVIGATION SANDBOX</span>
+                        <span>{focused < 0 ? '—' : 'NODE 0' + (focused + 1)}</span>
+                    </div>
+                    <div
+                        id={id}
+                        className={'demo-grid mode-' + mode}
+                        onKeyDown={(e) => {
+                            const keys: Record<string, number> = {
+                                ArrowUp: 12,
+                                ArrowDown: 13,
+                                ArrowLeft: 14,
+                                ArrowRight: 15,
+                                Enter: 0,
+                            };
+                            if (running && source === 'simulation' && e.key in keys) {
+                                e.preventDefault();
+                                if (!e.repeat) press(keys[e.key]!);
+                            }
+                        }}
+                        onKeyUp={(e) => {
+                            const keys: Record<string, number> = {
+                                ArrowUp: 12,
+                                ArrowDown: 13,
+                                ArrowLeft: 14,
+                                ArrowRight: 15,
+                                Enter: 0,
+                            };
+                            if (running && source === 'simulation' && e.key in keys) {
+                                e.preventDefault();
+                                release(keys[e.key]!);
+                            }
+                        }}
+                        onBlur={(e) => {
+                            if (!e.currentTarget.contains(e.relatedTarget)) {
+                                releaseAll();
+                            }
+                        }}
+                    >
+                        {tiles.map((tile) => (
+                            <button
+                                key={tile.name}
+                                className="demo-tile"
+                                onClick={() => {
+                                    setSelected(tile.name);
+                                    logEvent('opened · ' + tile.name);
+                                }}
+                            >
+                                <Icon name={tile.icon} size={26} />
+                                <strong>{tile.name}</strong>
+                                <span>{tile.sub}</span>
+                                <span className="tile-arrow" aria-hidden="true">
+                                    ↗
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="selection-output" role="status">
+                        {selected ? 'Selected: ' + selected : 'Your next destination is one move away.'}
+                    </div>
+                </div>
+            </div>
+            <div className="playground-bottom">
+                <div className="simulation-keys">
+                    {simulatedButton(14, '←')}
+                    {simulatedButton(12, '↑')}
+                    {simulatedButton(13, '↓')}
+                    {simulatedButton(15, '→')}
+                    {simulatedButton(
+                        0,
+                        variant === 'playstation' ? '× Select' : variant === 'unknown' ? '1 Select' : 'A Select'
+                    )}
+                    <span>
+                        {source === 'simulation'
+                            ? 'On-screen controls · or arrow keys on a tile'
+                            : 'Left stick / D-pad to move · primary button to select'}
+                    </span>
+                </div>
+                <span className="mono">
+                    {pressed.length ? pressed.map((i) => getButtonName(i, variant)).join(' + ') : 'INPUT IDLE'}
+                </span>
+            </div>
+            {error && (
+                <p className="input-error" role="alert">
+                    {error}
+                </p>
+            )}
+            <details className="event-log">
+                <summary>
+                    Event log <span>{log.length} recent events</span>
+                </summary>
+                <ol aria-label="Recent gamepad events">
+                    {log.length ? (
+                        log.map((entry, i) => (
+                            <li key={i}>
+                                <span className="mint">›</span> {entry}
+                            </li>
+                        ))
+                    ) : (
+                        <li>Start the demo and send an input to see service events.</li>
+                    )}
+                </ol>
+            </details>
+        </div>
+    );
+}

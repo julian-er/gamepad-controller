@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; font-family: 'Geist', sans-serif; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    code, kbd, pre { font-family: 'JetBrains Mono', monospace; }
+    .card-focus-ring {
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.7), 0 0 0 5px rgba(16, 185, 129, 0.18), 0 4px 12px rgba(16, 185, 129, 0.08);
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#f8fafc",
+            "surface-card": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f8fafc",
+            "surface-container": "#f1f5f9",
+            "surface-container-high": "#e2e8f0",
+            "surface-container-highest": "#cbd5e1",
+            "on-surface": "#0f172a",
+            "on-surface-variant": "#64748b",
+            "text-secondary": "#475569",
+            "outline-soft": "#e2e8f0",
+            "primary": "#059669",
+            "primary-soft": "rgba(16, 185, 129, 0.12)",
+            "mint-subtle": "#ecfdf5",
+            "mint-border": "#a7f3d0",
+            "secondary": "#0284c7",
+            "tertiary": "#6366f1"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background text-on-surface min-h-screen selection:bg-emerald-100 selection:text-emerald-900">
+<!-- LEFT NAVIGATION SIDEBAR -->
+<aside class="fixed left-0 top-0 h-full w-[270px] bg-surface-card border-r border-outline-soft z-50 flex flex-col shadow-[1px_0_3px_rgba(0,0,0,0.02)]">
+<!-- Brand Header -->
+<div class="p-5 pb-4 border-b border-outline-soft flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-emerald-50 border border-mint-border flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]">sports_esports</span>
+</div>
+<span class="font-semibold text-[15px] tracking-tight text-on-surface">gamepad-ctrl</span>
+</div>
+<span class="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-text-secondary border border-outline-soft font-medium">v1.0</span>
+</div>
+<div class="flex items-center gap-2 text-xs">
+<span class="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100"></span>
+<span class="text-[12px] font-medium text-emerald-700">Engine Ready • v1.0.0</span>
+</div>
+</div>
+<!-- Quick Search Command -->
+<div class="px-4 py-3 border-b border-outline-soft">
+<button class="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-50 border border-outline-soft text-on-surface-variant hover:text-on-surface hover:bg-slate-100/70 hover:border-slate-300 transition-all text-xs" type="button">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[15px] text-slate-400">search</span>
+<span>Quick search...</span>
+</div>
+<kbd class="px-1.5 py-0.5 rounded bg-white text-[10px] font-mono text-text-secondary border border-outline-soft shadow-xs">⌘K</kbd>
+</button>
+</div>
+<!-- Clean Navigation Links -->
+<nav class="flex-1 overflow-y-auto p-3 space-y-5 text-[13px]">
+<div>
+<div class="px-2 pb-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Getting Started</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-emerald-700 bg-emerald-50/80 border border-mint-border shadow-xs" href="#">Overview</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#">Quick Start</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#">Installation</a>
+</div>
+</div>
+<div>
+<div class="px-2 pb-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Navigation</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#">Spatial Solver</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#">Navigation Scopes</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#">Focus Trapping</a>
+</div>
+</div>
+<div>
+<div class="px-2 pb-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Integrations</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#">React Hooks</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#">Angular Directive</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#">Vanilla TS</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#">WebView2 Bridge</a>
+</div>
+</div>
+<div>
+<div class="px-2 pb-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Reference</div>
+<div class="space-y-0.5">
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#api-ref">GamepadService API</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#events">Event Lifecycle</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-text-secondary hover:text-on-surface hover:bg-slate-100 transition-colors" href="#ai-skills">AI Agent Prompts</a>
+</div>
+</div>
+</nav>
+<!-- Sidebar Footer -->
+<div class="p-3 border-t border-outline-soft flex items-center justify-between text-xs text-on-surface-variant bg-slate-50/50">
+<span class="font-medium text-slate-600">Crisp Mint UI</span>
+<span class="font-mono text-[11px] px-1.5 py-0.5 bg-slate-100 rounded text-slate-500 border border-slate-200">MIT</span>
+</div>
+</aside>
+<!-- MAIN WRAPPER -->
+<div class="pl-[270px] pr-[230px]">
+<!-- Clean Minimal Header -->
+<header class="fixed top-0 left-[270px] right-[230px] h-14 bg-white/90 backdrop-blur-md border-b border-outline-soft z-40 flex items-center justify-between px-8 shadow-xs">
+<div class="flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+<span class="text-slate-500">Docs</span>
+<span class="text-slate-300">/</span>
+<span class="text-on-surface font-semibold">Gamepad Overview &amp; Playground</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-mono">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-1 ring-emerald-300"></span>
+<span class="font-medium">Xbox Wireless Connected</span>
+</div>
+<!-- Theme toggle (Sun active in Light Mode) -->
+<button class="p-1.5 rounded-lg text-amber-500 bg-amber-50 border border-amber-200/70 hover:bg-amber-100/70 transition-colors" title="Light mode active">
+<span class="material-symbols-outlined text-[18px]">light_mode</span>
+</button>
+<a class="p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-slate-100 transition-colors" href="https://github.com" target="_blank" title="GitHub">
+<span class="material-symbols-outlined text-[18px]">code</span>
+</a>
+</div>
+</header>
+<!-- CONTENT AREA -->
+<main class="pt-20 pb-24 px-8 max-w-[1060px] mx-auto space-y-16">
+<!-- SECTION 1: CLEAN FRIENDLY HERO -->
+<section class="space-y-5 pt-2">
+<div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+<span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-mint-border font-semibold shadow-xs">v1.0.0 Stable</span>
+<span class="px-2.5 py-1 rounded-md bg-white text-text-secondary border border-outline-soft shadow-xs">TypeScript Native</span>
+<span class="px-2.5 py-1 rounded-md bg-white text-text-secondary border border-outline-soft shadow-xs">Zero Dependencies</span>
+<span class="px-2.5 py-1 rounded-md bg-white text-text-secondary border border-outline-soft shadow-xs">10-foot UI Ready</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+<div class="lg:col-span-8 space-y-3">
+<h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-on-surface">
+              gamepad-controller
+            </h1>
+<p class="text-base text-text-secondary leading-relaxed max-w-2xl font-normal">
+              Effortless spatial navigation for web apps, smart TV interfaces, and game dashboards. Add intuitive directional focus with zero input lag in minutes.
+            </p>
+</div>
+<!-- Streamlined Install Command -->
+<div class="lg:col-span-4">
+<div class="bg-surface-card border border-outline-soft rounded-xl p-3 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]">
+<div class="flex items-center justify-between mb-2 px-1">
+<div class="flex gap-2.5 text-xs font-mono">
+<button class="text-emerald-700 font-semibold" id="tab-npm" onclick="switchCli('npm')">npm</button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors" id="tab-pnpm" onclick="switchCli('pnpm')">pnpm</button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors" id="tab-bun" onclick="switchCli('bun')">bun</button>
+</div>
+<span class="text-[11px] text-slate-400 font-mono">Install</span>
+</div>
+<div class="flex items-center justify-between px-3 py-2 bg-slate-50 rounded-lg border border-outline-soft">
+<code class="text-xs text-on-surface font-mono select-all font-medium" id="cli-command">npm i gamepad-controller</code>
+<button class="text-slate-400 hover:text-emerald-600 p-1 transition-colors" onclick="copyCli()" title="Copy command">
+<span class="material-symbols-outlined text-[16px]" id="copy-icon">content_copy</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: SIMPLIFIED INTERACTIVE PLAYGROUND -->
+<section class="space-y-4" id="playground">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-xl font-semibold text-on-surface tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">videogame_asset</span>
+              Interactive Preview
+            </h2>
+<p class="text-xs text-text-secondary mt-0.5">Test navigation using on-screen controls or your connected gamepad.</p>
+</div>
+<!-- Friendly Simulator Controls -->
+<div class="flex items-center gap-1.5 bg-surface-card border border-outline-soft p-1 rounded-lg shadow-xs">
+<span class="text-[11px] font-mono text-on-surface-variant px-2">Simulate D-Pad:</span>
+<button class="w-7 h-7 flex items-center justify-center rounded bg-slate-100 hover:bg-slate-200 text-xs font-mono text-on-surface font-semibold border border-outline-soft transition-colors" onclick="simulateDpad('left')">←</button>
+<button class="w-7 h-7 flex items-center justify-center rounded bg-slate-100 hover:bg-slate-200 text-xs font-mono text-on-surface font-semibold border border-outline-soft transition-colors" onclick="simulateDpad('up')">↑</button>
+<button class="w-7 h-7 flex items-center justify-center rounded bg-slate-100 hover:bg-slate-200 text-xs font-mono text-on-surface font-semibold border border-outline-soft transition-colors" onclick="simulateDpad('down')">↓</button>
+<button class="w-7 h-7 flex items-center justify-center rounded bg-slate-100 hover:bg-slate-200 text-xs font-mono text-on-surface font-semibold border border-outline-soft transition-colors" onclick="simulateDpad('right')">→</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+<!-- Left: Official Xbox Wireless Controller Visualization Card (Light Theme Matte Slate Finish) -->
+<div class="lg:col-span-7 bg-surface-card border border-outline-soft rounded-xl p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]">
+<div class="flex items-center justify-between text-xs pb-3 border-b border-outline-soft">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-400/40"></span>
+<span class="font-semibold text-on-surface tracking-tight">Xbox Wireless Controller</span>
+</div>
+<span class="font-mono text-[11px] px-2 py-0.5 rounded bg-emerald-50 border border-mint-border text-emerald-800 font-semibold">Connected • DirectInput / XInput</span>
+</div>
+<!-- Authentic Xbox Controller Vector Silhouette & Controls (Matte Slate / Silver Finish) -->
+<div class="py-5 flex items-center justify-center bg-slate-50/60 rounded-xl my-2 border border-slate-100">
+<svg class="w-full max-w-[430px] h-auto select-none drop-shadow-sm" viewbox="0 0 540 330" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<!-- Glow for Xbox Guide Button -->
+<filter height="180%" id="xbox-jewel-glow-light" width="180%" x="-40%" y="-40%">
+<fegaussianblur in="SourceGraphic" result="blur" stddeviation="3"></fegaussianblur>
+<femerge>
+<femergenode in="blur"></femergenode>
+<femergenode in="SourceGraphic"></femergenode>
+</femerge>
+</filter>
+<radialgradient cx="50%" cy="40%" id="jewel-gradient-light" r="60%">
+<stop offset="0%" stop-color="#ffffff" stop-opacity="1"></stop>
+<stop offset="40%" stop-color="#a7f3d0" stop-opacity="0.9"></stop>
+<stop offset="100%" stop-color="#059669" stop-opacity="0.6"></stop>
+</radialgradient>
+<lineargradient id="body-gradient-light" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#475569"></stop>
+<stop offset="100%" stop-color="#334155"></stop>
+</lineargradient>
+</defs>
+<!-- Left Trigger (LT) & Right Trigger (RT) Tops -->
+<path d="M 122 18 C 130 18, 140 22, 145 32 L 95 32 C 98 24, 108 18, 122 18 Z" fill="#64748b" stroke="#cbd5e1" stroke-width="1.2"></path>
+<path d="M 418 18 C 410 18, 400 22, 395 32 L 445 32 C 442 24, 432 18, 418 18 Z" fill="#64748b" stroke="#cbd5e1" stroke-width="1.2"></path>
+<text fill="#cbd5e1" font-family="JetBrains Mono" font-size="7.5" font-weight="600" text-anchor="middle" x="120" y="27">LT</text>
+<text fill="#cbd5e1" font-family="JetBrains Mono" font-size="7.5" font-weight="600" text-anchor="middle" x="420" y="27">RT</text>
+<!-- Left Bumper (LB) & Right Bumper (RB) -->
+<path d="M 100 32 L 182 32 C 182 32, 172 44, 150 46 L 105 44 C 98 40, 97 34, 100 32 Z" fill="#475569" stroke="#94a3b8" stroke-width="1.2"></path>
+<path d="M 440 32 L 358 32 C 358 32, 368 44, 390 46 L 435 44 C 442 40, 443 34, 440 32 Z" fill="#475569" stroke="#94a3b8" stroke-width="1.2"></path>
+<text fill="#e2e8f0" font-family="JetBrains Mono" font-size="8" font-weight="500" text-anchor="middle" x="138" y="41">LB</text>
+<text fill="#e2e8f0" font-family="JetBrains Mono" font-size="8" font-weight="500" text-anchor="middle" x="402" y="41">RB</text>
+<!-- Official Xbox Controller Ergonomic Body (Matte Slate) -->
+<path d="M 160 38 
+           C 205 35, 335 35, 380 38 
+           C 425 42, 475 78, 498 135 
+           C 525 200, 520 282, 458 304 
+           C 410 320, 368 238, 332 208 
+           C 300 188, 240 188, 208 208 
+           C 172 238, 130 320, 82 304 
+           C 20 282, 15 200, 42 135 
+           C 65 78, 115 42, 160 38 Z" fill="url(#body-gradient-light)" stroke="#cbd5e1" stroke-width="1.5"></path>
+<!-- Subtle Contour Lines on Grips -->
+<path d="M 68 185 C 80 240, 115 288, 126 293" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"></path>
+<path d="M 472 185 C 460 240, 425 288, 414 293" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"></path>
+<!-- Center Xbox Guide Glowing Jewel Button -->
+<g class="cursor-pointer" onclick="handleCardClick('Xbox Guide Jewel Pressed')">
+<circle cx="270" cy="88" fill="#059669" fill-opacity="0.35" filter="url(#xbox-jewel-glow-light)" r="22"></circle>
+<circle cx="270" cy="88" fill="#1e293b" r="18" stroke="#10b981" stroke-width="2"></circle>
+<circle cx="270" cy="88" fill="#0f172a" r="15"></circle>
+<!-- Xbox 'X' Symbol Jewel Incision -->
+<path d="M 261 80 C 265 85, 275 85, 279 80 C 275 88, 275 92, 281 97 C 274 93, 266 93, 259 97 C 265 92, 265 88, 261 80 Z" fill="url(#jewel-gradient-light)"></path>
+</g>
+<!-- View Button (Left of Center: Overlapping Squares) -->
+<g class="cursor-pointer hover:opacity-80 transition-opacity" onclick="handleCardClick('View Button Pressed')" transform="translate(222, 112)">
+<circle cx="0" cy="0" fill="#1e293b" r="7.5" stroke="#94a3b8" stroke-width="1"></circle>
+<rect fill="none" height="5" rx="0.6" stroke="#cbd5e1" stroke-width="0.9" width="5.5" x="-4.5" y="-3"></rect>
+<rect fill="none" height="5" rx="0.6" stroke="#cbd5e1" stroke-width="0.9" width="5.5" x="-2" y="-1"></rect>
+</g>
+<!-- Share Button (Center Lower: Upload / Share Icon) -->
+<g class="cursor-pointer hover:opacity-80 transition-opacity" onclick="handleCardClick('Share Button Pressed')" transform="translate(270, 134)">
+<circle cx="0" cy="0" fill="#1e293b" r="5" stroke="#94a3b8" stroke-width="0.8"></circle>
+<path d="M -2.5 1.5 L 0 -1 L 2.5 1.5 M 0 -1 L 0 3" fill="none" stroke="#cbd5e1" stroke-linecap="round" stroke-width="0.9"></path>
+</g>
+<!-- Menu Button (Right of Center: Three Horizontal "Hamburger" Lines) -->
+<g class="cursor-pointer hover:opacity-80 transition-opacity" onclick="handleCardClick('Menu Button Pressed')" transform="translate(318, 112)">
+<circle cx="0" cy="0" fill="#1e293b" r="7.5" stroke="#94a3b8" stroke-width="1"></circle>
+<line stroke="#cbd5e1" stroke-linecap="round" stroke-width="1" x1="-3.5" x2="3.5" y1="-2.5" y2="-2.5"></line>
+<line stroke="#cbd5e1" stroke-linecap="round" stroke-width="1" x1="-3.5" x2="3.5" y1="0" y2="0"></line>
+<line stroke="#cbd5e1" stroke-linecap="round" stroke-width="1" x1="-3.5" x2="3.5" y1="2.5" y2="2.5"></line>
+</g>
+<!-- ASYMMETRIC CONTROLS: Left Thumbstick (Higher Position) -->
+<g id="stick-l-group" transform="translate(155, 120)">
+<!-- Base Well -->
+<circle cx="0" cy="0" fill="#1e293b" r="33" stroke="#64748b" stroke-width="1.5"></circle>
+<circle cx="0" cy="0" fill="#0f172a" r="28"></circle>
+<!-- Thumbstick Cap (Offset to simulate dynamic neutral position) -->
+<circle class="transition-transform duration-100" cx="2" cy="-2" fill="#334155" id="stick-l-puck" r="21" stroke="#10b981" stroke-width="2.2"></circle>
+<circle cx="2" cy="-2" fill="none" r="14" stroke="rgba(255,255,255,0.25)" stroke-dasharray="2 3"></circle>
+<circle cx="2" cy="-2" fill="#1e293b" r="7" stroke="#10b981" stroke-width="1.2"></circle>
+</g>
+<!-- Directional D-Pad (Lower-Left Position) -->
+<g id="dpad-group" transform="translate(208, 196)">
+<!-- D-pad housing dish -->
+<circle cx="0" cy="0" fill="#1e293b" r="30" stroke="#64748b" stroke-width="1"></circle>
+<!-- Modern Xbox Hybrid/Cross D-Pad Shape -->
+<path d="M -11 -28 H 11 V -11 H 28 V 11 H 11 V 28 H -11 V 11 H -28 V -11 H -11 Z" fill="#0f172a" stroke="#64748b" stroke-width="1.2"></path>
+<!-- Facet Accents & Click Targets -->
+<polygon class="cursor-pointer hover:fill-emerald-400 transition-colors" fill="#475569" onclick="simulateDpad('up')" points="0,-23 -6,-13 6,-13"></polygon>
+<polygon class="cursor-pointer hover:fill-emerald-400 transition-colors" fill="#475569" onclick="simulateDpad('down')" points="0,23 -6,13 6,13"></polygon>
+<polygon class="cursor-pointer hover:fill-emerald-400 transition-colors" fill="#475569" onclick="simulateDpad('left')" points="-23,0 -13,-6 -13,6"></polygon>
+<polygon class="cursor-pointer hover:fill-emerald-400 transition-colors" fill="#475569" onclick="simulateDpad('right')" points="23,0 13,-6 13,6"></polygon>
+<circle cx="0" cy="0" fill="#1e293b" r="5"></circle>
+</g>
+<!-- ASYMMETRIC CONTROLS: Right Thumbstick (Lower Position) -->
+<g id="stick-r-group" transform="translate(335, 196)">
+<!-- Base Well -->
+<circle cx="0" cy="0" fill="#1e293b" r="33" stroke="#64748b" stroke-width="1.5"></circle>
+<circle cx="0" cy="0" fill="#0f172a" r="28"></circle>
+<!-- Right Stick Cap -->
+<circle cx="0" cy="0" fill="#334155" r="21" stroke="#94a3b8" stroke-width="1.5"></circle>
+<circle cx="0" cy="0" fill="none" r="14" stroke="rgba(255,255,255,0.25)" stroke-dasharray="2 3"></circle>
+<circle cx="0" cy="0" fill="#1e293b" r="7"></circle>
+</g>
+<!-- Clustered Face Buttons (X, Y, B, A) with Crisp Authentic Xbox Colors -->
+<g transform="translate(390, 120)">
+<!-- Button X (Blue - Left) -->
+<g class="cursor-pointer group" onclick="handleCardClick('Action X fired')">
+<circle class="group-hover:brightness-110 transition-all shadow-sm" cx="-25" cy="0" fill="#0284c7" r="11.5" stroke="#ffffff" stroke-width="1.5"></circle>
+<text cx="-25" cy="0" fill="#ffffff" font-family="JetBrains Mono" font-size="11" font-weight="700" text-anchor="middle" x="-25" y="4">X</text>
+</g>
+<!-- Button Y (Yellow - Top) -->
+<g class="cursor-pointer group" onclick="handleCardClick('Action Y fired')">
+<circle class="group-hover:brightness-110 transition-all shadow-sm" cx="0" cy="-25" fill="#d97706" r="11.5" stroke="#ffffff" stroke-width="1.5"></circle>
+<text cx="0" cy="-25" fill="#ffffff" font-family="JetBrains Mono" font-size="11" font-weight="700" text-anchor="middle" x="0" y="-21">Y</text>
+</g>
+<!-- Button B (Red - Right) -->
+<g class="cursor-pointer group" onclick="handleCardClick('Action B fired')">
+<circle class="group-hover:brightness-110 transition-all shadow-sm" cx="25" cy="0" fill="#e11d48" r="11.5" stroke="#ffffff" stroke-width="1.5"></circle>
+<text cx="25" cy="0" fill="#ffffff" font-family="JetBrains Mono" font-size="11" font-weight="700" text-anchor="middle" x="25" y="4">B</text>
+</g>
+<!-- Button A (Green - Bottom) -->
+<g class="cursor-pointer group" onclick="handleCardClick('Action A fired')">
+<circle class="group-hover:brightness-110 transition-all shadow-sm" cx="0" cy="25" fill="#059669" r="11.5" stroke="#ffffff" stroke-width="1.5"></circle>
+<text cx="0" cy="25" fill="#ffffff" font-family="JetBrains Mono" font-size="11" font-weight="700" text-anchor="middle" x="0" y="29">A</text>
+</g>
+</g>
+</svg>
+</div>
+<!-- Real-time Telemetry Status Footer -->
+<div class="pt-3 border-t border-outline-soft flex items-center justify-between text-xs text-text-secondary font-mono">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span>Xbox Controller Ready • 60 FPS • Standard Mapping</span>
+</div>
+<span class="text-emerald-700 font-semibold" id="playground-status">Ready for input</span>
+</div>
+</div>
+<!-- Right: Friendly 4-Card Focus Grid Demo -->
+<div class="lg:col-span-5 flex flex-col justify-between gap-4">
+<div class="bg-surface-card border border-outline-soft rounded-xl p-5 flex-1 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]">
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-mono uppercase tracking-wider text-slate-500 font-semibold">Interactive Target Cards</span>
+<span class="text-xs font-mono text-emerald-700 font-semibold px-2 py-0.5 bg-emerald-50 rounded border border-mint-border">Scope: dashboard</span>
+</div>
+<!-- Friendly 4-Item Grid -->
+<div class="grid grid-cols-2 gap-3" id="target-grid">
+<!-- Card 0 (Active by default) -->
+<div class="gamepad-card p-4 rounded-lg bg-emerald-50/40 border border-emerald-500 card-focus-ring transition-all cursor-pointer hover:shadow-md" data-index="0" onclick="setFocusedCard(0)" tabindex="0">
+<div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2.5 shadow-xs">
+<span class="material-symbols-outlined text-[19px]">sports_esports</span>
+</div>
+<h4 class="font-semibold text-sm text-on-surface">Arcade Hub</h4>
+<p class="text-xs text-text-secondary mt-0.5">Quick game library</p>
+</div>
+<!-- Card 1 -->
+<div class="gamepad-card p-4 rounded-lg bg-white border border-outline-soft transition-all cursor-pointer hover:border-slate-300 hover:shadow-md" data-index="1" onclick="setFocusedCard(1)" tabindex="0">
+<div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center mb-2.5 shadow-xs border border-sky-100">
+<span class="material-symbols-outlined text-[19px]">rocket_launch</span>
+</div>
+<h4 class="font-semibold text-sm text-on-surface">Nebula Drift</h4>
+<p class="text-xs text-text-secondary mt-0.5">Vector racing</p>
+</div>
+<!-- Card 2 -->
+<div class="gamepad-card p-4 rounded-lg bg-white border border-outline-soft transition-all cursor-pointer hover:border-slate-300 hover:shadow-md" data-index="2" onclick="setFocusedCard(2)" tabindex="0">
+<div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2.5 shadow-xs border border-indigo-100">
+<span class="material-symbols-outlined text-[19px]">tune</span>
+</div>
+<h4 class="font-semibold text-sm text-on-surface">Audio Forge</h4>
+<p class="text-xs text-text-secondary mt-0.5">Sound settings</p>
+</div>
+<!-- Card 3 -->
+<div class="gamepad-card p-4 rounded-lg bg-white border border-outline-soft transition-all cursor-pointer hover:border-slate-300 hover:shadow-md" data-index="3" onclick="setFocusedCard(3)" tabindex="0">
+<div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-2.5 shadow-xs border border-amber-100">
+<span class="material-symbols-outlined text-[19px]">settings</span>
+</div>
+<h4 class="font-semibold text-sm text-on-surface">Preferences</h4>
+<p class="text-xs text-text-secondary mt-0.5">Input sensitivity</p>
+</div>
+</div>
+</div>
+<!-- Friendly Tip / Notification -->
+<div class="mt-4 p-3 rounded-lg bg-slate-50 border border-outline-soft flex items-center gap-2.5 text-xs text-text-secondary shadow-xs">
+<span class="material-symbols-outlined text-emerald-600 text-[18px]">info</span>
+<span>Click any card or use arrow buttons to see directional focus switching in action.</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: SIMPLIFIED 3-STEP EXECUTION FLOW -->
+<section class="space-y-4" id="flow">
+<div>
+<h2 class="text-xl font-semibold text-on-surface tracking-tight">How It Works</h2>
+<p class="text-xs text-text-secondary mt-0.5">A clear, lightweight architecture that connects hardware to DOM focus seamlessly.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Step 1 -->
+<div class="bg-surface-card border border-outline-soft rounded-xl p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+<div class="space-y-3">
+<div class="w-8 h-8 rounded-lg bg-emerald-50 border border-mint-border flex items-center justify-center text-emerald-700 font-mono text-xs font-bold shadow-xs">
+                01
+              </div>
+<h3 class="font-semibold text-on-surface text-base">Detect &amp; Connect</h3>
+<p class="text-xs text-text-secondary leading-relaxed">
+                Plug-and-play browser standard gamepad detection with automatic drift deadzone filtering.
+              </p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-soft text-[11px] font-mono text-emerald-700 font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>60 FPS Native Polling</span>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-card border border-outline-soft rounded-xl p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+<div class="space-y-3">
+<div class="w-8 h-8 rounded-lg bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-700 font-mono text-xs font-bold shadow-xs">
+                02
+              </div>
+<h3 class="font-semibold text-on-surface text-base">Spatial Navigation</h3>
+<p class="text-xs text-text-secondary leading-relaxed">
+                Intelligently determines the closest neighboring element based on directional vectors and active scope boundaries.
+              </p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-soft text-[11px] font-mono text-sky-700 font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>Smart Scope Boundaries</span>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-card border border-outline-soft rounded-xl p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+<div class="space-y-3">
+<div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 font-mono text-xs font-bold shadow-xs">
+                03
+              </div>
+<h3 class="font-semibold text-on-surface text-base">Smooth Interactions</h3>
+<p class="text-xs text-text-secondary leading-relaxed">
+                Applies standard browser focus with zero input delay, and exposes preventable event hooks for custom behavior.
+              </p>
+</div>
+<div class="mt-4 pt-3 border-t border-outline-soft text-[11px] font-mono text-indigo-700 font-medium flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>Native DOM focus()</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: CLEAN TABBED CODE INTEGRATION (Deep Slate Developer Box) -->
+<section class="space-y-4" id="frameworks">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-xl font-semibold text-on-surface tracking-tight">Quick Integration</h2>
+<p class="text-xs text-text-secondary mt-0.5">Integrate into your framework in under 10 lines of code.</p>
+</div>
+<!-- Framework Tabs -->
+<div class="flex items-center gap-1 bg-surface-card border border-outline-soft p-1 rounded-lg shadow-xs">
+<button class="px-3 py-1.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-800 border border-mint-border shadow-xs transition-all" id="tab-code-vanilla" onclick="switchSnippet('vanilla')">Vanilla TS</button>
+<button class="px-3 py-1.5 rounded text-xs font-medium text-text-secondary hover:text-on-surface transition-all" id="tab-code-react" onclick="switchSnippet('react')">React Hook</button>
+<button class="px-3 py-1.5 rounded text-xs font-medium text-text-secondary hover:text-on-surface transition-all" id="tab-code-angular" onclick="switchSnippet('angular')">Angular</button>
+</div>
+</div>
+<!-- Developer Code Box -->
+<div class="bg-code-dark bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg">
+<div class="flex items-center justify-between px-4 py-2.5 bg-slate-950/60 border-b border-slate-800">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+<span class="text-xs font-mono text-slate-400 ml-2" id="code-filename">navigation.ts</span>
+</div>
+<button class="flex items-center gap-1 text-xs font-mono text-slate-400 hover:text-white transition-colors" onclick="copySnippet()">
+<span class="material-symbols-outlined text-[15px]" id="code-copy-icon">content_copy</span>
+<span>Copy</span>
+</button>
+</div>
+<pre class="p-4 text-xs font-mono leading-relaxed text-slate-200 overflow-x-auto"><code id="code-content"><span class="text-purple-400">import</span> { gamepadService } <span class="text-purple-400">from</span> <span class="text-emerald-400">'gamepad-controller'</span>;
+
+<span class="text-slate-500">// Initialize navigation engine</span>
+<span class="text-purple-400">const</span> ctrl = gamepadService({ deadzone: <span class="text-sky-400">0.15</span> });
+ctrl.init();
+
+<span class="text-slate-500">// Set current screen scope</span>
+ctrl.setActiveScope(<span class="text-emerald-400">'dashboard'</span>, { trapFocus: <span class="text-purple-400">true</span> });
+
+<span class="text-slate-500">// Listen for actions or button presses</span>
+ctrl.on(<span class="text-emerald-400">'action'</span>, (e) =&gt; console.log(<span class="text-emerald-400">'Gamepad Action:'</span>, e));</code></pre>
+</div>
+</section>
+<!-- SECTION 5: SIMPLIFIED AI AGENT PROMPTS -->
+<section class="space-y-4" id="ai-skills">
+<div>
+<h2 class="text-xl font-semibold text-on-surface tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">smart_toy</span>
+            AI Agent Assistant Prompts
+          </h2>
+<p class="text-xs text-text-secondary mt-0.5">Ready-to-use prompts for Claude, ChatGPT, or Cursor to configure gamepad logic.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Skill 1 -->
+<div class="bg-surface-card border border-outline-soft rounded-xl p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border border-mint-border">
+<span class="material-symbols-outlined text-[19px]">bolt</span>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-outline-soft text-slate-600 font-semibold">Setup</span>
+</div>
+<h3 class="font-semibold text-on-surface text-sm pt-1">Quick Setup</h3>
+<p class="text-xs text-text-secondary leading-relaxed">
+                Add gamepad controls and fallback keyboard events to any React or Next.js layout.
+              </p>
+</div>
+<button class="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-50 hover:bg-slate-100 border border-outline-soft text-xs text-on-surface font-medium transition-colors shadow-xs" onclick="copyPrompt('Install and integrate gamepad-controller into my React app with keyboard fallback')">
+<span>Copy Prompt</span>
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+<!-- Skill 2 -->
+<div class="bg-surface-card border border-outline-soft rounded-xl p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-200">
+<span class="material-symbols-outlined text-[19px]">grid_view</span>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-outline-soft text-slate-600 font-semibold">Modal</span>
+</div>
+<h3 class="font-semibold text-on-surface text-sm pt-1">Modal Navigation</h3>
+<p class="text-xs text-text-secondary leading-relaxed">
+                Configure modal focus trapping, cancel hooks, and directional boundary returns.
+              </p>
+</div>
+<button class="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-50 hover:bg-slate-100 border border-outline-soft text-xs text-on-surface font-medium transition-colors shadow-xs" onclick="copyPrompt('Configure a modal scope with gamepad focus trapping and back-button dismissal')">
+<span>Copy Prompt</span>
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+<!-- Skill 3 -->
+<div class="bg-surface-card border border-outline-soft rounded-xl p-5 flex flex-col justify-between shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow">
+<div class="space-y-2">
+<div class="flex items-center justify-between">
+<div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-200">
+<span class="material-symbols-outlined text-[19px]">desktop_windows</span>
+</div>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-outline-soft text-slate-600 font-semibold">Native</span>
+</div>
+<h3 class="font-semibold text-on-surface text-sm pt-1">WebView2 Bridge</h3>
+<p class="text-xs text-text-secondary leading-relaxed">
+                Forward native desktop XInput messages directly into the web view DOM pipeline.
+              </p>
+</div>
+<button class="mt-4 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-50 hover:bg-slate-100 border border-outline-soft text-xs text-on-surface font-medium transition-colors shadow-xs" onclick="copyPrompt('Setup bidirectional WebView2 gamepad packet injector for desktop apps')">
+<span>Copy Prompt</span>
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+</div>
+</div>
+</section>
+<!-- SECTION 6: STREAMLINED ESSENTIAL API REFERENCE -->
+<section class="space-y-4" id="api-ref">
+<div>
+<h2 class="text-xl font-semibold text-on-surface tracking-tight">Essential API Reference</h2>
+<p class="text-xs text-text-secondary mt-0.5">The four core methods you need to build any gamepad interface.</p>
+</div>
+<div class="bg-surface-card border border-outline-soft rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.03)]">
+<div class="overflow-x-auto">
+<table class="w-full text-left text-xs">
+<thead class="bg-slate-50 border-b border-outline-soft font-mono text-slate-600 uppercase text-[11px]">
+<tr>
+<th class="py-3 px-4 font-semibold">Method</th>
+<th class="py-3 px-4 font-semibold">Parameters</th>
+<th class="py-3 px-4 font-semibold">Description</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-soft">
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3.5 px-4 font-mono font-semibold">
+<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-mint-border">init(options?)</span>
+</td>
+<td class="py-3.5 px-4 font-mono text-text-secondary">options?: GamepadOptions</td>
+<td class="py-3.5 px-4 text-on-surface">Initializes the 60Hz gamepad loop and registers browser event listeners.</td>
+</tr>
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3.5 px-4 font-mono font-semibold">
+<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-mint-border">setActiveScope(id, opts?)</span>
+</td>
+<td class="py-3.5 px-4 font-mono text-text-secondary">id: string, opts?: ScopeOpts</td>
+<td class="py-3.5 px-4 text-on-surface">Pushes a focus scope (e.g. modal or menu) to restrict navigation.</td>
+</tr>
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3.5 px-4 font-mono font-semibold">
+<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-mint-border">on(event, callback)</span>
+</td>
+<td class="py-3.5 px-4 font-mono text-text-secondary">'action' | 'beforeaction', fn</td>
+<td class="py-3.5 px-4 text-on-surface">Subscribes to directional navigation or button actions with cancellation support.</td>
+</tr>
+<tr class="hover:bg-slate-50/70 transition-colors">
+<td class="py-3.5 px-4 font-mono font-semibold">
+<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-mint-border">destroy()</span>
+</td>
+<td class="py-3.5 px-4 font-mono text-text-secondary">none</td>
+<td class="py-3.5 px-4 text-on-surface">Stops polling, cleans up listeners, and releases all focus references.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- RIGHT ON-PAGE TABLE OF CONTENTS -->
+<aside class="fixed right-0 top-0 h-full w-[230px] bg-surface-card border-l border-outline-soft z-40 flex flex-col pt-16 px-4 pb-6 shadow-[-1px_0_3px_rgba(0,0,0,0.02)]">
+<div class="py-2">
+<div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold mb-3">On This Page</div>
+<ul class="space-y-1 text-xs text-text-secondary">
+<li>
+<a class="block py-1.5 px-2 rounded hover:text-on-surface hover:bg-slate-50 transition-colors font-medium" href="#playground">Interactive Preview</a>
+</li>
+<li>
+<a class="block py-1.5 px-2 rounded hover:text-on-surface hover:bg-slate-50 transition-colors font-medium" href="#flow">How It Works</a>
+</li>
+<li>
+<a class="block py-1.5 px-2 rounded hover:text-on-surface hover:bg-slate-50 transition-colors font-medium" href="#frameworks">Quick Integration</a>
+</li>
+<li>
+<a class="block py-1.5 px-2 rounded hover:text-on-surface hover:bg-slate-50 transition-colors font-medium" href="#ai-skills">AI Agent Prompts</a>
+</li>
+<li>
+<a class="block py-1.5 px-2 rounded hover:text-on-surface hover:bg-slate-50 transition-colors font-medium" href="#api-ref">API Reference</a>
+</li>
+</ul>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-soft space-y-2">
+<span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold block">Resources</span>
+<a class="flex items-center gap-2 text-xs text-text-secondary hover:text-on-surface transition-colors py-1" href="#">
+<span class="material-symbols-outlined text-[16px] text-slate-400">code</span>
+<span>GitHub Repository</span>
+</a>
+<a class="flex items-center gap-2 text-xs text-text-secondary hover:text-on-surface transition-colors py-1" href="#">
+<span class="material-symbols-outlined text-[16px] text-slate-400">forum</span>
+<span>Discord Community</span>
+</a>
+</div>
+</aside>
+<!-- SCRIPT LOGIC -->
+<script>
+    let activeCardIndex = 0;
+
+    const snippets = {
+      vanilla: {
+        filename: 'navigation.ts',
+        code: `<span class="text-purple-400">import</span> { gamepadService } <span class="text-purple-400">from</span> <span class="text-emerald-400">'gamepad-controller'</span>;
+
+<span class="text-slate-500">// Initialize navigation engine</span>
+<span class="text-purple-400">const</span> ctrl = gamepadService({ deadzone: <span class="text-sky-400">0.15</span> });
+ctrl.init();
+
+<span class="text-slate-500">// Set current screen scope</span>
+ctrl.setActiveScope(<span class="text-emerald-400">'dashboard'</span>, { trapFocus: <span class="text-purple-400">true</span> });
+
+<span class="text-slate-500">// Listen for actions or button presses</span>
+ctrl.on(<span class="text-emerald-400">'action'</span>, (e) =&gt; console.log(<span class="text-emerald-400">'Gamepad Action:'</span>, e));`
+      },
+      react: {
+        filename: 'GamepadView.tsx',
+        code: `<span class="text-purple-400">import</span> { useGamepadNav } <span class="text-purple-400">from</span> <span class="text-emerald-400">'gamepad-controller/react'</span>;
+
+<span class="text-purple-400">export function</span> <span class="text-sky-400">GamepadView</span>() {
+  <span class="text-purple-400">const</span> { activeIndex } = useGamepadNav({
+    scopeId: <span class="text-emerald-400">'dashboard'</span>,
+    defaultFocus: <span class="text-sky-400">0</span>
+  });
+
+  <span class="text-purple-400">return</span> &lt;<span class="text-sky-400">div</span> className=<span class="text-emerald-400">"grid grid-cols-2"</span>&gt;...&lt;/<span class="text-sky-400">div</span>&gt;;
+}`
+      },
+      angular: {
+        filename: 'gamepad.directive.ts',
+        code: `<span class="text-purple-400">@Component</span>({
+  template: <span class="text-emerald-400">\`&lt;div [gamepadScope]="'dashboard'" [trapFocus]="true"&gt;&lt;/div&gt;\`</span>
+})
+<span class="text-purple-400">export class</span> <span class="text-sky-400">GamepadComponent</span> {
+  <span class="text-purple-400">constructor</span>(<span class="text-purple-400">private</span> gamepad: GamepadService) {
+    <span class="text-purple-400">this</span>.gamepad.init();
+  }
+}`
+      }
+    };
+
+    function setFocusedCard(idx) {
+      activeCardIndex = idx;
+      const cards = document.querySelectorAll('.gamepad-card');
+      cards.forEach((card, i) => {
+        if (i === idx) {
+          card.classList.add('card-focus-ring', 'bg-emerald-50/40', 'border-emerald-500');
+          card.classList.remove('border-outline-soft', 'bg-white');
+        } else {
+          card.classList.remove('card-focus-ring', 'bg-emerald-50/40', 'border-emerald-500');
+          card.classList.add('border-outline-soft', 'bg-white');
+        }
+      });
+      const names = ['Arcade Hub', 'Nebula Drift', 'Audio Forge', 'Preferences'];
+      document.getElementById('playground-status').innerText = 'Focused: ' + names[idx];
+    }
+
+    function simulateDpad(dir) {
+      let next = activeCardIndex;
+      if (dir === 'right') {
+        if (activeCardIndex % 2 === 0) next = activeCardIndex + 1;
+      } else if (dir === 'left') {
+        if (activeCardIndex % 2 === 1) next = activeCardIndex - 1;
+      } else if (dir === 'down') {
+        if (activeCardIndex + 2 < 4) next = activeCardIndex + 2;
+      } else if (dir === 'up') {
+        if (activeCardIndex - 2 >= 0) next = activeCardIndex - 2;
+      }
+      setFocusedCard(next);
+    }
+
+    function handleCardClick(msg) {
+      document.getElementById('playground-status').innerText = msg;
+    }
+
+    function switchCli(tool) {
+      const el = document.getElementById('cli-command');
+      const tabs = ['npm', 'pnpm', 'bun'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-' + t);
+        if (t === tool) {
+          btn.className = 'text-emerald-700 font-semibold';
+        } else {
+          btn.className = 'text-on-surface-variant hover:text-on-surface transition-colors';
+        }
+      });
+
+      if (tool === 'npm') el.innerText = 'npm i gamepad-controller';
+      if (tool === 'pnpm') el.innerText = 'pnpm add gamepad-controller';
+      if (tool === 'bun') el.innerText = 'bun add gamepad-controller';
+    }
+
+    function copyCli() {
+      const text = document.getElementById('cli-command').innerText;
+      navigator.clipboard.writeText(text);
+      const icon = document.getElementById('copy-icon');
+      icon.innerText = 'check';
+      setTimeout(() => icon.innerText = 'content_copy', 1500);
+    }
+
+    function switchSnippet(fw) {
+      const data = snippets[fw];
+      document.getElementById('code-filename').innerText = data.filename;
+      document.getElementById('code-content').innerHTML = data.code;
+
+      const tabs = ['vanilla', 'react', 'angular'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-code-' + t);
+        if (t === fw) {
+          btn.className = 'px-3 py-1.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-800 border border-mint-border shadow-xs transition-all';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded text-xs font-medium text-text-secondary hover:text-on-surface transition-all';
+        }
+      });
+    }
+
+    function copySnippet() {
+      const code = document.getElementById('code-content').innerText;
+      navigator.clipboard.writeText(code);
+      const icon = document.getElementById('code-copy-icon');
+      icon.innerText = 'check';
+      setTimeout(() => icon.innerText = 'content_copy', 1500);
+    }
+
+    function copyPrompt(prompt) {
+      navigator.clipboard.writeText(prompt);
+      const prev = document.getElementById('playground-status').innerText;
+      document.getElementById('playground-status').innerText = 'Prompt copied to clipboard!';
+      setTimeout(() => {
+        document.getElementById('playground-status').innerText = prev;
+      }, 2000);
+    }
+  </script>
+</body></html>

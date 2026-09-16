@@ -1,0 +1,168 @@
+.recipe-browser {
+    padding: 24px;
+    background: linear-gradient(150deg, #a1702522, transparent 65%), var(--subtle);
+    h2 {
+        font-size: clamp(28px, 4vw, 42px);
+        line-height: 1.1;
+        letter-spacing: -1px;
+        margin: 28px 0;
+    }
+    .recipe-masthead {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 9px;
+    }
+    .recipe-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 22px;
+        button {
+            border-radius: 20px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--muted);
+            padding: 9px 14px;
+            font-size: 11px;
+        }
+        button[aria-pressed='true'] {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+    }
+    .recipe-count {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.8;
+    }
+    .recipe-cards {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .recipe-card {
+        min-width: 0;
+        padding: 0;
+        overflow: hidden;
+        background: var(--panel);
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        text-align: left;
+    }
+    .recipe-thumbnail {
+        display: grid;
+        place-items: center;
+        min-height: 110px;
+        color: white;
+        font-size: 65px;
+    }
+    .recipe-card-copy {
+        display: grid;
+        padding: 15px;
+        gap: 9px;
+        strong {
+            font-size: 15px;
+        }
+        small {
+            font-size: 10px;
+            color: var(--muted);
+        }
+        > span {
+            font-size: 11px;
+            line-height: 1.6;
+            color: var(--muted);
+        }
+    }
+    .recipe-garden {
+        background: linear-gradient(130deg, #507055, #8c9b5b);
+    }
+    .recipe-citrus {
+        background: linear-gradient(130deg, #98702e, #bda254);
+    }
+    .recipe-golden {
+        background: linear-gradient(130deg, #985b29, #bd9150);
+    }
+    .recipe-roasted {
+        background: linear-gradient(130deg, #874638, #b07851);
+    }
+    .recipe-detail {
+        font-size: 13px;
+        line-height: 1.8;
+    }
+    .recipe-hero {
+        border-radius: 9px;
+        padding: 25px;
+        margin-top: 22px;
+        color: white;
+        > span {
+            font-size: 55px;
+        }
+        p {
+            font-size: 11px;
+            margin: 0;
+        }
+        h3 {
+            font-size: 27px;
+            line-height: 1.2;
+            margin: 10px 0 0;
+        }
+    }
+    .recipe-ingredients {
+        border-block: 1px solid var(--line);
+        margin: 24px 0;
+        padding: 20px 0;
+        h4 {
+            margin: 0;
+        }
+    }
+    .recipe-scroll-note {
+        color: var(--accent);
+        font-size: 11px;
+    }
+    .recipe-steps {
+        list-style: none;
+        padding: 0;
+        li {
+            padding: 30px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        h4 {
+            font-size: 21px;
+            margin: 10px 0;
+        }
+        .mono {
+            color: var(--muted);
+            font-size: 10px;
+        }
+        button {
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            padding: 9px;
+            color: var(--accent);
+            background: var(--panel);
+            font-size: 11px;
+        }
+    }
+    .recipe-tip {
+        color: var(--muted);
+        font-style: italic;
+    }
+    .recipe-step-done h4 {
+        color: var(--accent);
+    }
+}
+@media (max-width: 700px) {
+    .recipe-browser {
+        padding: 18px;
+        .recipe-cards {
+            gap: 10px;
+        }
+        .recipe-card-copy {
+            padding: 11px;
+        }
+    }
+}

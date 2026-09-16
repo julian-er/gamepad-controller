@@ -1,0 +1,22 @@
+// These are content sources, never executable instructions or raw HTML.
+export const referenceSources: [string, string, string][] = [
+    ['docs/README.md', 'package-guide', 'Package overview'],
+    ['docs/PROJECT_COOKBOOK.md', 'project-cookbook', 'Project cookbook'],
+    ['docs/USAGE_ANGULAR.md', 'source-angular', 'Angular source guide'],
+    ['docs/USAGE_REACT.md', 'source-react', 'React source guide'],
+    ['docs/USAGE_VANILLA.md', 'source-vanilla', 'Vanilla source guide'],
+    ['docs/API.md', 'source-api', 'Public API contracts'],
+    ['docs/CONFIGURATION.md', 'configuration', 'Configuration'],
+    ['docs/PUBLIC_API.md', 'public-api', 'Complete public contracts'],
+    ['docs/GAMEPAD_SERVICE_METHODS.md', 'source-methods', 'Service ownership'],
+    ['docs/GAMEPAD_ACTION_DETECTION.md', 'action-detection', 'Action detection'],
+    ['docs/ARCHITECTURE.md', 'architecture', 'Architecture'],
+    ['docs/BUILDING.md', 'building', 'Building and packaging'],
+    ['docs/CHANGELOG.md', 'release-notes', 'First release'],
+    ['docs/AGENT_SKILLS.md', 'agent-skills', 'AI consumer skills'],
+    ...['gamepad-integrate', 'gamepad-navigation', 'gamepad-webview2', 'gamepad-debug'].flatMap((name): [string, string, string][] => [[`skills/${name}/SKILL.md`, name, name]]),
+    ['skills/gamepad-integrate/references/integration.md', 'integration-recipes', 'Integration recipes'],
+    ['skills/gamepad-navigation/references/navigation.md', 'navigation-recipes', 'Navigation recipes'],
+    ['skills/gamepad-webview2/references/host-protocol.md', 'host-protocol', 'WebView2 host protocol'],
+    ['skills/gamepad-debug/references/diagnostics.md', 'diagnostics', 'Diagnostics'],
+];

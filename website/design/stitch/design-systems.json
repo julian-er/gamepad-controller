@@ -1,0 +1,342 @@
+{
+  "designSystems": [
+    {
+      "designSystem": {
+        "displayName": "Obsidian Mint",
+        "styleGuidelines": "## Brand & Style\n\nThis design system delivers a calm, razor-sharp technical documentation experience for gamepad and controller hardware/software ecosystems. It strips away aggressive gamer aesthetics—such as saturated neon glows, chromatic aberration, and heavy cyberpunk motifs—in favor of a disciplined developer-centric space inspired by modern technical platforms like Stripe, Vercel, and Tailwind CSS.\n\n### Personality & Tone\n- **Precision & Clarity:** Technical diagrams, input bindings, and API specifications are presented with zero clutter.\n- **Understated Restraint:** Deep obsidian and slate surfaces allow content, interactive controller diagrams, and code snippets to stand out naturally.\n- **Engineered Elegance:** Accents act as precise signals for states, axes, and interactive triggers rather than ambient decorative lighting.\n- **Cognitive Comfort:** Built to reduce eye fatigue across multi-hour development, integration, and debugging sessions.\n\n## Layout & Spacing\n\nThe layout follows a disciplined three-column architecture tailored for developer documentation:\n\n1. **Primary Navigation (Left, 260px Fixed):** Persistent tree view of controller SDK guides, firmware protocols, and component references.\n2. **Main Documentation Canvas (Center, Max 820px Fluid):** High-readability technical copy, visual input testers, and code examples.\n3. **Contextual Inspector / Table of Contents (Right, 220px Fixed):** On-page jump navigation and live telemetry hooks.\n\n### Breakpoints & Adaptive Behavior\n- **Desktop (≥ 1280px):** Full three-column view with static sidebars and `margin: 2.5rem`.\n- **Tablet (768px – 1279px):** Inspector collapses into a top sticky toggle. Navigation shifts to an off-canvas drawer. Reading canvas expands fluidly with `margin: 1.5rem` and `gutter: 1rem`.\n- **Mobile (< 768px):** Single-column layout. Margin resets to `1rem`. Code examples and visual gamepad testers enable horizontal overflow scrolling with fade hints.\n\n## Elevation & Depth\n\nTo eliminate gamer tropes like drop-glows and high-intensity neon bloom, this system uses **tonal layer stepping** combined with **subtle low-contrast borders**.\n\n### Depth Layers\n- **Elevation 0 (Base Canvas):** `#090D16` with zero shadow.\n- **Elevation 1 (Cards, Code Blocks, Nav Bars):** `#0F172A` resting surface surrounded by a 1px hairline border of `rgba(148, 163, 184, 0.1)`.\n- **Elevation 2 (Floating Popovers, Dropdowns, Tooltips):** `#1E293B` elevated surface with a 1px border of `rgba(148, 163, 184, 0.16)` and an ambient, ultra-diffused shadow: `box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6)`.\n\nGlow effects, blurred box shadows on interactive buttons, and high-frequency drop-shadows are strictly forbidden. All contrast transitions must remain tactile, clean, and flat.\n\n## Components\n\n### Buttons\n- **Primary:** Solid background `#10B981`, dark foreground `#042F2E`, font weight `500`. No outer glow. Subtle hover shift to `#059669`.\n- **Secondary:** Surface background `rgba(255, 255, 255, 0.04)`, 1px border of `rgba(148, 163, 184, 0.15)`, text `#E2E8F0`. Hover shifts background to `rgba(255, 255, 255, 0.08)`.\n- **Ghost/Icon:** No background or border. Text `#94A3B8`, shifting to `#F8FAFC` on hover.\n\n### Badges & Chips\n- Monospace typography (`label-sm`).\n- **Method Pills (GET, POST, EVENT):** Muted slate backgrounds with precise colored text indicators (e.g., event listeners use mint text `#34D399` on `rgba(16, 185, 129, 0.1)` background).\n- **Gamepad Input Tags (`LS_CLICK`, `RT`):** Background `#1E293B`, border `1px solid rgba(148, 163, 184, 0.2)`, text `#E2E8F0`.\n\n### Code Blocks & Parameter Tables\n- **Code Terminals:** Background `#0B1120`, top header bar containing language tag, copy button, and protocol indicator. Border `1px solid rgba(148, 163, 184, 0.1)`. Syntax highlighting leans on cool slate, soft teal, and pale amber instead of bright saturated neons.\n- **Parameter Lists:** Borderless table rows separated by `1px solid rgba(148, 163, 184, 0.06)`. Left column displays parameter name in monospace; right column shows type badge and documentation text.\n\n### Interactive Hardware Visualizer\n- **Gamepad Blueprint Display:** Neutral slate line-art vector (`#334155`) over a dark container (`#0F172A`).\n- **Active State Signaling:** When an input is triggered in real-time, the respective thumbstick or trigger fills with a crisp, non-glowing mint (`#10B981`) or slate cyan (`#38BDF8`), showing instantaneous input precision without ambient blur.\n\n### Inputs & Toggles\n- **Input Fields:** Background `#0F172A`, border `1px solid rgba(148, 163, 184, 0.15)`. Active focus transitions border to `#10B981` with an interior subtle 1px ring, avoiding large exterior glows.\n- **Switches:** Low-profile rounded rect track in `#1E293B`, thumb in `#94A3B8`. Active state shifts track to `#10B981` and thumb to `#FFFFFF`.",
+        "theme": {
+          "bodyFont": "GEIST",
+          "bodyFontFamily": "Geist",
+          "colorMode": "DARK",
+          "colorVariant": "FIDELITY",
+          "customColor": "#10b981",
+          "designMd": "---\nname: Obsidian Mint\ncolors:\n  surface: '#0f131c'\n  surface-dim: '#0f131c'\n  surface-bright: '#353943'\n  surface-container-lowest: '#0a0e17'\n  surface-container-low: '#181b25'\n  surface-container: '#1c1f29'\n  surface-container-high: '#262a34'\n  surface-container-highest: '#31353f'\n  on-surface: '#dfe2ef'\n  on-surface-variant: '#bbcabf'\n  inverse-surface: '#dfe2ef'\n  inverse-on-surface: '#2c303a'\n  outline: '#86948a'\n  outline-variant: '#3c4a42'\n  surface-tint: '#4edea3'\n  primary: '#4edea3'\n  on-primary: '#003824'\n  primary-container: '#10b981'\n  on-primary-container: '#00422b'\n  inverse-primary: '#006c49'\n  secondary: '#7bd0ff'\n  on-secondary: '#00354a'\n  secondary-container: '#00a6e0'\n  on-secondary-container: '#00374d'\n  tertiary: '#b7c8e1'\n  on-tertiary: '#213145'\n  tertiary-container: '#94a4bd'\n  on-tertiary-container: '#2a3a4f'\n  error: '#ffb4ab'\n  on-error: '#690005'\n  error-container: '#93000a'\n  on-error-container: '#ffdad6'\n  primary-fixed: '#6ffbbe'\n  primary-fixed-dim: '#4edea3'\n  on-primary-fixed: '#002113'\n  on-primary-fixed-variant: '#005236'\n  secondary-fixed: '#c4e7ff'\n  secondary-fixed-dim: '#7bd0ff'\n  on-secondary-fixed: '#001e2c'\n  on-secondary-fixed-variant: '#004c69'\n  tertiary-fixed: '#d3e4fe'\n  tertiary-fixed-dim: '#b7c8e1'\n  on-tertiary-fixed: '#0b1c30'\n  on-tertiary-fixed-variant: '#38485d'\n  background: '#0f131c'\n  on-background: '#dfe2ef'\n  surface-variant: '#31353f'\ntypography:\n  headline-xl:\n    fontFamily: Geist\n    fontSize: 40px\n    fontWeight: '600'\n    lineHeight: 48px\n    letterSpacing: -0.03em\n  headline-xl-mobile:\n    fontFamily: Geist\n    fontSize: 30px\n    fontWeight: '600'\n    lineHeight: 38px\n    letterSpacing: -0.02em\n  headline-lg:\n    fontFamily: Geist\n    fontSize: 28px\n    fontWeight: '600'\n    lineHeight: 36px\n    letterSpacing: -0.02em\n  headline-lg-mobile:\n    fontFamily: Geist\n    fontSize: 22px\n    fontWeight: '600'\n    lineHeight: 30px\n    letterSpacing: -0.01em\n  headline-md:\n    fontFamily: Geist\n    fontSize: 20px\n    fontWeight: '500'\n    lineHeight: 28px\n    letterSpacing: -0.01em\n  headline-sm:\n    fontFamily: Geist\n    fontSize: 16px\n    fontWeight: '500'\n    lineHeight: 24px\n    letterSpacing: 0em\n  body-lg:\n    fontFamily: Geist\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 28px\n    letterSpacing: -0.005em\n  body-md:\n    fontFamily: Geist\n    fontSize: 14px\n    fontWeight: '400'\n    lineHeight: 24px\n    letterSpacing: 0em\n  body-sm:\n    fontFamily: Geist\n    fontSize: 13px\n    fontWeight: '400'\n    lineHeight: 20px\n    letterSpacing: 0em\n  label-md:\n    fontFamily: JetBrains Mono\n    fontSize: 13px\n    fontWeight: '500'\n    lineHeight: 18px\n    letterSpacing: 0em\n  label-sm:\n    fontFamily: JetBrains Mono\n    fontSize: 11px\n    fontWeight: '500'\n    lineHeight: 16px\n    letterSpacing: 0.02em\nrounded:\n  sm: 0.125rem\n  DEFAULT: 0.25rem\n  md: 0.375rem\n  lg: 0.5rem\n  xl: 0.75rem\n  full: 9999px\nspacing:\n  gutter: 1.5rem\n  margin: 2rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2.5rem\n---\n\n## Brand & Style\n\nThis design system delivers a calm, razor-sharp technical documentation experience for gamepad and controller hardware/software ecosystems. It strips away aggressive gamer aesthetics—such as saturated neon glows, chromatic aberration, and heavy cyberpunk motifs—in favor of a disciplined developer-centric space inspired by modern technical platforms like Stripe, Vercel, and Tailwind CSS.\n\n### Personality & Tone\n- **Precision & Clarity:** Technical diagrams, input bindings, and API specifications are presented with zero clutter.\n- **Understated Restraint:** Deep obsidian and slate surfaces allow content, interactive controller diagrams, and code snippets to stand out naturally.\n- **Engineered Elegance:** Accents act as precise signals for states, axes, and interactive triggers rather than ambient decorative lighting.\n- **Cognitive Comfort:** Built to reduce eye fatigue across multi-hour development, integration, and debugging sessions.\n\n## Colors\n\nThe palette relies on a base of layered obsidian and cool zinc/slate neutrals paired with a muted emerald-mint primary accent. A soft cyan-slate secondary accent is reserved for telemetry, axis visualizations, and active digital inputs.\n\n### Surface Tiers\n- **Canvas Base (`#090D16`):** The foundational dark space for all documentation canvases.\n- **Surface Layer 1 (`#0F172A`):** Used for sidebar navigation, header bars, and top-level page containers.\n- **Surface Layer 2 (`#1E293B`):** Employed for code terminal blocks, interactive parameter tables, and controller hardware canvas panels.\n- **Surface Layer 3 (`#334155`):** Subdued surface state used exclusively for hover interactions, active table rows, and neutral pill badges.\n\n### Accents & Borders\n- **Primary Mint (`#10B981`):** Applied deliberately to active toggle states, connected controller indicators, and primary callout highlights. Never rendered with neon blur or drop-glow filters.\n- **Secondary Slate Blue (`#38BDF8`):** Designated for dynamic gamepad inputs (joystick vector paths, trigger pressure gauges, and parameter references).\n- **Subtle Stroke/Border (`rgba(148, 163, 184, 0.12)`): Ultra-crisp hairline dividers that establish structural bounds without visual weight.\n- **Text & Foreground:** Primary text sits at `#F8FAFC`, secondary documentation prose at `#94A3B8`, and muted parameter captions at `#64748B`.\n\n## Typography\n\nTypography prioritizes high-density technical legibility. **Geist** provides an unadorned, neutral structural foundation across headings, reading paragraphs, and standard UI navigation. **JetBrains Mono** handles all technical variables, gamepad button mappings (`BTN_SOUTH`, `AXIS_LEFT_X`), raw packet payloads, and inline/block code snippets.\n\n### Rules & Formatting\n- **Body Hierarchy:** Keep continuous reading blocks constrained to `body-md` (14px) and `body-lg` (16px) with comfortable leading (1.7×) to allow skimming through extensive API documentation.\n- **Monospace Integration:** All gamepad identifiers, packet schemas, and hardware event names must use `label-md` or `label-sm` enclosed within muted background spans.\n- **Letter Spacing:** Apply micro negative tracking (`-0.01em` to `-0.03em`) on larger Geist headings to preserve compact, engineered visual cohesion.\n\n## Layout & Spacing\n\nThe layout follows a disciplined three-column architecture tailored for developer documentation:\n\n1. **Primary Navigation (Left, 260px Fixed):** Persistent tree view of controller SDK guides, firmware protocols, and component references.\n2. **Main Documentation Canvas (Center, Max 820px Fluid):** High-readability technical copy, visual input testers, and code examples.\n3. **Contextual Inspector / Table of Contents (Right, 220px Fixed):** On-page jump navigation and live telemetry hooks.\n\n### Breakpoints & Adaptive Behavior\n- **Desktop (≥ 1280px):** Full three-column view with static sidebars and `margin: 2.5rem`.\n- **Tablet (768px – 1279px):** Inspector collapses into a top sticky toggle. Navigation shifts to an off-canvas drawer. Reading canvas expands fluidly with `margin: 1.5rem` and `gutter: 1rem`.\n- **Mobile (< 768px):** Single-column layout. Margin resets to `1rem`. Code examples and visual gamepad testers enable horizontal overflow scrolling with fade hints.\n\n## Elevation & Depth\n\nTo eliminate gamer tropes like drop-glows and high-intensity neon bloom, this system uses **tonal layer stepping** combined with **subtle low-contrast borders**.\n\n### Depth Layers\n- **Elevation 0 (Base Canvas):** `#090D16` with zero shadow.\n- **Elevation 1 (Cards, Code Blocks, Nav Bars):** `#0F172A` resting surface surrounded by a 1px hairline border of `rgba(148, 163, 184, 0.1)`.\n- **Elevation 2 (Floating Popovers, Dropdowns, Tooltips):** `#1E293B` elevated surface with a 1px border of `rgba(148, 163, 184, 0.16)` and an ambient, ultra-diffused shadow: `box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6)`.\n\nGlow effects, blurred box shadows on interactive buttons, and high-frequency drop-shadows are strictly forbidden. All contrast transitions must remain tactile, clean, and flat.\n\n## Shapes\n\nThe design system employs a refined **Soft** shape language (`roundedness: 1`). Radii remain small and purposeful to uphold a technical and precise developer-tool aesthetic:\n\n- **Interactive Inputs, Badges, Buttons:** `0.25rem` (4px).\n- **Code Containers, Controller Hardware Modules, Visualizers:** `0.5rem` (8px).\n- **Modals, Dialogs, Floating Toolbars:** `0.75rem` (12px).\n- **Gamepad Button Markers (D-Pad, Face Buttons):** Circular (`50%`) only when representing physical hardware hardware geometry; UI wrapper containers remain squared or soft-cornered.\n\n## Components\n\n### Buttons\n- **Primary:** Solid background `#10B981`, dark foreground `#042F2E`, font weight `500`. No outer glow. Subtle hover shift to `#059669`.\n- **Secondary:** Surface background `rgba(255, 255, 255, 0.04)`, 1px border of `rgba(148, 163, 184, 0.15)`, text `#E2E8F0`. Hover shifts background to `rgba(255, 255, 255, 0.08)`.\n- **Ghost/Icon:** No background or border. Text `#94A3B8`, shifting to `#F8FAFC` on hover.\n\n### Badges & Chips\n- Monospace typography (`label-sm`).\n- **Method Pills (GET, POST, EVENT):** Muted slate backgrounds with precise colored text indicators (e.g., event listeners use mint text `#34D399` on `rgba(16, 185, 129, 0.1)` background).\n- **Gamepad Input Tags (`LS_CLICK`, `RT`):** Background `#1E293B`, border `1px solid rgba(148, 163, 184, 0.2)`, text `#E2E8F0`.\n\n### Code Blocks & Parameter Tables\n- **Code Terminals:** Background `#0B1120`, top header bar containing language tag, copy button, and protocol indicator. Border `1px solid rgba(148, 163, 184, 0.1)`. Syntax highlighting leans on cool slate, soft teal, and pale amber instead of bright saturated neons.\n- **Parameter Lists:** Borderless table rows separated by `1px solid rgba(148, 163, 184, 0.06)`. Left column displays parameter name in monospace; right column shows type badge and documentation text.\n\n### Interactive Hardware Visualizer\n- **Gamepad Blueprint Display:** Neutral slate line-art vector (`#334155`) over a dark container (`#0F172A`).\n- **Active State Signaling:** When an input is triggered in real-time, the respective thumbstick or trigger fills with a crisp, non-glowing mint (`#10B981`) or slate cyan (`#38BDF8`), showing instantaneous input precision without ambient blur.\n\n### Inputs & Toggles\n- **Input Fields:** Background `#0F172A`, border `1px solid rgba(148, 163, 184, 0.15)`. Active focus transitions border to `#10B981` with an interior subtle 1px ring, avoiding large exterior glows.\n- **Switches:** Low-profile rounded rect track in `#1E293B`, thumb in `#94A3B8`. Active state shifts track to `#10B981` and thumb to `#FFFFFF`.",
+          "font": "GEIST",
+          "headlineFont": "GEIST",
+          "headlineFontFamily": "Geist",
+          "labelFont": "JETBRAINS_MONO",
+          "labelFontFamily": "JetBrains Mono",
+          "namedColors": {
+            "background": "#0f131c",
+            "error": "#ffb4ab",
+            "error_container": "#93000a",
+            "inverse_on_surface": "#2c303a",
+            "inverse_primary": "#006c49",
+            "inverse_surface": "#dfe2ef",
+            "on_background": "#dfe2ef",
+            "on_error": "#690005",
+            "on_error_container": "#ffdad6",
+            "on_primary": "#003824",
+            "on_primary_container": "#00422b",
+            "on_primary_fixed": "#002113",
+            "on_primary_fixed_variant": "#005236",
+            "on_secondary": "#00354a",
+            "on_secondary_container": "#00374d",
+            "on_secondary_fixed": "#001e2c",
+            "on_secondary_fixed_variant": "#004c69",
+            "on_surface": "#dfe2ef",
+            "on_surface_variant": "#bbcabf",
+            "on_tertiary": "#213145",
+            "on_tertiary_container": "#2a3a4f",
+            "on_tertiary_fixed": "#0b1c30",
+            "on_tertiary_fixed_variant": "#38485d",
+            "outline": "#86948a",
+            "outline_variant": "#3c4a42",
+            "primary": "#4edea3",
+            "primary_container": "#10b981",
+            "primary_fixed": "#6ffbbe",
+            "primary_fixed_dim": "#4edea3",
+            "secondary": "#7bd0ff",
+            "secondary_container": "#00a6e0",
+            "secondary_fixed": "#c4e7ff",
+            "secondary_fixed_dim": "#7bd0ff",
+            "surface": "#0f131c",
+            "surface_bright": "#353943",
+            "surface_container": "#1c1f29",
+            "surface_container_high": "#262a34",
+            "surface_container_highest": "#31353f",
+            "surface_container_low": "#181b25",
+            "surface_container_lowest": "#0a0e17",
+            "surface_dim": "#0f131c",
+            "surface_tint": "#4edea3",
+            "surface_variant": "#31353f",
+            "tertiary": "#b7c8e1",
+            "tertiary_container": "#94a4bd",
+            "tertiary_fixed": "#d3e4fe",
+            "tertiary_fixed_dim": "#b7c8e1"
+          },
+          "overrideNeutralColor": "#090d16",
+          "overridePrimaryColor": "#10b981",
+          "overrideSecondaryColor": "#38bdf8",
+          "overrideTertiaryColor": "#64748b",
+          "roundness": "ROUND_FOUR",
+          "spacing": {
+            "gutter": "1.5rem",
+            "margin": "2rem",
+            "space-lg": "1.5rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem"
+          },
+          "spacingScale": 2,
+          "typography": {
+            "body-lg": {
+              "fontFamily": "Geist",
+              "fontSize": "16px",
+              "fontWeight": "400",
+              "letterSpacing": "-0.005em",
+              "lineHeight": "28px"
+            },
+            "body-md": {
+              "fontFamily": "Geist",
+              "fontSize": "14px",
+              "fontWeight": "400",
+              "letterSpacing": "0em",
+              "lineHeight": "24px"
+            },
+            "body-sm": {
+              "fontFamily": "Geist",
+              "fontSize": "13px",
+              "fontWeight": "400",
+              "letterSpacing": "0em",
+              "lineHeight": "20px"
+            },
+            "headline-lg": {
+              "fontFamily": "Geist",
+              "fontSize": "28px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.02em",
+              "lineHeight": "36px"
+            },
+            "headline-lg-mobile": {
+              "fontFamily": "Geist",
+              "fontSize": "22px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.01em",
+              "lineHeight": "30px"
+            },
+            "headline-md": {
+              "fontFamily": "Geist",
+              "fontSize": "20px",
+              "fontWeight": "500",
+              "letterSpacing": "-0.01em",
+              "lineHeight": "28px"
+            },
+            "headline-sm": {
+              "fontFamily": "Geist",
+              "fontSize": "16px",
+              "fontWeight": "500",
+              "letterSpacing": "0em",
+              "lineHeight": "24px"
+            },
+            "headline-xl": {
+              "fontFamily": "Geist",
+              "fontSize": "40px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.03em",
+              "lineHeight": "48px"
+            },
+            "headline-xl-mobile": {
+              "fontFamily": "Geist",
+              "fontSize": "30px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.02em",
+              "lineHeight": "38px"
+            },
+            "label-md": {
+              "fontFamily": "JetBrains Mono",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "letterSpacing": "0em",
+              "lineHeight": "18px"
+            },
+            "label-sm": {
+              "fontFamily": "JetBrains Mono",
+              "fontSize": "11px",
+              "fontWeight": "500",
+              "letterSpacing": "0.02em",
+              "lineHeight": "16px"
+            }
+          }
+        }
+      },
+      "name": "assets/1bcaf04ae81e4ebb8fd77888f89ca232",
+      "version": "1"
+    },
+    {
+      "designSystem": {
+        "displayName": "Mint Porcelain",
+        "styleGuidelines": "## Brand & Style\n\nThis design system delivers an ultra-clean, developer-centric documentation and tooling experience. Built with a pristine light-mode aesthetic inspired by top-tier developer platforms, it balances high-density technical utility with airy visual clarity.\n\nThe visual style combines modern corporate precision with subtle tactile feedback. Deep slate typography rests upon porcelain and crisp slate backdrops, energized by vibrant emerald-mint accents. The system prioritizes instant legibility, structural low-contrast borders, delicate ambient elevation, and tactile focus states suitable for both traditional mouse navigation and spatial controller interactions.\n\n## Layout & Spacing\n\nThe layout is built on a responsive 12-column grid system paired with strict 4px/8px incremental spatial rhythm:\n\n- **Desktop (1024px+):** Employs a multi-pane layout featuring a fixed 260px navigation sidebar, a central documentation column maxing out at 800px for comfortable reading spans, and an optional 220px table-of-contents or live playground rail.\n- **Tablet (768px - 1023px):** Collapses auxiliary rails into drawer panels; gutters shift to `1.5rem` with a unified main scroll column.\n- **Mobile (< 768px):** Shifts to a single fluid column with `1rem` edge margins and sticky top/bottom utility bars for navigation and interactive controls.\n\n## Elevation & Depth\n\nVisual depth is achieved through structural layering and soft ambient lighting rather than heavy drop shadows:\n\n- **Borders over Shadows:** Surfaces rely primarily on hairline borders (`#E2E8F0` or `rgba(0, 0, 0, 0.08)`) to establish structural boundaries.\n- **Ambient Elevation:** Elevated cards and dropdown menus feature soft diffused shadows: `0 1px 3px rgba(15, 23, 42, 0.04), 0 6px 16px rgba(15, 23, 42, 0.04)`.\n- **Interactive Focus & Elevation:** Focused or active interactive elements elevate by `translateY(-1px)` and cast a dual-ring emerald focus cue: `box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 0 4px rgba(16, 185, 129, 0.15)`.\n- **Dark Mode Code Layering:** High-contrast slate shells (`#0F172A`) frame technical snippets directly within light surfaces, using subtle inner borders (`rgba(255, 255, 255, 0.1)`) to preserve clean division.\n\n## Components\n\n### Buttons\n- **Primary:** Background `#059669`, text `#FFFFFF`, font weight medium, subtle border `1px solid #047857`. Hover transitions to `#10B981` with `-1px` vertical lift. Focus invokes the mint dual-ring glow.\n- **Secondary:** Surface `#FFFFFF`, border `#CBD5E1`, text `#0F172A`. Hover background `#F8FAFC` and border `#94A3B8`.\n- **Ghost/Tertiary:** Transparent base, text `#475569`, hover background `#F1F5F9`, text `#0F172A`.\n\n### Badges & Chips\n- **API & Parameter Chips:** Built on `#ECFDF5` background with `#A7F3D0` borders and `#059669` monospace typography.\n- **Status Tags:** Compact, 20px height, uppercase `11px` monospace with subtle rounded corners and 6px colored dot status markers.\n\n### Input Fields & Search\n- Inputs use `#FFFFFF` or `#F8FAFC` backgrounds bounded by `#CBD5E1`. Placeholder text uses `#64748B`.\n- On focus, input borders snap to `#10B981` accompanied by the dual mint outer focus halo.\n\n### Checkboxes & Radio Buttons\n- Crisp 16px square (checkbox) and round (radio) containers with `#CBD5E1` borders.\n- Active states fill with `#059669` displaying a crisp white icon check or center dot.\n\n### Cards & Container Panels\n- Surface `#FFFFFF`, border `1px solid #E2E8F0`, corner radius `8px`. Ambient elevation elevates cards gently on hover (`#94A3B8` border tint).\n\n### Code Blocks & Interactive Playgrounds\n- **Snippet Blocks:** Deep `#0F172A` background, `JetBrains Mono` typography, subtle header bar housing language tags and a one-click copy button.\n- **Gamepad Visualizer Wells:** Light porcelain bed (`#F1F5F9`) housing a titanium slate (`#334155`) interactive controller silhouette with live mint highlight cues for real-time button actuation.",
+        "theme": {
+          "bodyFont": "GEIST",
+          "bodyFontFamily": "Geist",
+          "colorMode": "LIGHT",
+          "colorVariant": "FIDELITY",
+          "customColor": "#059669",
+          "designMd": "---\nname: Mint Porcelain\ncolors:\n  surface: '#faf8ff'\n  surface-dim: '#d2d9f4'\n  surface-bright: '#faf8ff'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f2f3ff'\n  surface-container: '#E2E8F0'\n  surface-container-high: '#e2e7ff'\n  surface-container-highest: '#dae2fd'\n  on-surface: '#131b2e'\n  on-surface-variant: '#3d4a42'\n  inverse-surface: '#283044'\n  inverse-on-surface: '#eef0ff'\n  outline: '#6d7a72'\n  outline-variant: '#bccac0'\n  surface-tint: '#006c4a'\n  primary: '#006948'\n  on-primary: '#ffffff'\n  primary-container: '#00855d'\n  on-primary-container: '#f5fff7'\n  inverse-primary: '#68dba9'\n  secondary: '#006398'\n  on-secondary: '#ffffff'\n  secondary-container: '#5bb8fe'\n  on-secondary-container: '#00476e'\n  tertiary: '#4648d4'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#6063ee'\n  on-tertiary-container: '#fffbff'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#85f8c4'\n  primary-fixed-dim: '#68dba9'\n  on-primary-fixed: '#002114'\n  on-primary-fixed-variant: '#005137'\n  secondary-fixed: '#cce5ff'\n  secondary-fixed-dim: '#93ccff'\n  on-secondary-fixed: '#001d31'\n  on-secondary-fixed-variant: '#004b73'\n  tertiary-fixed: '#e1e0ff'\n  tertiary-fixed-dim: '#c0c1ff'\n  on-tertiary-fixed: '#07006c'\n  on-tertiary-fixed-variant: '#2f2ebe'\n  background: '#faf8ff'\n  on-background: '#131b2e'\n  surface-variant: '#dae2fd'\n  canvas-base: '#F8FAFC'\n  surface-card: '#FFFFFF'\n  surface-low: '#F1F5F9'\n  mint-accent: '#10B981'\n  mint-subtle: '#ECFDF5'\n  mint-border: '#A7F3D0'\n  text-primary: '#0F172A'\n  text-secondary: '#475569'\n  text-muted: '#64748B'\n  code-dark: '#0F172A'\n  warning: '#D97706'\n  danger: '#E11D48'\ntypography:\n  headline-xl:\n    fontFamily: Geist\n    fontSize: 40px\n    fontWeight: '700'\n    lineHeight: 48px\n  headline-xl-mobile:\n    fontFamily: Geist\n    fontSize: 30px\n    fontWeight: '700'\n    lineHeight: 38px\n  headline-lg:\n    fontFamily: Geist\n    fontSize: 32px\n    fontWeight: '600'\n    lineHeight: 40px\n  headline-lg-mobile:\n    fontFamily: Geist\n    fontSize: 24px\n    fontWeight: '600'\n    lineHeight: 32px\n  headline-md:\n    fontFamily: Geist\n    fontSize: 24px\n    fontWeight: '600'\n    lineHeight: 32px\n  headline-sm:\n    fontFamily: Geist\n    fontSize: 20px\n    fontWeight: '600'\n    lineHeight: 28px\n  body-lg:\n    fontFamily: Geist\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 26px\n  body-md:\n    fontFamily: Geist\n    fontSize: 14px\n    fontWeight: '400'\n    lineHeight: 22px\n  body-sm:\n    fontFamily: Geist\n    fontSize: 12px\n    fontWeight: '400'\n    lineHeight: 18px\n  label-lg:\n    fontFamily: JetBrains Mono\n    fontSize: 14px\n    fontWeight: '500'\n    lineHeight: 20px\n  label-md:\n    fontFamily: JetBrains Mono\n    fontSize: 13px\n    fontWeight: '500'\n    lineHeight: 18px\n  label-sm:\n    fontFamily: JetBrains Mono\n    fontSize: 11px\n    fontWeight: '500'\n    lineHeight: 16px\nrounded:\n  sm: 0.125rem\n  DEFAULT: 0.25rem\n  md: 0.375rem\n  lg: 0.5rem\n  xl: 0.75rem\n  full: 9999px\nspacing:\n  gutter: 1.5rem\n  gutter-mobile: 1rem\n  margin: 2rem\n  margin-mobile: 1rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2.5rem\n---\n\n# Design System Specification: `gamepad-controller` Documentation Platform (Pure Mint / Light Mode)\n\n## 1. Design Philosophy & Brand Identity\n\n### Aesthetic: Crisp Mint & Porcelain Light Mode\n- **Visual Identity:** Ultra-clean, developer-first light mode inspired by Stripe, Nextra, Tailwind CSS, and GitHub docs. High contrast text on soft neutral porcelain/slate backgrounds with emerald/mint accents.\n- **Core Tenet:** Maximum readability, crisp borders, subtle shadows, and zero visual glare. Focus states remain tactile and prominent for spatial gamepad navigation without eye strain.\n\n---\n\n## 2. Color Palette & Token Hierarchy\n\n### Canvas & Surfaces (Porcelain Slate)\n- **Base Canvas:** `#F8FAFC` (Slate-50 soft crisp backdrop)\n- **Surface / Cards:** `#FFFFFF` (Pure white primary panel and card surface)\n- **Surface Low / Section:** `#F1F5F9` (Elevated section containers, subtle pill tags)\n- **Surface Container:** `#E2E8F0` (Input backgrounds, active tabs, subtle dividers)\n- **Borders:**\n  - Subtle: `rgba(0, 0, 0, 0.06)` or `#E2E8F0`\n  - Default: `rgba(0, 0, 0, 0.10)` or `#CBD5E1`\n  - Hover: `rgba(0, 0, 0, 0.18)` or `#94A3B8`\n\n### Accent Color (Emerald Mint & Complements)\n- **Primary Brand Accent (Mint/Emerald):** `#059669` / `#10B981` (Accessible emerald green on light surfaces, AAA contrast for text/badges)\n- **Mint Subtle:** `rgba(16, 185, 129, 0.10)` / `#ECFDF5` (Tag/badge backgrounds, selection tint)\n- **Mint Border:** `rgba(16, 185, 129, 0.35)` / `#A7F3D0`\n- **Secondary Tones:**\n  - Sky Blue: `#0284C7` (Types, parameters)\n  - Soft Indigo: `#6366F1` (Informational cues)\n  - Warning: `#D97706`\n  - Danger: `#E11D48`\n\n### Text & Foreground\n- **Text Primary:** `#0F172A` (Slate 900, ultra high contrast)\n- **Text Secondary:** `#475569` (Slate 600)\n- **Text Muted:** `#64748B` (Slate 500)\n\n### Focus & Accessibility\n- Clean double ring adapted for light surfaces:\n  `box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.6), 0 0 0 4px rgba(16, 185, 129, 0.15);`\n  with smooth, subtle transition (`transform: translateY(-1px); transition: 150ms ease`).\n\n---\n\n## 3. Code Block & Playground in Light Mode\n- **Code Block:** `#0F172A` (deep dark slate code editor container for optimal syntax highlighting) or soft muted light code container `#F8FAFC` with border `#E2E8F0`.\n- **Controller Vector:** Crisp dark titanium `#334155` body with slate controls on a soft white/gray preview bed.\n",
+          "font": "GEIST",
+          "headlineFont": "GEIST",
+          "headlineFontFamily": "Geist",
+          "labelFont": "JETBRAINS_MONO",
+          "labelFontFamily": "JetBrains Mono",
+          "namedColors": {
+            "background": "#faf8ff",
+            "canvas-base": "#F8FAFC",
+            "code-dark": "#0F172A",
+            "danger": "#E11D48",
+            "error": "#ba1a1a",
+            "error_container": "#ffdad6",
+            "inverse_on_surface": "#eef0ff",
+            "inverse_primary": "#68dba9",
+            "inverse_surface": "#283044",
+            "mint-accent": "#10B981",
+            "mint-border": "#A7F3D0",
+            "mint-subtle": "#ECFDF5",
+            "on_background": "#131b2e",
+            "on_error": "#ffffff",
+            "on_error_container": "#93000a",
+            "on_primary": "#ffffff",
+            "on_primary_container": "#f5fff7",
+            "on_primary_fixed": "#002114",
+            "on_primary_fixed_variant": "#005137",
+            "on_secondary": "#ffffff",
+            "on_secondary_container": "#00476e",
+            "on_secondary_fixed": "#001d31",
+            "on_secondary_fixed_variant": "#004b73",
+            "on_surface": "#131b2e",
+            "on_surface_variant": "#3d4a42",
+            "on_tertiary": "#ffffff",
+            "on_tertiary_container": "#fffbff",
+            "on_tertiary_fixed": "#07006c",
+            "on_tertiary_fixed_variant": "#2f2ebe",
+            "outline": "#6d7a72",
+            "outline_variant": "#bccac0",
+            "primary": "#006948",
+            "primary_container": "#00855d",
+            "primary_fixed": "#85f8c4",
+            "primary_fixed_dim": "#68dba9",
+            "secondary": "#006398",
+            "secondary_container": "#5bb8fe",
+            "secondary_fixed": "#cce5ff",
+            "secondary_fixed_dim": "#93ccff",
+            "surface": "#faf8ff",
+            "surface-card": "#FFFFFF",
+            "surface-container": "#E2E8F0",
+            "surface-low": "#F1F5F9",
+            "surface_bright": "#faf8ff",
+            "surface_container": "#eaedff",
+            "surface_container_high": "#e2e7ff",
+            "surface_container_highest": "#dae2fd",
+            "surface_container_low": "#f2f3ff",
+            "surface_container_lowest": "#ffffff",
+            "surface_dim": "#d2d9f4",
+            "surface_tint": "#006c4a",
+            "surface_variant": "#dae2fd",
+            "tertiary": "#4648d4",
+            "tertiary_container": "#6063ee",
+            "tertiary_fixed": "#e1e0ff",
+            "tertiary_fixed_dim": "#c0c1ff",
+            "text-muted": "#64748B",
+            "text-primary": "#0F172A",
+            "text-secondary": "#475569",
+            "warning": "#D97706"
+          },
+          "overrideNeutralColor": "#0f172a",
+          "overridePrimaryColor": "#059669",
+          "overrideSecondaryColor": "#0284c7",
+          "overrideTertiaryColor": "#6366f1",
+          "roundness": "ROUND_FOUR",
+          "spacing": {
+            "gutter": "1.5rem",
+            "gutter-mobile": "1rem",
+            "margin": "2rem",
+            "margin-mobile": "1rem",
+            "space-lg": "1.5rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem"
+          },
+          "spacingScale": 2,
+          "typography": {
+            "body-lg": {
+              "fontFamily": "Geist",
+              "fontSize": "16px",
+              "fontWeight": "400",
+              "lineHeight": "26px"
+            },
+            "body-md": {
+              "fontFamily": "Geist",
+              "fontSize": "14px",
+              "fontWeight": "400",
+              "lineHeight": "22px"
+            },
+            "body-sm": {
+              "fontFamily": "Geist",
+              "fontSize": "12px",
+              "fontWeight": "400",
+              "lineHeight": "18px"
+            },
+            "headline-lg": {
+              "fontFamily": "Geist",
+              "fontSize": "32px",
+              "fontWeight": "600",
+              "lineHeight": "40px"
+            },
+            "headline-lg-mobile": {
+              "fontFamily": "Geist",
+              "fontSize": "24px",
+              "fontWeight": "600",
+              "lineHeight": "32px"
+            },
+            "headline-md": {
+              "fontFamily": "Geist",
+              "fontSize": "24px",
+              "fontWeight": "600",
+              "lineHeight": "32px"
+            },
+            "headline-sm": {
+              "fontFamily": "Geist",
+              "fontSize": "20px",
+              "fontWeight": "600",
+              "lineHeight": "28px"
+            },
+            "headline-xl": {
+              "fontFamily": "Geist",
+              "fontSize": "40px",
+              "fontWeight": "700",
+              "lineHeight": "48px"
+            },
+            "headline-xl-mobile": {
+              "fontFamily": "Geist",
+              "fontSize": "30px",
+              "fontWeight": "700",
+              "lineHeight": "38px"
+            },
+            "label-lg": {
+              "fontFamily": "JetBrains Mono",
+              "fontSize": "14px",
+              "fontWeight": "500",
+              "lineHeight": "20px"
+            },
+            "label-md": {
+              "fontFamily": "JetBrains Mono",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "lineHeight": "18px"
+            },
+            "label-sm": {
+              "fontFamily": "JetBrains Mono",
+              "fontSize": "11px",
+              "fontWeight": "500",
+              "lineHeight": "16px"
+            }
+          }
+        }
+      },
+      "name": "assets/f92f84790ab44ec7b9192e2c0e997949",
+      "version": "1"
+    }
+  ]
+}

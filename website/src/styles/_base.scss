@@ -1,0 +1,145 @@
+:root {
+    color-scheme: dark;
+    --bg: var(--gc-canvas-base);
+    --panel: var(--gc-canvas-surface);
+    --well: var(--gc-canvas-surface-low);
+    --line: var(--gc-border-default);
+    --text: var(--gc-text-primary);
+    --muted: var(--gc-text-secondary);
+    --accent: #4edea3;
+    --accent-solid: #10b981;
+    --accent-ink: #002819;
+    --subtle: var(--gc-mint-subtle);
+    --mono: var(--gc-font-mono);
+}
+:root[data-theme='light'] {
+    color-scheme: light;
+    --accent: #047857;
+    --accent-solid: #059669;
+    --accent-ink: #fff;
+}
+* {
+    box-sizing: border-box;
+}
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 96px;
+}
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--gc-font-sans);
+    font-size: 14px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+}
+button,
+input,
+select {
+    font: inherit;
+}
+button,
+a,
+select,
+input {
+    -webkit-tap-highlight-color: transparent;
+}
+button {
+    color: inherit;
+    cursor: pointer;
+}
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+a {
+    color: inherit;
+    text-decoration: none;
+}
+button,
+a {
+    touch-action: manipulation;
+}
+button,
+select,
+a {
+    transition:
+        background 0.16s,
+        border-color 0.16s,
+        color 0.16s,
+        box-shadow 0.16s;
+}
+a:hover {
+    color: var(--accent);
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+pre:focus-visible,
+summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+main:focus {
+    outline: none;
+}
+::selection {
+    background: #10b98155;
+}
+h1,
+h2,
+h3,
+h4,
+p {
+    margin-top: 0;
+}
+h1,
+h2,
+h3 {
+    line-height: 1.18;
+    letter-spacing: -0.035em;
+}
+p {
+    color: var(--muted);
+}
+svg {
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+code,
+kbd,
+.mono {
+    font-family: var(--mono);
+}
+code {
+    overflow-wrap: anywhere;
+}
+.mint {
+    color: var(--accent);
+}
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+.skip-link {
+    position: fixed;
+    z-index: 200;
+    top: 8px;
+    left: 8px;
+    padding: 10px 20px;
+    background: var(--accent-solid);
+    color: var(--accent-ink);
+    transform: translateY(-150%);
+    &:focus {
+        transform: translateY(0);
+    }
+}

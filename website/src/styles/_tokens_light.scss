@@ -1,0 +1,142 @@
+// =============================================================================
+// gamepad-controller SCSS Design Tokens (_tokens.scss)
+// Crisp Mint Design System — Light Mode
+// =============================================================================
+
+// --- Color Palette: Canvas & Surface (Light Mode) ---
+$gc-canvas-base: #f8fafc !default;
+$gc-canvas-surface: #ffffff !default;
+$gc-canvas-surface-low: #f1f5f9 !default;
+$gc-canvas-surface-container: #e2e8f0 !default;
+$gc-canvas-surface-high: #cbd5e1 !default;
+$gc-canvas-glass: rgba(255, 255, 255, 0.9) !default;
+
+// --- Color Palette: Brand & Accents (Emerald Mint Light) ---
+$gc-mint-primary: #059669 !default;
+$gc-mint-hover: #047857 !default;
+$gc-mint-subtle: #ecfdf5 !default;
+$gc-mint-border: #a7f3d0 !default;
+
+// Secondary accents (accessible on light)
+$gc-accent-blue: #0284c7 !default;
+$gc-accent-indigo: #4f46e5 !default;
+$gc-accent-purple: #9333ea !default;
+$gc-status-warning: #d97706 !default;
+$gc-status-danger: #e11d48 !default;
+
+// --- Color Palette: Text & Foreground ---
+$gc-text-primary: #0f172a !default;
+$gc-text-secondary: #475569 !default;
+$gc-text-muted: #64748b !default;
+$gc-text-inverse: #ffffff !default;
+
+// --- Color Palette: Borders ---
+$gc-border-subtle: #f1f5f9 !default;
+$gc-border-default: #e2e8f0 !default;
+$gc-border-hover: #cbd5e1 !default;
+$gc-border-accent: $gc-mint-border !default;
+
+// --- Typography Scale ---
+$gc-font-sans:
+    'Geist',
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif !default;
+$gc-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace !default;
+
+$gc-text-xs: 0.75rem !default; // 12px
+$gc-text-sm: 0.875rem !default; // 14px
+$gc-text-base: 1rem !default; // 16px
+$gc-text-lg: 1.125rem !default; // 18px
+$gc-text-xl: 1.25rem !default; // 20px
+$gc-text-2xl: 1.5rem !default; // 24px
+$gc-text-3xl: 1.875rem !default; // 30px
+$gc-text-4xl: 2.25rem !default; // 36px
+
+$gc-weight-regular: 400 !default;
+$gc-weight-medium: 500 !default;
+$gc-weight-semibold: 600 !default;
+$gc-weight-bold: 700 !default;
+
+// --- Spacing Scale ---
+$gc-space-1: 4px !default;
+$gc-space-2: 8px !default;
+$gc-space-3: 12px !default;
+$gc-space-4: 16px !default;
+$gc-space-5: 20px !default;
+$gc-space-6: 24px !default;
+$gc-space-8: 32px !default;
+$gc-space-10: 40px !default;
+$gc-space-12: 48px !default;
+$gc-space-16: 64px !default;
+
+// --- Border Radius ---
+$gc-radius-sm: 4px !default;
+$gc-radius-md: 8px !default;
+$gc-radius-lg: 12px !default;
+$gc-radius-xl: 16px !default;
+$gc-radius-pill: 9999px !default;
+
+// --- Shadows & Focus Effects ---
+$gc-shadow-card:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.04) !default;
+$gc-shadow-card-hover:
+    0 10px 25px -5px rgba(0, 0, 0, 0.08),
+    0 8px 10px -6px rgba(0, 0, 0, 0.04) !default;
+$gc-focus-ring:
+    0 0 0 2px rgba(16, 185, 129, 0.6),
+    0 0 0 4px rgba(16, 185, 129, 0.15) !default;
+
+// --- Transitions ---
+$gc-transition-fast: 150ms ease !default;
+$gc-transition-smooth: 220ms cubic-bezier(0.4, 0, 0.2, 1) !default;
+
+// --- CSS Custom Properties Export ---
+:root[data-theme='light'] {
+    --gc-canvas-base: #{$gc-canvas-base};
+    --gc-canvas-surface: #{$gc-canvas-surface};
+    --gc-canvas-surface-low: #{$gc-canvas-surface-low};
+    --gc-canvas-surface-container: #{$gc-canvas-surface-container};
+    --gc-canvas-glass: #{$gc-canvas-glass};
+
+    --gc-mint-primary: #{$gc-mint-primary};
+    --gc-mint-subtle: #{$gc-mint-subtle};
+    --gc-accent-blue: #{$gc-accent-blue};
+    --gc-accent-indigo: #{$gc-accent-indigo};
+
+    --gc-text-primary: #{$gc-text-primary};
+    --gc-text-secondary: #{$gc-text-secondary};
+    --gc-text-muted: #{$gc-text-muted};
+
+    --gc-border-subtle: #{$gc-border-subtle};
+    --gc-border-default: #{$gc-border-default};
+    --gc-border-accent: #{$gc-border-accent};
+
+    --gc-font-sans: #{$gc-font-sans};
+    --gc-font-mono: #{$gc-font-mono};
+
+    --gc-focus-ring: #{$gc-focus-ring};
+}
+
+// --- Mixins ---
+@mixin gamepad-focus {
+    outline: none;
+    border-color: $gc-mint-primary;
+    box-shadow: $gc-focus-ring;
+    transform: translateY(-1px);
+    transition:
+        transform $gc-transition-fast,
+        box-shadow $gc-transition-fast,
+        border-color $gc-transition-fast;
+}
+
+@mixin code-block-surface {
+    background-color: #0f172a;
+    border: 1px solid #e2e8f0;
+    border-radius: $gc-radius-lg;
+    font-family: $gc-font-mono;
+}

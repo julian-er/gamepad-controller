@@ -1,0 +1,379 @@
+{
+  "createTime": "2026-09-15T11:36:58.416553Z",
+  "designTheme": {
+    "bodyFont": "INTER",
+    "bodyFontFamily": "Inter",
+    "colorMode": "DARK",
+    "colorVariant": "FIDELITY",
+    "customColor": "#00f59b",
+    "designMd": "---\nname: Gamepad Engine OS\ncolors:\n  surface: '#111318'\n  surface-dim: '#111318'\n  surface-bright: '#37393f'\n  surface-container-lowest: '#0c0e13'\n  surface-container-low: '#1a1b21'\n  surface-container: '#1e1f25'\n  surface-container-high: '#282a2f'\n  surface-container-highest: '#33353a'\n  on-surface: '#e2e2e9'\n  on-surface-variant: '#b9cbbd'\n  inverse-surface: '#e2e2e9'\n  inverse-on-surface: '#2e3036'\n  outline: '#849588'\n  outline-variant: '#3b4a3f'\n  surface-tint: '#00e38f'\n  primary: '#cdffdc'\n  on-primary: '#003920'\n  primary-container: '#00f59b'\n  on-primary-container: '#006b41'\n  inverse-primary: '#006d42'\n  secondary: '#7bd0ff'\n  on-secondary: '#00354a'\n  secondary-container: '#00a6e0'\n  on-secondary-container: '#00374d'\n  tertiary: '#f4f1ff'\n  on-tertiary: '#1000a9'\n  tertiary-container: '#d3d3ff'\n  on-tertiary-container: '#4749d5'\n  error: '#ffb4ab'\n  on-error: '#690005'\n  error-container: '#93000a'\n  on-error-container: '#ffdad6'\n  primary-fixed: '#53ffab'\n  primary-fixed-dim: '#00e38f'\n  on-primary-fixed: '#002111'\n  on-primary-fixed-variant: '#005231'\n  secondary-fixed: '#c4e7ff'\n  secondary-fixed-dim: '#7bd0ff'\n  on-secondary-fixed: '#001e2c'\n  on-secondary-fixed-variant: '#004c69'\n  tertiary-fixed: '#e1e0ff'\n  tertiary-fixed-dim: '#c0c1ff'\n  on-tertiary-fixed: '#07006c'\n  on-tertiary-fixed-variant: '#2f2ebe'\n  background: '#111318'\n  on-background: '#e2e2e9'\n  surface-variant: '#33353a'\ntypography:\n  display-lg:\n    fontFamily: Geist\n    fontSize: 48px\n    fontWeight: '700'\n    lineHeight: 56px\n    letterSpacing: -0.03em\n  display-lg-mobile:\n    fontFamily: Geist\n    fontSize: 32px\n    fontWeight: '700'\n    lineHeight: 40px\n    letterSpacing: -0.02em\n  headline-xl:\n    fontFamily: Geist\n    fontSize: 36px\n    fontWeight: '700'\n    lineHeight: 44px\n    letterSpacing: -0.025em\n  headline-xl-mobile:\n    fontFamily: Geist\n    fontSize: 26px\n    fontWeight: '700'\n    lineHeight: 34px\n    letterSpacing: -0.02em\n  headline-lg:\n    fontFamily: Geist\n    fontSize: 28px\n    fontWeight: '600'\n    lineHeight: 36px\n    letterSpacing: -0.02em\n  headline-md:\n    fontFamily: Geist\n    fontSize: 22px\n    fontWeight: '600'\n    lineHeight: 30px\n    letterSpacing: -0.015em\n  headline-sm:\n    fontFamily: Geist\n    fontSize: 18px\n    fontWeight: '600'\n    lineHeight: 26px\n    letterSpacing: -0.01em\n  body-lg:\n    fontFamily: Inter\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 26px\n  body-md:\n    fontFamily: Inter\n    fontSize: 14px\n    fontWeight: '400'\n    lineHeight: 22px\n  body-sm:\n    fontFamily: Inter\n    fontSize: 12px\n    fontWeight: '400'\n    lineHeight: 18px\n  code-lg:\n    fontFamily: JetBrains Mono\n    fontSize: 14px\n    fontWeight: '500'\n    lineHeight: 22px\n  code-sm:\n    fontFamily: JetBrains Mono\n    fontSize: 12px\n    fontWeight: '400'\n    lineHeight: 18px\n  label-caps:\n    fontFamily: JetBrains Mono\n    fontSize: 11px\n    fontWeight: '600'\n    lineHeight: 16px\n    letterSpacing: 0.08em\n  label-badge:\n    fontFamily: JetBrains Mono\n    fontSize: 10px\n    fontWeight: '600'\n    lineHeight: 14px\n    letterSpacing: 0.04em\nrounded:\n  sm: 0.125rem\n  DEFAULT: 0.25rem\n  md: 0.375rem\n  lg: 0.5rem\n  xl: 0.75rem\n  full: 9999px\nspacing:\n  gutter: 1.5rem\n  gutter-sm: 1rem\n  gutter-lg: 2rem\n  margin: 2rem\n  margin-sm: 1rem\n  margin-lg: 4rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2.5rem\n---\n\n## Brand & Style\n\nThis design system targets developers, game designers, and platform engineers architecting gamepad-driven interfaces and low-latency input engines. It blends the structural rigor of developer command bars (such as Raycast) with the reactive, high-contrast spatial cues of modern console operating systems (SteamOS, Xbox Dashboard, PS5 UI).\n\n### Core Aesthetic Pillars\n- **Spatial Precision & Kinetic State:** Interfaces must clearly broadcast currently focused nodes for both 10-foot television viewports and high-density desktop displays. Navigational boundaries are razor-sharp with neon energy blooms to indicate hardware connectivity and spatial travel.\n- **Hardware-Native Functionalism:** Surfaces mimic high-end carbon polymers and dark matte chassis finishes. Glass effects are restrained and non-decorative, applied strictly to preserve HUD layering without sacrificing render speed.\n- **Diagnostic Transparency:** Real-time telemetry, deadzone calibrations, keymap chord graphs, and API references are treated with uniform engineering precision via monospaced accents and direct contrast hierarchies.\n\n## Colors\n\nThe palette is engineered exclusively for an immersive, zero-eye-strain dark mode. Backgrounds step through precise charcoal tiers to construct optical elevation without reliant shadows.\n\n### Primary Accents & Hardware Signals\n- **Console Neon Green (`#00F59B`):** Denotes active polling, connected devices, spatial controller focus, and execution confirmation. Used sparingly for critical real-time states to maintain optical potency.\n- **Cyber Blue (`#38BDF8`):** Applied to secondary interactive mechanics, spatial navigation vectors, wireframe controller bindings, and informational indicators.\n- **Controller Indigo (`#6366F1`):** Represents structural boundaries, framework wrappers, API signatures, and deep systems plumbing.\n\n### Surface Tonal Hierarchy\n- **Canvas Base (`#0B0D12`):** Primary viewport backdrop; deepest midnight value.\n- **Surface Level 1 / Dark Slate (`#121620`):** Default card surfaces, side panels, table rows, and resting control clusters.\n- **Surface Level 2 / Elevated Slate (`#1A2234`):** Modals, tooltips, flyout palettes, command bars, and active code blocks.\n- **Surface Level 3 / Highlight (`#242F48`):** Hover layers and resting selection wells.\n- **Border Subtle (`rgba(255, 255, 255, 0.08)`): Base framing for cards and structural grids.\n- **Border Pronounced (`rgba(56, 189, 248, 0.28)`):** Structural guides and inactive interactive perimeters.\n\n### System Diagnostics\n- **Warning Amber (`#F59E0B`):** Drift detection alerts, battery conservation modes, and throttling warnings.\n- **Error / Disconnected Red (`#EF4444`):** Dropped frames, input thread timeouts, and button mapping collisions.\n- **AI Skill Purple (`#A855F7`):** Predictive input smoothing, auto-calibration routines, and gesture heuristics.\n\n## Typography\n\nThe typographic system separates structural display copy, long-form technical documentation, and mechanical runtime readouts into dedicated functional families.\n\n### Type Pairings & Applications\n- **Headings (Geist):** Geometric, stark, and engineered. Tight tracking (`-0.02em` to `-0.03em`) creates a compact, screen-native architecture for high-resolution displays.\n- **Prose & Body (Inter):** Highly legible, neutral sans-serif that balances extensive documentation paragraphs, tables, and multi-column parameter registers.\n- **Machine Readouts & Labels (JetBrains Mono):** Reserved for button glyph notations (e.g., `BTN_SOUTH`, `AXIS_L2`), telemetry rates (`1000Hz`, `0.4ms`), CLI scripts, and API parameter payloads. All caps-tracked labels reinforce hardware debug aesthetic.\n\n## Layout & Spacing\n\nThe layout is built upon an uncompromising 8-point base module (subdivided to 4px for telemetry badges, inline tags, and split buttons). \n\n### Layout Grids\n- **Desktop / 10-Foot HUD Mode (>= 1280px):** 12-column dynamic grid with `2rem` gutters and fluid outer margins capped at `1680px`. Left rail anchors persistent D-pad/stick navigational hierarchies, while the primary canvas displays interactive controllers, visualizers, and code mirrors.\n- **Tablet / Split-Pane View (768px - 1279px):** 8-column layout with `1.5rem` gutters and `1.5rem` margins. Side docks collapse into drawer overlays triggered by shoulder button (`L1`/`R1`) or keyboard shortcut.\n- **Mobile Viewport (< 768px):** 4-column layout with `1rem` gutters and `1rem` margins. Nested telemetry clusters switch from horizontal arrays to stacked vertical registers.\n\n### Spatial Navigation Grid Philosophy\nEvery focusable block in the layout must calculate its spatial boundaries so directional thumbstick movements step logically between Cartesian neighbors. Gaps between grid tiles (`space-md` or `space-lg`) provide sufficient spatial buffer to prevent dual glow-bleed when nodes receive active focus.\n\n## Elevation & Depth\n\nThis design system avoids traditional blurry drop shadows, which look washed out in deep dark interfaces. Depth is achieved via dark tonal layering, high-precision razor borders, and targeted luminescent backglows.\n\n### The Z-Layer Continuum\n- **Base Deck (0dp / `#0B0D12`):** Passive canvas background. No borders.\n- **Panel Deck (1dp / `#121620`):** Modular containers, cards, and tool decks. Framed by a crisp 1px border (`rgba(255, 255, 255, 0.08)`).\n- **Raised Module (2dp / `#1A2234`):** Flyout panels, contextual action shelves, code inspect windows. Border moves to `rgba(255, 255, 255, 0.14)`.\n- **Command Overlays & Drawers (3dp / `#1A2234`):** Features backdrop-filter blur (`16px`) combined with dark slate tinting (`rgba(18, 22, 32, 0.85)`) to layer cleanly over active canvas elements.\n\n### The Focus Ring & Glow Signature\nSpatial controller interfaces demand instant recognition of active elements across long distances:\n- **Focused State:** `box-shadow: 0 0 0 2px #00F59B, 0 0 16px rgba(0, 245, 155, 0.45);`\n- **Secondary Spatial Track:** `box-shadow: 0 0 0 1px #38BDF8, 0 0 10px rgba(56, 189, 248, 0.3);`\n- **Critical Interlock State:** `box-shadow: 0 0 0 2px #EF4444, 0 0 16px rgba(239, 68, 68, 0.45);`\n\n## Shapes\n\nThe shape system adopts a technical, high-performance aesthetic: **Soft (`1`)** corner curves engineered to echo modern handheld hardware, gaming consoles, and display bezels.\n\n### Radius Scale Rules\n- **Base Components (`0.25rem` / 4px):** Micro buttons, status chips, monospaced inline code tokens, and input fields.\n- **Containers & Panels (`0.5rem` / 8px):** Cards, API method containers, modal frames, and dynamic visualizers.\n- **Floating Overlays & Island Bars (`0.75rem` / 12px):** Command palettes, bottom dock shelves, and toast notifications.\n- **Fully Rounded (`9999px`):** Gamepad trigger meters, circular D-pad visualizers, and stick-boundary test circles.\n\n## Components\n\n### Buttons\n- **Primary (Focus Action):** Solid `#00F59B` surface with `#0B0D12` bold typography. Hover/active shifts luminosity. Controller focus adds the signature dual neon green glow ring.\n- **Secondary (Tooling):** Deep slate `#1A2234` background with 1px border (`rgba(255, 255, 255, 0.12)`) and `#38BDF8` text. Focus shifts border to `#38BDF8` with a cyber blue glow.\n- **Ghost / Action Icon:** Transparent surface, white text at 70% opacity. Hover yields `#1A2234` fill. Keyboard/controller binding badges (e.g., `[A]`, `[Enter]`) are anchored to the trailing edge using JetBrains Mono in `#A855F7` or `#38BDF8`.\n\n### Chips & Telemetry Badges\n- **Status Indicator Chips:** Compact pill structures with a `0.25rem` radius. Background set to 10% accent opacity with a matching solid 1px border (e.g., Green for `POLLING_ACTIVE`, Amber for `DRIFT_COMPENSATED`, Red for `DISCONNECTED`). JetBrains Mono label text, uppercase.\n- **Key Binding Pill:** Monospaced keyboard or gamepad key representation (`LB`, `RT`, `Cross`, `Circle`). Bordered in `rgba(255, 255, 255, 0.2)` with a subtle linear gradient simulating a mechanical keycap.\n\n### Cards & Code Containers\n- **API Spec & Parameter Cards:** Solid `#121620` background, 1px border `rgba(255, 255, 255, 0.08)`. Hover transitions border to `rgba(56, 189, 248, 0.4)`. Header bands partition endpoint routes or function signatures from description bodies using a solid 1px separator.\n- **Code Mirrors:** Background `#07080B` (deeper than base canvas) to establish terminal recession. Left gutter displays line numbers in muted slate. Syntax highlighting uses `#00F59B` (strings/returns), `#38BDF8` (methods), `#A855F7` (keywords), and `#F59E0B` (constants).\n\n### Inputs & Sliders\n- **Deadzone / Calibration Sliders:** Track height 4px in `#1A2234`. Active range rendered in gradient `#38BDF8` to `#00F59B`. Thumb is a high-contrast 16px circular puck with an active `#00F59B` halo ring when selected.\n- **Text & Value Fields:** Background `#121620`, border `rgba(255, 255, 255, 0.12)`, font Inter 14px with JetBrains Mono numbers. On focus, triggers the dual green focus glow and shifts border color to `#00F59B`.\n\n### Checkboxes & Toggle Switches\n- **Toggle Switches:** Track measures 40px × 22px with `#1A2234` resting background. Checked state switches to `#00F59B` with a `#0B0D12` toggle node. Focus deploys the system glow ring.\n- **Checkboxes:** 18px square with a `0.25rem` radius. Inactive border is `rgba(255, 255, 255, 0.2)`. Checked state displays a solid `#00F59B` fill with an angled black checkmark.\n\n### Gamepad Axis Visualizer (Domain-Specific)\n- **Stick / Trigger Monitor:** 2D Cartesian coordinate plane rendered as a circle or crosshair box in `#121620` with fine vector gridlines (`rgba(255, 255, 255, 0.05)`). Real-time position displayed as an active glowing dot in `#00F59B` tracking stick deflection, with dynamic numeric readouts (`X: +0.42`, `Y: -0.88`) anchored in JetBrains Mono.",
+    "font": "GEIST",
+    "headlineFont": "GEIST",
+    "headlineFontFamily": "Geist",
+    "labelFont": "JETBRAINS_MONO",
+    "labelFontFamily": "JetBrains Mono",
+    "namedColors": {
+      "background": "#111318",
+      "error": "#ffb4ab",
+      "error_container": "#93000a",
+      "inverse_on_surface": "#2e3036",
+      "inverse_primary": "#006d42",
+      "inverse_surface": "#e2e2e9",
+      "on_background": "#e2e2e9",
+      "on_error": "#690005",
+      "on_error_container": "#ffdad6",
+      "on_primary": "#003920",
+      "on_primary_container": "#006b41",
+      "on_primary_fixed": "#002111",
+      "on_primary_fixed_variant": "#005231",
+      "on_secondary": "#00354a",
+      "on_secondary_container": "#00374d",
+      "on_secondary_fixed": "#001e2c",
+      "on_secondary_fixed_variant": "#004c69",
+      "on_surface": "#e2e2e9",
+      "on_surface_variant": "#b9cbbd",
+      "on_tertiary": "#1000a9",
+      "on_tertiary_container": "#4749d5",
+      "on_tertiary_fixed": "#07006c",
+      "on_tertiary_fixed_variant": "#2f2ebe",
+      "outline": "#849588",
+      "outline_variant": "#3b4a3f",
+      "primary": "#cdffdc",
+      "primary_container": "#00f59b",
+      "primary_fixed": "#53ffab",
+      "primary_fixed_dim": "#00e38f",
+      "secondary": "#7bd0ff",
+      "secondary_container": "#00a6e0",
+      "secondary_fixed": "#c4e7ff",
+      "secondary_fixed_dim": "#7bd0ff",
+      "surface": "#111318",
+      "surface_bright": "#37393f",
+      "surface_container": "#1e1f25",
+      "surface_container_high": "#282a2f",
+      "surface_container_highest": "#33353a",
+      "surface_container_low": "#1a1b21",
+      "surface_container_lowest": "#0c0e13",
+      "surface_dim": "#111318",
+      "surface_tint": "#00e38f",
+      "surface_variant": "#33353a",
+      "tertiary": "#f4f1ff",
+      "tertiary_container": "#d3d3ff",
+      "tertiary_fixed": "#e1e0ff",
+      "tertiary_fixed_dim": "#c0c1ff"
+    },
+    "overrideNeutralColor": "#0b0d12",
+    "overridePrimaryColor": "#00f59b",
+    "overrideSecondaryColor": "#38bdf8",
+    "overrideTertiaryColor": "#6366f1",
+    "roundness": "ROUND_FOUR",
+    "spacing": {
+      "gutter": "1.5rem",
+      "gutter-lg": "2rem",
+      "gutter-sm": "1rem",
+      "margin": "2rem",
+      "margin-lg": "4rem",
+      "margin-sm": "1rem",
+      "space-lg": "1.5rem",
+      "space-md": "1rem",
+      "space-sm": "0.5rem",
+      "space-xl": "2.5rem",
+      "space-xs": "0.25rem"
+    },
+    "spacingScale": 2,
+    "typography": {
+      "body-lg": {
+        "fontFamily": "Inter",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "lineHeight": "26px"
+      },
+      "body-md": {
+        "fontFamily": "Inter",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "lineHeight": "22px"
+      },
+      "body-sm": {
+        "fontFamily": "Inter",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "18px"
+      },
+      "code-lg": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": "14px",
+        "fontWeight": "500",
+        "lineHeight": "22px"
+      },
+      "code-sm": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "lineHeight": "18px"
+      },
+      "display-lg": {
+        "fontFamily": "Geist",
+        "fontSize": "48px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.03em",
+        "lineHeight": "56px"
+      },
+      "display-lg-mobile": {
+        "fontFamily": "Geist",
+        "fontSize": "32px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.02em",
+        "lineHeight": "40px"
+      },
+      "headline-lg": {
+        "fontFamily": "Geist",
+        "fontSize": "28px",
+        "fontWeight": "600",
+        "letterSpacing": "-0.02em",
+        "lineHeight": "36px"
+      },
+      "headline-md": {
+        "fontFamily": "Geist",
+        "fontSize": "22px",
+        "fontWeight": "600",
+        "letterSpacing": "-0.015em",
+        "lineHeight": "30px"
+      },
+      "headline-sm": {
+        "fontFamily": "Geist",
+        "fontSize": "18px",
+        "fontWeight": "600",
+        "letterSpacing": "-0.01em",
+        "lineHeight": "26px"
+      },
+      "headline-xl": {
+        "fontFamily": "Geist",
+        "fontSize": "36px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.025em",
+        "lineHeight": "44px"
+      },
+      "headline-xl-mobile": {
+        "fontFamily": "Geist",
+        "fontSize": "26px",
+        "fontWeight": "700",
+        "letterSpacing": "-0.02em",
+        "lineHeight": "34px"
+      },
+      "label-badge": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": "10px",
+        "fontWeight": "600",
+        "letterSpacing": "0.04em",
+        "lineHeight": "14px"
+      },
+      "label-caps": {
+        "fontFamily": "JetBrains Mono",
+        "fontSize": "11px",
+        "fontWeight": "600",
+        "letterSpacing": "0.08em",
+        "lineHeight": "16px"
+      }
+    }
+  },
+  "deviceType": "DESKTOP",
+  "metadata": {
+    "userRole": "OWNER"
+  },
+  "name": "projects/17072487755286859910",
+  "origin": "STITCH",
+  "projectType": "TEXT_TO_UI_PRO",
+  "screenInstances": [
+    {
+      "height": 2484,
+      "id": "00ca673116764fc38940e5a23c1589b4",
+      "sourceScreen": "projects/17072487755286859910/screens/00ca673116764fc38940e5a23c1589b4",
+      "width": 1280,
+      "x": 7441,
+      "y": 4035
+    },
+    {
+      "height": 600,
+      "id": "0f3e5e0ae9224044b7d5381f9046fa88",
+      "sourceScreen": "projects/17072487755286859910/screens/0f3e5e0ae9224044b7d5381f9046fa88",
+      "width": 600,
+      "x": 5089,
+      "y": 4035
+    },
+    {
+      "height": 2430,
+      "hidden": true,
+      "id": "160987ac195d4e058ad28647910a6ce5",
+      "sourceScreen": "projects/17072487755286859910/screens/160987ac195d4e058ad28647910a6ce5",
+      "width": 1280,
+      "x": 1024,
+      "y": 4011
+    },
+    {
+      "height": 2430,
+      "id": "29fd7968f1ff411b9b0a6bdab60cde15",
+      "sourceScreen": "projects/17072487755286859910/screens/29fd7968f1ff411b9b0a6bdab60cde15",
+      "width": 1280,
+      "x": 1057,
+      "y": 4035
+    },
+    {
+      "height": 600,
+      "hidden": true,
+      "id": "2f2d13c285d9444cb9deb0b0dfa8aa8c",
+      "sourceScreen": "projects/17072487755286859910/screens/2f2d13c285d9444cb9deb0b0dfa8aa8c",
+      "width": 600,
+      "x": 516,
+      "y": -1757
+    },
+    {
+      "height": 2446,
+      "id": "388bc2e457e447d3be3a245de6e52d75",
+      "sourceScreen": "projects/17072487755286859910/screens/388bc2e457e447d3be3a245de6e52d75",
+      "width": 1280,
+      "x": 2401,
+      "y": 4035
+    },
+    {
+      "height": 512,
+      "id": "522913b72ffd479f9a11caf8b3149099",
+      "sourceScreen": "projects/17072487755286859910/screens/522913b72ffd479f9a11caf8b3149099",
+      "width": 512,
+      "x": 2496,
+      "y": 6774
+    },
+    {
+      "height": 3755,
+      "hidden": true,
+      "id": "635e4693820a4f9ea49048965819ebda",
+      "sourceScreen": "projects/17072487755286859910/screens/635e4693820a4f9ea49048965819ebda",
+      "width": 1280,
+      "x": 4860,
+      "y": -1757
+    },
+    {
+      "height": 600,
+      "id": "7f97e2fdd0214b4693beac10703fe114",
+      "sourceScreen": "projects/17072487755286859910/screens/7f97e2fdd0214b4693beac10703fe114",
+      "width": 600,
+      "x": 5753,
+      "y": 4035
+    },
+    {
+      "height": 600,
+      "hidden": true,
+      "id": "814cd4c668ec44879674fe73529bd15b",
+      "sourceScreen": "projects/17072487755286859910/screens/814cd4c668ec44879674fe73529bd15b",
+      "width": 600,
+      "x": -147,
+      "y": -1757
+    },
+    {
+      "height": 286,
+      "id": "a17646fe62cc48b984f01d6aeafa7d38",
+      "sourceScreen": "projects/17072487755286859910/screens/a17646fe62cc48b984f01d6aeafa7d38",
+      "width": 512,
+      "x": 1920,
+      "y": 6774
+    },
+    {
+      "height": 600,
+      "id": "a62d73a930a5488ca3d136d91dbc6700",
+      "sourceScreen": "projects/17072487755286859910/screens/a62d73a930a5488ca3d136d91dbc6700",
+      "width": 600,
+      "x": -1340,
+      "y": 3996
+    },
+    {
+      "height": 286,
+      "id": "ab374a1bdb6f462bbeab16bd2cecc576",
+      "sourceScreen": "projects/17072487755286859910/screens/ab374a1bdb6f462bbeab16bd2cecc576",
+      "width": 512,
+      "x": 1344,
+      "y": 6774
+    },
+    {
+      "height": 540,
+      "id": "assets_1bcaf04ae81e4ebb8fd77888f89ca232",
+      "sourceAsset": "assets/1bcaf04ae81e4ebb8fd77888f89ca232",
+      "type": "DESIGN_SYSTEM_INSTANCE",
+      "width": 960,
+      "y": 4011
+    },
+    {
+      "height": 540,
+      "hidden": true,
+      "id": "assets_8af353b1c6fb48b1ab763abe1510010d",
+      "sourceAsset": "assets/8af353b1c6fb48b1ab763abe1510010d",
+      "type": "DESIGN_SYSTEM_INSTANCE",
+      "width": 960,
+      "x": 3836,
+      "y": -1757
+    },
+    {
+      "height": 540,
+      "id": "assets_f92f84790ab44ec7b9192e2c0e997949",
+      "sourceAsset": "assets/f92f84790ab44ec7b9192e2c0e997949",
+      "type": "DESIGN_SYSTEM_INSTANCE",
+      "width": 960,
+      "x": 6417,
+      "y": 4035
+    },
+    {
+      "height": 4631,
+      "hidden": true,
+      "id": "b352f7d21fad43a9a5425a41b787c6bd",
+      "sourceScreen": "projects/17072487755286859910/screens/b352f7d21fad43a9a5425a41b787c6bd",
+      "width": 1280,
+      "y": 6774
+    },
+    {
+      "height": 7833,
+      "id": "b864e852fdb74effbae5593dacb39494",
+      "sourceScreen": "projects/17072487755286859910/screens/b864e852fdb74effbae5593dacb39494",
+      "width": 1280,
+      "x": 3072,
+      "y": 6774
+    },
+    {
+      "height": 600,
+      "hidden": true,
+      "id": "cc3b5ad2f69b4a948321c3b1e8bb0c68",
+      "sourceScreen": "projects/17072487755286859910/screens/cc3b5ad2f69b4a948321c3b1e8bb0c68",
+      "width": 600,
+      "x": 1180,
+      "y": -1757
+    },
+    {
+      "height": 600,
+      "id": "d890d24ee98146568d151c376bffaaab",
+      "sourceScreen": "projects/17072487755286859910/screens/d890d24ee98146568d151c376bffaaab",
+      "width": 600,
+      "x": -2004,
+      "y": 3996
+    },
+    {
+      "height": 2430,
+      "id": "e9e8f899d09e4e1d91fdd554fec2fe9e",
+      "sourceScreen": "projects/17072487755286859910/screens/e9e8f899d09e4e1d91fdd554fec2fe9e",
+      "width": 1280,
+      "x": 3745,
+      "y": 4035
+    },
+    {
+      "height": 600,
+      "id": "fdc314bfa7714776904c3b61ce70af2e",
+      "sourceScreen": "projects/17072487755286859910/screens/fdc314bfa7714776904c3b61ce70af2e",
+      "width": 600,
+      "x": -676,
+      "y": 3996
+    }
+  ],
+  "thumbnailScreenshot": {
+    "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1Ucu7GzqCSwIlVVGc3_XdsjbRhQfOGa7n_vG9adP3J5kwVPM2YX2bzqiiGLIFsDBJ2M68SURvQXjyadR2ai-0rvUvDMus-1tjJOflyZaE1wg1zPLD7LYNvT6GYF5T3I3S73tFldMFoX_ZD0ADN7DmpSGfhwDK2xyetIF-5lmsoeRVl1CtJbzbVRumvFmw7BN9dQBU4jOkCBhGigqcBzyQNaNHTyrjHfJFiBh7sRupp3fKrkUlUsIIzGLzsY",
+    "name": "projects/17072487755286859910/screens/635e4693820a4f9ea49048965819ebda/fileEntries/screenshot"
+  },
+  "title": "Gamepad Controller Documentation System",
+  "updateTime": "2026-09-15T12:58:13.496124Z",
+  "visibility": "PRIVATE"
+}

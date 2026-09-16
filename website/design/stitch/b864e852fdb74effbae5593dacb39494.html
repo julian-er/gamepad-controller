@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; background-color: #0a0e17; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+
+    @keyframes float-slow {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(0.5deg); }
+    }
+    @keyframes float-reverse {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(8px) rotate(-0.5deg); }
+    }
+    @keyframes pulse-emerald {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.06); }
+    }
+    @keyframes scan-line {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(200%); }
+    }
+    .animate-float { animation: float-slow 6s ease-in-out infinite; }
+    .animate-float-delay { animation: float-reverse 7s ease-in-out infinite 1.5s; }
+    .animate-glow-ring { animation: pulse-emerald 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    .scan-ray {
+      background: linear-gradient(180deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.4) 50%, rgba(16,185,129,0) 100%);
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#0a0e17",
+            "surface": "#0f131c",
+            "surface-container-lowest": "#070a10",
+            "surface-container-low": "#111622",
+            "surface-container": "#181e2b",
+            "surface-container-high": "#222a3a",
+            "surface-container-highest": "#2e374a",
+            "primary": "#4edea3",
+            "primary-container": "#10b981",
+            "on-primary": "#003824",
+            "on-primary-container": "#002819",
+            "secondary": "#7bd0ff",
+            "secondary-container": "#00a6e0",
+            "tertiary": "#b7c8e1",
+            "outline": "#475569",
+            "outline-variant": "#222c3d",
+            "on-surface": "#dfe2ef",
+            "on-surface-variant": "#94a3b8",
+            "error": "#ffb4ab"
+          },
+          fontFamily: {
+            "body-sm": ["Geist", "sans-serif"],
+            "body-md": ["Geist", "sans-serif"],
+            "body-lg": ["Geist", "sans-serif"],
+            "headline-sm": ["Geist", "sans-serif"],
+            "headline-md": ["Geist", "sans-serif"],
+            "headline-lg": ["Geist", "sans-serif"],
+            "headline-xl": ["Geist", "sans-serif"],
+            "label-sm": ["JetBrains Mono", "monospace"],
+            "label-md": ["JetBrains Mono", "monospace"]
+          },
+          borderRadius: {
+            DEFAULT: "0.125rem",
+            lg: "0.375rem",
+            xl: "0.75rem",
+            "2xl": "1.25rem",
+            full: "9999px"
+          },
+          spacing: {
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2.5rem",
+            "margin": "2rem"
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-[#0a0e17] font-body-md text-body-md text-on-surface antialiased selection:bg-primary selection:text-on-primary">
+<!-- ==================== TOP NAVIGATION ==================== -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#0a0e17]/85 backdrop-blur-xl border-b border-white/10 transition-all">
+<div class="h-16 max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<a class="flex items-center gap-2 text-on-surface hover:text-primary transition-colors group" href="#">
+<div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-center group-hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-primary text-[20px]">sports_esports</span>
+</div>
+<span class="font-label-md text-[14px] font-bold tracking-tight text-white">gamepad-controller</span>
+</a>
+<span class="px-2 py-0.5 rounded-full bg-surface-container border border-primary/30 font-label-sm text-[10px] text-primary tracking-wider uppercase">v1.2 Public</span>
+</div>
+<nav class="hidden lg:flex items-center gap-7">
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#features">Architecture</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#playground">Interactive Demo</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#ten-foot">10-Foot UI</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#frameworks">Integrations</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors" href="#telemetry">Benchmarks</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-white flex items-center gap-1 transition-colors" href="https://github.com" target="_blank">
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+<span>2.4k</span>
+</a>
+</nav>
+<div class="flex items-center gap-3">
+<div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#111622] border border-white/10 font-label-sm text-xs">
+<span class="text-primary font-bold">$</span>
+<code class="text-slate-300">npm i gamepad-controller</code>
+<button class="hover:text-primary transition-colors text-slate-400 pl-1" onclick="copyNpmCommand()" title="Copy command">
+<span class="material-symbols-outlined text-[15px]" id="nav-copy-icon">content_copy</span>
+</button>
+</div>
+<a class="px-4 py-2 rounded-lg bg-primary text-slate-950 font-bold text-xs tracking-wide uppercase hover:bg-primary-fixed-dim transition-all shadow-lg shadow-primary/20" href="#playground">
+          Launch Demo
+        </a>
+</div>
+</div>
+</header>
+<!-- ==================== HERO SECTION (PREMIUM APPLE/RAZER STYLE) ==================== -->
+<main class="w-full pt-20">
+<section class="relative w-full overflow-hidden px-6 md:px-10 pt-12 pb-20 border-b border-white/5">
+<!-- Ambient Glows -->
+<div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-primary/10 blur-[150px] rounded-full pointer-events-none -z-10"></div>
+<div class="absolute top-1/2 -left-40 w-[450px] h-[450px] bg-secondary/10 blur-[140px] rounded-full pointer-events-none -z-10"></div>
+<div class="absolute top-2/3 -right-40 w-[500px] h-[500px] bg-primary/10 blur-[160px] rounded-full pointer-events-none -z-10"></div>
+<div class="max-w-6xl mx-auto flex flex-col items-center text-center">
+<!-- Live Pill -->
+<div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface-container/90 border border-primary/30 text-on-surface mb-8 shadow-inner shadow-primary/10">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+<span class="font-label-sm text-xs text-primary font-semibold tracking-wider uppercase">Next-Gen Spatial Input Runtime</span>
+<span class="text-white/20 text-xs">|</span>
+<span class="font-label-sm text-xs text-slate-300 hidden sm:inline">Zero Dependencies • 3.2 kB</span>
+</div>
+<!-- High-Impact Headline -->
+<h1 class="font-headline-xl text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white max-w-5xl leading-[1.08] mb-6">
+          Bring <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-emerald-300 to-secondary">Console-Grade Navigation</span> to Any Web Experience.
+        </h1>
+<!-- Subheadline -->
+<p class="font-body-lg text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl mb-10 leading-relaxed font-normal">
+          A lightning-fast, 3kB spatial navigation engine. Plug in any Xbox, PlayStation DualSense, or generic gamepad and navigate WebViews, smart TV dashboards, and WebGL apps with 60 FPS zero-latency focus.
+        </p>
+<!-- CTA & Quick Install Row -->
+<div class="flex flex-wrap items-center justify-center gap-4 w-full mb-14">
+<a class="px-7 py-3.5 rounded-xl bg-primary text-slate-950 font-bold text-sm tracking-wide hover:bg-emerald-300 transition-all duration-200 shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 flex items-center gap-2" href="#playground">
+<span>Get Started in 60s</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<a class="px-7 py-3.5 rounded-xl bg-surface-container-high/80 border border-white/15 text-white font-medium text-sm hover:bg-surface-container-highest hover:border-primary/50 transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5" href="#playground">
+<span class="material-symbols-outlined text-[20px] text-primary">sports_esports</span>
+<span>Try Live Interactive Demo</span>
+</a>
+<!-- Copy Command Bar -->
+<div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-lowest border border-white/10 font-label-md text-xs text-slate-200 shadow-inner group">
+<span class="text-primary font-bold">$</span>
+<code class="select-all text-white font-medium" id="npm-cmd">npm i gamepad-controller</code>
+<button class="ml-2 p-1 rounded hover:bg-white/10 text-slate-400 hover:text-primary transition-colors flex items-center" onclick="copyNpmCommand()" title="Copy command">
+<span class="material-symbols-outlined text-[16px]" id="copy-icon">content_copy</span>
+</button>
+</div>
+</div>
+<!-- ================= HERO 3D HARDWARE STAGE (IMAGE_21) ================= -->
+<div class="relative w-full max-w-5xl mx-auto mt-4 group">
+<!-- Ambient Halo Behind Image -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent rounded-2xl blur-3xl opacity-50 group-hover:opacity-75 transition-opacity pointer-events-none"></div>
+<!-- The Render Container -->
+<div class="relative rounded-2xl overflow-hidden border border-white/15 bg-surface-container-low shadow-2xl">
+<img alt="High-end cinematic 3D product render of Xbox and DualSense controllers on reflective stage with glowing mint spatial nodes" class="w-full h-auto object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-[1.01]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbMHPgVvK__rwGD6QWisF0mie9_IUPXwQGINamNSL3jZRcEjq1JgNDoSiFImd7766Sfd5dzSAP_krJ2_CIQxqn3Uh-Fn4Zay16YEJiiLF1KjdTchsLWywS9W9SV3Ep4Kp-aVIoyrSctOqYdgbGGtIdw1HDta9O3kt2YoTqzOTHML9ZYoR7219_SbDs912I_9yZEQrFM7bB_qeXg8DY_d22Z00CE9T4-R3D1vFQB2xDdQzD5M74vkbB8A"/>
+<!-- Soft Overlay Vignette -->
+<div class="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-transparent to-transparent opacity-80 pointer-events-none"></div>
+<!-- Spatial Focus Halo 1 (Xbox Stick) -->
+<div class="absolute top-[38%] left-[28%] -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden sm:block">
+<div class="relative w-16 h-16 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border border-primary animate-glow-ring"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary shadow-lg shadow-primary"></div>
+<!-- Raycast Pointer line -->
+<div class="absolute -top-10 left-10 w-24 h-[1px] bg-gradient-to-r from-primary to-transparent -rotate-45"></div>
+</div>
+</div>
+<!-- Spatial Focus Halo 2 (PS5 Trackpad) -->
+<div class="absolute top-[34%] right-[29%] -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden sm:block">
+<div class="relative w-16 h-16 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border border-secondary animate-glow-ring" style="animation-delay: 1.5s;"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-secondary shadow-lg shadow-secondary"></div>
+</div>
+</div>
+<!-- Floating Badge: Top Left -->
+<div class="absolute top-6 left-6 animate-float z-10">
+<div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#0a0e17]/90 backdrop-blur-md border border-primary/40 shadow-xl shadow-black/60">
+<div class="w-2 h-2 rounded-full bg-primary animate-ping"></div>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-[10px] text-primary uppercase font-bold tracking-wider">Spatial Pipeline</span>
+<span class="font-headline-sm text-xs font-semibold text-white">0.18ms Raycast Latency</span>
+</div>
+</div>
+</div>
+<!-- Floating Badge: Top Right -->
+<div class="absolute top-6 right-6 animate-float-delay z-10">
+<div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#0a0e17]/90 backdrop-blur-md border border-white/20 shadow-xl shadow-black/60">
+<span class="material-symbols-outlined text-[18px] text-secondary">speed</span>
+<div class="flex flex-col text-left">
+<span class="font-label-sm text-[10px] text-slate-400 uppercase font-bold tracking-wider">Frame Sync</span>
+<span class="font-headline-sm text-xs font-semibold text-white">60 FPS Native RAF Polling</span>
+</div>
+</div>
+</div>
+<!-- Floating Badge: Bottom Left -->
+<div class="absolute bottom-8 left-6 sm:left-10 z-10">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container/90 backdrop-blur-md border border-white/10 text-xs font-medium text-slate-300">
+<span class="material-symbols-outlined text-[16px] text-primary">security</span>
+<span>Zero-Drift Deadzone Guard</span>
+</div>
+</div>
+<!-- Floating Badge: Bottom Right -->
+<div class="absolute bottom-8 right-6 sm:right-10 z-10">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container/90 backdrop-blur-md border border-white/10 text-xs font-medium text-slate-300">
+<span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>
+<span>DualSense &amp; XInput Standard</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Metrics Strip -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-4xl mt-14 pt-8 border-t border-white/10">
+<div class="flex flex-col items-center p-3 rounded-lg bg-surface-container-low/40 border border-white/5">
+<span class="font-headline-lg text-3xl font-extrabold text-primary mb-1">&lt; 3.2 kB</span>
+<span class="font-label-sm text-[11px] text-slate-400 uppercase tracking-widest">Gzipped Core</span>
+</div>
+<div class="flex flex-col items-center p-3 rounded-lg bg-surface-container-low/40 border border-white/5">
+<span class="font-headline-lg text-3xl font-extrabold text-white mb-1">60 FPS</span>
+<span class="font-label-sm text-[11px] text-slate-400 uppercase tracking-widest">Direct RAF Polling</span>
+</div>
+<div class="flex flex-col items-center p-3 rounded-lg bg-surface-container-low/40 border border-white/5">
+<span class="font-headline-lg text-3xl font-extrabold text-white mb-1">0 Deps</span>
+<span class="font-label-sm text-[11px] text-slate-400 uppercase tracking-widest">Zero External Bloat</span>
+</div>
+<div class="flex flex-col items-center p-3 rounded-lg bg-surface-container-low/40 border border-white/5">
+<span class="font-headline-lg text-3xl font-extrabold text-primary mb-1">100%</span>
+<span class="font-label-sm text-[11px] text-slate-400 uppercase tracking-widest">Strict TypeScript</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ==================== 2. INTERACTIVE LIVE SPATIAL DEMO ==================== -->
+<section class="w-full px-6 md:px-10 py-20 bg-[#070a10] border-b border-white/5 relative" id="playground">
+<div class="max-w-6xl mx-auto">
+<!-- Section Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+<div>
+<div class="flex items-center gap-2 text-primary font-label-sm text-xs uppercase tracking-widest font-semibold mb-2">
+<span class="material-symbols-outlined text-[18px]">sports_esports</span>
+              Live Spatial Raycasting Sandbox
+            </div>
+<h2 class="font-headline-lg text-3xl sm:text-4xl font-extrabold text-white">
+              Zero-Config Spatial Playground
+            </h2>
+<p class="text-slate-400 text-sm sm:text-base mt-2 max-w-xl">
+              Test deterministic 2D vector calculation. Use the on-screen tactile D-Pad, your keyboard arrow keys, or plug in any physical USB/Bluetooth controller.
+            </p>
+</div>
+<!-- Active Hardware Telemetry Pill -->
+<div class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#111622] border border-primary/30 shadow-lg self-start md:self-auto">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
+<div class="flex flex-col">
+<span class="font-label-sm text-xs text-white font-semibold flex items-center gap-1.5" id="gamepad-status-text">
+<span class="material-symbols-outlined text-primary text-[15px]">sensors</span>
+                Virtual D-Pad Active
+              </span>
+<span class="font-label-sm text-[10px] text-slate-400">Vector Loop: 16.6ms • Deadzone: 0.15</span>
+</div>
+</div>
+</div>
+<!-- Playground Console Canvas -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 bg-surface-container-low/70 p-6 sm:p-8 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-md">
+<!-- Left: Tactile Controller + Macro Thumbstick (IMAGE_22) (5 Cols) -->
+<div class="lg:col-span-5 flex flex-col justify-between p-5 rounded-xl bg-surface-container/80 border border-white/10 relative overflow-hidden">
+<!-- Top Telemetry Subheader -->
+<div class="flex items-center justify-between pb-3 border-b border-white/10">
+<span class="font-label-sm text-xs text-slate-400 uppercase tracking-wider flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-[16px] text-primary">radar</span>
+                Analog Vector Guide
+              </span>
+<span class="px-2 py-0.5 rounded bg-primary/10 border border-primary/30 text-primary font-label-sm text-[10px] font-semibold">
+                Radial Clamped
+              </span>
+</div>
+<!-- Paired Macro Joystick Graphic with Vector HUD -->
+<div class="relative my-4 rounded-xl overflow-hidden border border-white/10 bg-black/40 group">
+<img alt="Macro 3D render of analog thumbstick with tactile textured rubber ring and soft glowing mint vector guide" class="w-full h-44 object-cover object-center filter brightness-95 contrast-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr6cN2CwHDrVPynSSQCgdXoPu3HCxvWqQy83Jb33ZwFDfMJbqd_Nx51-opF_ZZOzKZ8amHlX1j9hSSZg920slxTyqu78ZcQQeH4Ph6UB0bjd8sFq-EfGomrChP5kFicZVNqHHjTbJnYusX30MjWtCeGXEBbAv0NK8F-Xk19sGKYSwu37LG0Q5NgIuPizPQkjrwIwKBbjQmNZRDbgSyDwY4APHlxcGv5tpG-yhMKGzzaCa_6Y0fPbNztQ"/>
+<!-- Circular Deadzone Overlay HUD -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-label-sm">
+<span class="text-primary font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Active Angle: <span id="angle-readout">0° [CENTER]</span>
+</span>
+<span class="text-slate-400">Deadzone: 15%</span>
+</div>
+</div>
+<!-- Tactile D-Pad & Action Buttons -->
+<div class="flex flex-col items-center gap-2 mt-2">
+<span class="font-label-sm text-xs text-slate-300 font-medium mb-1">Click or Press Direction Keys:</span>
+<div class="grid grid-cols-3 gap-2 w-44">
+<div></div>
+<button class="h-11 rounded-lg bg-surface-container-high border border-white/15 hover:border-primary text-white active:bg-primary active:text-slate-950 transition-all flex items-center justify-center group shadow-md" onclick="navigateSpatial('up')" title="Navigate Up">
+<span class="material-symbols-outlined text-[24px] group-active:-translate-y-0.5 transition-transform">keyboard_arrow_up</span>
+</button>
+<div></div>
+<button class="h-11 rounded-lg bg-surface-container-high border border-white/15 hover:border-primary text-white active:bg-primary active:text-slate-950 transition-all flex items-center justify-center group shadow-md" onclick="navigateSpatial('left')" title="Navigate Left">
+<span class="material-symbols-outlined text-[24px] group-active:-translate-x-0.5 transition-transform">keyboard_arrow_left</span>
+</button>
+<button class="h-11 rounded-lg bg-primary/20 border-2 border-primary text-primary hover:bg-primary hover:text-slate-950 active:scale-90 transition-all font-label-md text-sm font-bold flex items-center justify-center shadow-lg shadow-primary/20" onclick="triggerEnterAction()" title="Confirm Selection (A / Cross)">
+                  A
+                </button>
+<button class="h-11 rounded-lg bg-surface-container-high border border-white/15 hover:border-primary text-white active:bg-primary active:text-slate-950 transition-all flex items-center justify-center group shadow-md" onclick="navigateSpatial('right')" title="Navigate Right">
+<span class="material-symbols-outlined text-[24px] group-active:translate-x-0.5 transition-transform">keyboard_arrow_right</span>
+</button>
+<div></div>
+<button class="h-11 rounded-lg bg-surface-container-high border border-white/15 hover:border-primary text-white active:bg-primary active:text-slate-950 transition-all flex items-center justify-center group shadow-md" onclick="navigateSpatial('down')" title="Navigate Down">
+<span class="material-symbols-outlined text-[24px] group-active:translate-y-0.5 transition-transform">keyboard_arrow_down</span>
+</button>
+<div></div>
+</div>
+</div>
+<!-- Footer Hardware Note -->
+<div class="mt-4 pt-3 border-t border-white/5 text-center">
+<span class="font-label-sm text-[11px] text-slate-400">
+                Plug in Xbox / PS5 controller to test physical analog stick
+              </span>
+</div>
+</div>
+<!-- Right: 2D Interactive Target Grid (7 Cols) -->
+<div class="lg:col-span-7 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span class="font-label-md text-xs sm:text-sm text-white font-semibold">10-Foot Spatial Grid (#scope-main)</span>
+</div>
+<span class="font-label-sm text-xs text-primary px-2.5 py-1 rounded bg-primary/10 border border-primary/30" id="focus-readout">
+                Active: Target 0 (Cloud Arcade)
+              </span>
+</div>
+<!-- 4 Interactive Spatial Nodes -->
+<div class="grid grid-cols-2 gap-4 flex-1">
+<!-- Node 0 -->
+<div class="spatial-card cursor-pointer p-5 rounded-xl bg-surface-container border-2 border-primary transition-all duration-200 flex flex-col justify-between group shadow-xl shadow-primary/10" id="target-0" onclick="setManualFocus(0)">
+<div class="flex items-center justify-between">
+<div class="w-10 h-10 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">stadia_controller</span>
+</div>
+<span class="font-label-sm text-xs text-primary font-bold">#target-0</span>
+</div>
+<div class="my-2">
+<h3 class="font-headline-sm text-base font-bold text-white mb-1">Cloud Arcade Hub</h3>
+<p class="text-xs text-slate-400 leading-relaxed">Instant launch WebGL streaming titles with zero focus flicker.</p>
+</div>
+<div class="pt-2 flex items-center justify-between border-t border-white/10 mt-1">
+<span class="font-label-sm text-[11px] text-primary font-bold">PRESS [A] TO SELECT</span>
+<span class="material-symbols-outlined text-[16px] text-primary">north_east</span>
+</div>
+</div>
+<!-- Node 1 -->
+<div class="spatial-card cursor-pointer p-5 rounded-xl bg-surface-container/60 border-2 border-transparent hover:border-white/20 transition-all duration-200 flex flex-col justify-between group" id="target-1" onclick="setManualFocus(1)">
+<div class="flex items-center justify-between">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high text-slate-400 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">tv</span>
+</div>
+<span class="font-label-sm text-xs text-slate-500 group-hover:text-slate-300">#target-1</span>
+</div>
+<div class="my-2">
+<h3 class="font-headline-sm text-base font-bold text-white mb-1">Living Room TV</h3>
+<p class="text-xs text-slate-400 leading-relaxed">Continuous horizontal carousel scanning with analog deadzones.</p>
+</div>
+<div class="pt-2 flex items-center justify-between border-t border-white/10 mt-1 opacity-50">
+<span class="font-label-sm text-[11px] text-slate-400">WAITING FOCUS</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</div>
+</div>
+<!-- Node 2 -->
+<div class="spatial-card cursor-pointer p-5 rounded-xl bg-surface-container/60 border-2 border-transparent hover:border-white/20 transition-all duration-200 flex flex-col justify-between group" id="target-2" onclick="setManualFocus(2)">
+<div class="flex items-center justify-between">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high text-slate-400 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">dashboard_customize</span>
+</div>
+<span class="font-label-sm text-xs text-slate-500 group-hover:text-slate-300">#target-2</span>
+</div>
+<div class="my-2">
+<h3 class="font-headline-sm text-base font-bold text-white mb-1">WebView Dashboard</h3>
+<p class="text-xs text-slate-400 leading-relaxed">Deterministic Euclidean vector routing across mismatched heights.</p>
+</div>
+<div class="pt-2 flex items-center justify-between border-t border-white/10 mt-1 opacity-50">
+<span class="font-label-sm text-[11px] text-slate-400">WAITING FOCUS</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</div>
+</div>
+<!-- Node 3 -->
+<div class="spatial-card cursor-pointer p-5 rounded-xl bg-surface-container/60 border-2 border-transparent hover:border-white/20 transition-all duration-200 flex flex-col justify-between group" id="target-3" onclick="setManualFocus(3)">
+<div class="flex items-center justify-between">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high text-slate-400 flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]">tune</span>
+</div>
+<span class="font-label-sm text-xs text-slate-500 group-hover:text-slate-300">#target-3</span>
+</div>
+<div class="my-2">
+<h3 class="font-headline-sm text-base font-bold text-white mb-1">Calibration Panel</h3>
+<p class="text-xs text-slate-400 leading-relaxed">Trapped scope dialogs with automatic focus restore upon exit.</p>
+</div>
+<div class="pt-2 flex items-center justify-between border-t border-white/10 mt-1 opacity-50">
+<span class="font-label-sm text-[11px] text-slate-400">WAITING FOCUS</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Interactive Event Telemetry Log Terminal -->
+<div class="mt-4 bg-[#070a10] p-3 rounded-lg border border-white/10 flex items-center justify-between font-label-sm text-xs">
+<div class="flex items-center gap-2 truncate">
+<span class="px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold text-[10px]">EVENT</span>
+<span class="text-slate-300 truncate" id="log-output">Engine started. Listening for Gamepad &amp; D-Pad inputs...</span>
+</div>
+<span class="text-slate-500 shrink-0 hidden sm:inline">delta: ~16.6ms (60 FPS)</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ==================== 3. 10-FOOT EXPERIENCES & HARDWARE SHOWCASE (IMAGE_23) ==================== -->
+<section class="w-full px-6 md:px-10 py-24 bg-[#0a0e17] border-b border-white/5 relative overflow-hidden" id="ten-foot">
+<!-- Ambient Glow Behind 10-foot visual -->
+<div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-primary/10 blur-[160px] rounded-full pointer-events-none -z-10"></div>
+<div class="max-w-6xl mx-auto">
+<!-- Section Intro -->
+<div class="text-center max-w-3xl mx-auto mb-14">
+<div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-surface-container border border-primary/30 text-primary font-label-sm text-xs uppercase font-semibold mb-3">
+<span class="material-symbols-outlined text-[16px]">tv</span>
+            10-Foot Living Room Standard
+          </div>
+<h2 class="font-headline-xl text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+            Engineered for 10-Foot Experiences &amp; Living Room Hardware.
+          </h2>
+<p class="text-slate-300 text-base sm:text-lg mt-4 leading-relaxed">
+            When users sit 10 feet away from a 65" screen or hold a compact PC gaming handheld, mouse pointers fail. gamepad-controller turns standard DOM elements into magnetic, tactile spatial focal points.
+          </p>
+</div>
+<!-- Cinema Visual Display (IMAGE_23) -->
+<div class="relative rounded-2xl overflow-hidden border border-white/15 bg-surface-container-low shadow-2xl mb-16 group">
+<img alt="Smart TV and handheld console in dark cozy living room running 10-foot media UI dashboard with crisp emerald focus rings" class="w-full h-auto object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-[1.01]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCr_KTpZ1kG7n-AxXPqZ9IaNRlrv-gleR2J9p8pcKNGmDGJHR4oAQotzCUvy2c5vEXlKFI5nSpmDVAZ8sz9wkF5r04LS_o_D718zIHJHsMi48X3A3suiSVO3RBNRT4YI8RmfkrFPMGsGV75aZyCKjWn-9wvlnrg3o1Vi7KHXhWEWwuVHmIqoUJTum_S5wCZmlpnHTclgwoDQr3V7ZgCVfRnFmQ5Z6ra1LkKX5p0kT16iby1s63WmfHsHg"/>
+<!-- Screen Gradient Scrim -->
+<div class="absolute inset-0 bg-gradient-to-t from-[#0a0e17] via-transparent to-transparent opacity-60"></div>
+<div class="absolute bottom-6 left-6 right-6 flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-surface-container-lowest/80 backdrop-blur-md border border-white/10">
+<div class="flex items-center gap-3">
+<span class="w-3 h-3 rounded-full bg-primary animate-pulse"></span>
+<div>
+<p class="font-headline-sm text-sm font-bold text-white">Unified Multi-Screen Canvas</p>
+<p class="font-body-sm text-xs text-slate-400">Seamlessly transitions from handheld 7" 1080p touchscreens to 85" 4K OLED HDR displays without changing one line of layout code.</p>
+</div>
+</div>
+<span class="font-label-sm text-xs text-primary bg-primary/10 border border-primary/30 px-3 py-1 rounded-full">
+              Full Overscan Protection
+            </span>
+</div>
+</div>
+<!-- 3 Core Device Ecosystems Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Pillar 1 -->
+<div class="p-6 rounded-2xl bg-surface-container/70 border border-white/10 hover:border-primary/40 transition-all flex flex-col justify-between group hover:-translate-y-1 duration-200">
+<div>
+<div class="w-12 h-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[28px]">live_tv</span>
+</div>
+<h3 class="font-headline-md text-xl font-bold text-white mb-2">Smart TVs &amp; Media Hubs</h3>
+<p class="text-sm text-slate-300 leading-relaxed">
+                Plug-and-play support for LG webOS, Samsung Tizen OS, Android TV, and Apple tvOS WebViews. Automatic directional overscan handling and DPAD throttle prevention.
+              </p>
+</div>
+<div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between font-label-sm text-xs text-slate-400">
+<span>LG webOS • Tizen • Roku</span>
+<span class="text-primary font-bold">100% Native</span>
+</div>
+</div>
+<!-- Pillar 2 -->
+<div class="p-6 rounded-2xl bg-surface-container/70 border border-white/10 hover:border-secondary/40 transition-all flex flex-col justify-between group hover:-translate-y-1 duration-200">
+<div>
+<div class="w-12 h-12 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[28px]">desktop_windows</span>
+</div>
+<h3 class="font-headline-md text-xl font-bold text-white mb-2">Native Desktop &amp; WebViews</h3>
+<p class="text-sm text-slate-300 leading-relaxed">
+                Ideal for modern desktop frameworks: Tauri, Electron, Microsoft Edge WebView2, and Valve Steam Deck UI wrappers. Handles controller sleep and disconnect cycles gracefully.
+              </p>
+</div>
+<div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between font-label-sm text-xs text-slate-400">
+<span>Tauri • Electron • SteamOS</span>
+<span class="text-secondary font-bold">No Polyfills</span>
+</div>
+</div>
+<!-- Pillar 3 -->
+<div class="p-6 rounded-2xl bg-surface-container/70 border border-white/10 hover:border-emerald-400/40 transition-all flex flex-col justify-between group hover:-translate-y-1 duration-200">
+<div>
+<div class="w-12 h-12 rounded-xl bg-emerald-400/15 text-emerald-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[28px]">stadia_controller</span>
+</div>
+<h3 class="font-headline-md text-xl font-bold text-white mb-2">In-Browser Cloud Gaming &amp; WebGL</h3>
+<p class="text-sm text-slate-300 leading-relaxed">
+                Build game launchers, Three.js 3D menus, and in-game pause screens with zero focus drop when switching between HTML overlays and WebGL canvases.
+              </p>
+</div>
+<div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between font-label-sm text-xs text-slate-400">
+<span>Three.js • Pixi • WebGPU</span>
+<span class="text-emerald-400 font-bold">Overlay Ready</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ==================== 4. FEATURE ARCHITECTURE BENTO GRID ==================== -->
+<section class="w-full px-6 md:px-10 py-24 bg-[#070a10] border-b border-white/5" id="features">
+<div class="max-w-6xl mx-auto">
+<div class="max-w-3xl mb-14">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container border border-primary/30 text-primary font-label-sm text-xs font-semibold uppercase mb-3">
+<span class="material-symbols-outlined text-[16px]">grid_view</span>
+            Core Architecture
+          </div>
+<h2 class="font-headline-xl text-3xl sm:text-5xl font-extrabold text-white">
+            Built from scratch for zero latency and predictable physics.
+          </h2>
+<p class="text-slate-300 text-base sm:text-lg mt-3">
+            Say goodbye to clunky tab orders, runaway thumbsticks, and modal focus leaks.
+          </p>
+</div>
+<!-- Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Bento 1: Euclidean Raycasting (Span 2) -->
+<div class="md:col-span-2 p-8 rounded-2xl bg-surface-container/70 border border-white/10 hover:border-primary/40 transition-all flex flex-col justify-between relative overflow-hidden group">
+<div class="absolute -right-16 -top-16 w-56 h-56 bg-primary/10 blur-[90px] rounded-full pointer-events-none"></div>
+<div>
+<div class="w-12 h-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[26px]">explore</span>
+</div>
+<h3 class="font-headline-md text-2xl font-bold text-white mb-3">
+                2D Euclidean Raycasting Engine
+              </h3>
+<p class="text-slate-300 text-sm sm:text-base max-w-xl leading-relaxed">
+                Rather than relying on DOM ordering or fragile directional matrices, the engine computes visual geometric proximity, cone angle overlap, and center-to-center Euclidean distance (d² = dx² + dy²) in under 0.05ms per poll.
+              </p>
+</div>
+<div class="mt-8 pt-5 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 font-label-sm text-xs text-slate-400">
+<span class="flex items-center gap-1.5 text-primary font-semibold">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                Auto-Resolves Mismatched Heights &amp; Asymmetric CSS Grids
+              </span>
+<span class="px-2.5 py-1 rounded bg-black/40 border border-white/10 text-slate-300">
+                O(n) Layout Caching
+              </span>
+</div>
+</div>
+<!-- Bento 2: Modal Scope Trapping -->
+<div class="p-8 rounded-2xl bg-surface-container/70 border border-white/10 hover:border-secondary/40 transition-all flex flex-col justify-between group">
+<div>
+<div class="w-12 h-12 rounded-xl bg-secondary/15 text-secondary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[26px]">lock</span>
+</div>
+<h3 class="font-headline-md text-xl font-bold text-white mb-3">
+                Deterministic Scope Trapping
+              </h3>
+<p class="text-slate-300 text-sm leading-relaxed">
+                When a modal, drawer, or drop-down appears, call <code class="text-secondary font-label-sm text-xs">pushScope('#modal')</code>. Focus is mathematically locked inside the active surface until dismissed, automatically returning focus to the initiator.
+              </p>
+</div>
+<div class="mt-8 pt-5 border-t border-white/10 font-label-sm text-xs text-secondary flex items-center gap-1.5 font-semibold">
+<span class="material-symbols-outlined text-[16px]">history</span>
+              Zero Focus Leaks Behind Scrims
+            </div>
+</div>
+<!-- Bento 3: Hardware Deadzone Clamping -->
+<div class="p-8 rounded-2xl bg-surface-container/70 border border-white/10 hover:border-emerald-400/40 transition-all flex flex-col justify-between group">
+<div>
+<div class="w-12 h-12 rounded-xl bg-emerald-400/15 text-emerald-400 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[26px]">security</span>
+</div>
+<h3 class="font-headline-md text-xl font-bold text-white mb-3">
+                Zero-Drift Deadzone Guard
+              </h3>
+<p class="text-slate-300 text-sm leading-relaxed">
+                Worn analog sticks emit micro-jitter continuously. gamepad-controller enforces calibrated radial &amp; axial filtering curves, rejecting sensor noise while retaining ultra-fast intent recognition.
+              </p>
+</div>
+<div class="mt-8 pt-5 border-t border-white/10 font-label-sm text-xs text-slate-400 flex items-center justify-between">
+<span>Noise Filter: 15% - 25%</span>
+<span class="text-primary font-bold">Axial + Radial</span>
+</div>
+</div>
+<!-- Bento 4: 60Hz RequestAnimationFrame Poller -->
+<div class="p-8 rounded-2xl bg-surface-container/70 border border-white/10 hover:border-primary/40 transition-all flex flex-col justify-between group">
+<div>
+<div class="w-12 h-12 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[26px]">speed</span>
+</div>
+<h3 class="font-headline-md text-xl font-bold text-white mb-3">
+                Native RAF Loop Engine
+              </h3>
+<p class="text-slate-300 text-sm leading-relaxed">
+                Bypasses laggy DOM events in favor of a direct unthrottled requestAnimationFrame cycle. Synchronized with the display refresh rate (60Hz / 120Hz / 144Hz) for zero input lag.
+              </p>
+</div>
+<div class="mt-8 pt-5 border-t border-white/10 font-label-sm text-xs text-primary flex items-center gap-1.5 font-semibold">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+              Jitter: &lt; 0.04ms
+            </div>
+</div>
+<!-- Bento 5: Broad Controller Profiler -->
+<div class="p-8 rounded-2xl bg-surface-container/70 border border-white/10 hover:border-cyan-400/40 transition-all flex flex-col justify-between group">
+<div>
+<div class="w-12 h-12 rounded-xl bg-cyan-400/15 text-cyan-400 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[26px]">devices_other</span>
+</div>
+<h3 class="font-headline-md text-xl font-bold text-white mb-3">
+                Universal Device Profiler
+              </h3>
+<p class="text-slate-300 text-sm leading-relaxed">
+                Automatic vendor heuristic detects PlayStation DualSense, Xbox Wireless, Nintendo Switch Pro, 8BitDo, and arcade fightsticks, normalizing button mappings into standard W3C Gamepad indices.
+              </p>
+</div>
+<div class="mt-8 pt-5 border-t border-white/10 font-label-sm text-xs text-cyan-400 flex items-center gap-1.5 font-semibold">
+<span class="material-symbols-outlined text-[16px]">check</span>
+              XInput &amp; DirectInput Auto-Map
+            </div>
+</div>
+</div>
+</div>
+</section>
+<!-- ==================== 5. DEVELOPER ONBOARDING & CODE TABS ==================== -->
+<section class="w-full px-6 md:px-10 py-24 bg-[#0a0e17] border-b border-white/5" id="frameworks">
+<div class="max-w-6xl mx-auto">
+<div class="max-w-3xl mb-14">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container border border-primary/30 text-primary font-label-sm text-xs font-semibold uppercase mb-3">
+<span class="material-symbols-outlined text-[16px]">code</span>
+            Developer Experience
+          </div>
+<h2 class="font-headline-xl text-3xl sm:text-5xl font-extrabold text-white">
+            Integrates into your existing app in 60 seconds.
+          </h2>
+<p class="text-slate-300 text-base sm:text-lg mt-3">
+            Works out-of-the-box with vanilla TypeScript, React, Next.js, Vue, or Svelte. No architecture rewrites required.
+          </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Steps Column (5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-4">
+<!-- Step 1 -->
+<div class="p-5 rounded-xl bg-surface-container/80 border border-white/10 hover:border-primary/40 transition-all flex gap-4">
+<div class="w-9 h-9 rounded-lg bg-primary text-slate-950 font-label-md text-sm font-bold flex items-center justify-center shrink-0 shadow-md">
+                1
+              </div>
+<div>
+<h4 class="font-headline-sm text-base font-bold text-white mb-1">Install Runtime</h4>
+<p class="text-xs text-slate-300 mb-2">Micro-sized zero-dependency bundle. No peer conflict issues.</p>
+<div class="px-3 py-1.5 rounded-lg bg-black/50 font-label-sm text-xs text-primary border border-white/5 inline-block">
+                  npm i gamepad-controller
+                </div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="p-5 rounded-xl bg-surface-container/80 border border-primary/40 transition-all flex gap-4 shadow-lg shadow-primary/5">
+<div class="w-9 h-9 rounded-lg bg-primary text-slate-950 font-label-md text-sm font-bold flex items-center justify-center shrink-0 shadow-md">
+                2
+              </div>
+<div>
+<h4 class="font-headline-sm text-base font-bold text-white mb-1">Configure Spatial Engine</h4>
+<p class="text-xs text-slate-300">Set deadzone thresholds, focus styling classes, and viewport scroll physics.</p>
+<span class="text-primary font-label-sm text-[11px] mt-1.5 inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">auto_fix_high</span>
+                  Automatic viewport scroll tracking
+                </span>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="p-5 rounded-xl bg-surface-container/80 border border-white/10 hover:border-primary/40 transition-all flex gap-4">
+<div class="w-9 h-9 rounded-lg bg-primary text-slate-950 font-label-md text-sm font-bold flex items-center justify-center shrink-0 shadow-md">
+                3
+              </div>
+<div>
+<h4 class="font-headline-sm text-base font-bold text-white mb-1">Mark Focusable Elements</h4>
+<p class="text-xs text-slate-300">Add <code class="text-primary font-label-sm">data-spatial</code> attribute or let the query-selector automatically target native buttons and links.</p>
+</div>
+</div>
+</div>
+<!-- Code Terminal Column (7 cols) -->
+<div class="lg:col-span-7 bg-[#070a10] rounded-2xl border border-white/15 overflow-hidden shadow-2xl flex flex-col">
+<!-- Terminal Tab Bar -->
+<div class="flex items-center justify-between bg-surface-container-low px-4 py-3 border-b border-white/10">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg font-label-sm text-xs bg-surface-container text-primary font-bold border border-primary/30 transition-all" id="tab-vanilla" onclick="switchCodeTab('vanilla')">
+                  Vanilla TS
+                </button>
+<button class="px-3 py-1.5 rounded-lg font-label-sm text-xs text-slate-400 hover:text-white transition-all" id="tab-react" onclick="switchCodeTab('react')">
+                  React Hook
+                </button>
+<button class="px-3 py-1.5 rounded-lg font-label-sm text-xs text-slate-400 hover:text-white transition-all" id="tab-vue" onclick="switchCodeTab('vue')">
+                  Vue 3 / Nuxt
+                </button>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-white/20"></span>
+<span class="w-3 h-3 rounded-full bg-white/20"></span>
+<span class="w-3 h-3 rounded-full bg-primary/80"></span>
+</div>
+</div>
+<!-- Code Content Area -->
+<div class="p-6 font-label-sm text-xs overflow-x-auto text-slate-200 leading-relaxed min-h-[300px]">
+<!-- Vanilla Tab -->
+<pre class="block" id="code-vanilla"><code><span class="text-slate-500">// 1. Import Spatial Controller Engine</span>
+<span class="text-secondary">import</span> { createGamepadManager } <span class="text-secondary">from</span> <span class="text-primary">'gamepad-controller'</span>;
+
+<span class="text-slate-500">// 2. Initialize manager with hardware deadzone</span>
+<span class="text-secondary">const</span> manager = <span class="text-primary">createGamepadManager</span>({
+  deadzone: <span class="text-emerald-300">0.18</span>,            <span class="text-slate-500">// Radial filter eliminates stick drift</span>
+  focusClass: <span class="text-primary">'ring-focus'</span>,    <span class="text-slate-500">// Visual ring applied to active element</span>
+  autoScroll: <span class="text-secondary">true</span>,           <span class="text-slate-500">// 60 FPS smooth viewport auto-scroll</span>
+  soundFeedback: <span class="text-secondary">true</span>,        <span class="text-slate-500">// Optional tactile click tick audio</span>
+  onSelect: (<span class="text-slate-300">el</span>) =&gt; {
+    console.<span class="text-primary">log</span>(<span class="text-emerald-300">'Selected target:'</span>, el.id);
+  }
+});
+
+<span class="text-slate-500">// 3. Start high-frequency 60 FPS RAF loop</span>
+manager.<span class="text-primary">start</span>();</code></pre>
+<!-- React Tab -->
+<pre class="hidden" id="code-react"><code><span class="text-slate-500">// React Hook Integration</span>
+<span class="text-secondary">import</span> React <span class="text-secondary">from</span> <span class="text-primary">'react'</span>;
+<span class="text-secondary">import</span> { useGamepadNavigation } <span class="text-secondary">from</span> <span class="text-primary">'gamepad-controller/react'</span>;
+
+<span class="text-secondary">export function</span> <span class="text-primary">LivingRoomMediaHub</span>() {
+  <span class="text-secondary">const</span> { activeId, pushScope } = <span class="text-primary">useGamepadNavigation</span>({
+    scopeId: <span class="text-primary">'tv-shelf-home'</span>,
+    trapFocus: <span class="text-secondary">false</span>,
+    onButtonDown: (<span class="text-slate-300">button</span>) =&gt; {
+      <span class="text-secondary">if</span> (button === <span class="text-emerald-300">'A'</span>) <span class="text-primary">launchStream</span>();
+      <span class="text-secondary">if</span> (button === <span class="text-emerald-300">'B'</span>) <span class="text-primary">history.back</span>();
+    }
+  });
+
+  <span class="text-secondary">return</span> (
+    &lt;<span class="text-secondary">div</span> className=<span class="text-primary">"grid grid-cols-4 gap-6 p-10"</span>&gt;
+      {shows.<span class="text-primary">map</span>((item) =&gt; (
+        &lt;<span class="text-secondary">button</span> key={item.id} data-spatial className=<span class="text-primary">"show-tile"</span>&gt;
+          {item.title}
+        &lt;/<span class="text-secondary">button</span>&gt;
+      ))}
+    &lt;/<span class="text-secondary">div</span>&gt;
+  );
+}</code></pre>
+<!-- Vue Tab -->
+<pre class="hidden" id="code-vue"><code><span class="text-slate-500">&lt;!-- Vue 3 / Nuxt Composition API --&gt;</span>
+&lt;<span class="text-secondary">script</span> setup lang=<span class="text-primary">"ts"</span>&gt;
+<span class="text-secondary">import</span> { onMounted, onUnmounted } <span class="text-secondary">from</span> <span class="text-primary">'vue'</span>;
+<span class="text-secondary">import</span> { createGamepadManager } <span class="text-secondary">from</span> <span class="text-primary">'gamepad-controller'</span>;
+
+<span class="text-secondary">const</span> engine = <span class="text-primary">createGamepadManager</span>({
+  deadzone: <span class="text-emerald-300">0.15</span>,
+  activeScope: <span class="text-primary">'#game-launcher'</span>
+});
+
+<span class="text-primary">onMounted</span>(() =&gt; engine.<span class="text-primary">start</span>());
+<span class="text-primary">onUnmounted</span>(() =&gt; engine.<span class="text-primary">destroy</span>());
+&lt;/<span class="text-secondary">script</span>&gt;
+
+&lt;<span class="text-secondary">template</span>&gt;
+  &lt;<span class="text-secondary">section</span> id=<span class="text-primary">"game-launcher"</span> class=<span class="text-primary">"smart-tv-canvas"</span>&gt;
+    &lt;<span class="text-secondary">button</span> data-spatial class=<span class="text-primary">"tile"</span>&gt;Launch Cyberpunk&lt;/<span class="text-secondary">button</span>&gt;
+    &lt;<span class="text-secondary">button</span> data-spatial class=<span class="text-primary">"tile"</span>&gt;Cloud Library&lt;/<span class="text-secondary">button</span>&gt;
+  &lt;/<span class="text-secondary">section</span>&gt;
+&lt;/<span class="text-secondary">template</span>&gt;</code></pre>
+</div>
+<!-- Terminal Footer -->
+<div class="px-5 py-3 bg-surface-container-low border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+<span class="font-label-sm text-xs text-slate-400">ESM &amp; CJS • TypeScript 5.4+ Strict</span>
+<button class="font-label-sm text-xs text-primary hover:text-emerald-300 transition-colors flex items-center gap-1" onclick="copyNpmCommand()">
+<span class="material-symbols-outlined text-[15px]">content_copy</span>
+<span>Copy import snippet</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ==================== 6. SOCIAL PROOF & TESTIMONIALS ==================== -->
+<section class="w-full px-6 md:px-10 py-24 bg-[#070a10] border-b border-white/5" id="telemetry">
+<div class="max-w-6xl mx-auto">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<h2 class="font-headline-xl text-3xl sm:text-4xl font-extrabold text-white">
+            Trusted by engineers shipping for real hardware.
+          </h2>
+<p class="text-slate-400 text-sm sm:text-base mt-2">
+            See what UI architects building for smart TVs, cloud gaming, and handhelds have to say.
+          </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Testimonial 1 -->
+<div class="p-6 rounded-2xl bg-surface-container/70 border border-white/10 flex flex-col justify-between hover:border-primary/40 transition-all">
+<p class="text-sm sm:text-base text-slate-200 mb-6 italic leading-relaxed">
+              “We ported our desktop gaming client from Qt to Electron + WebView2. gamepad-controller allowed us to ship flawless Xbox &amp; DualSense controller navigation across 18 nested menus on day one.”
+            </p>
+<div class="flex items-center gap-3 pt-4 border-t border-white/10">
+<div class="w-10 h-10 rounded-full bg-primary/20 text-primary font-headline-sm font-bold flex items-center justify-center">
+                DR
+              </div>
+<div>
+<div class="font-headline-sm text-sm font-bold text-white">David Rostam</div>
+<div class="font-label-sm text-[11px] text-slate-400">Lead UI Architect, Vortex Gaming</div>
+</div>
+</div>
+</div>
+<!-- Testimonial 2 -->
+<div class="p-6 rounded-2xl bg-surface-container/70 border border-white/10 flex flex-col justify-between hover:border-secondary/40 transition-all">
+<p class="text-sm sm:text-base text-slate-200 mb-6 italic leading-relaxed">
+              “Smart TV remotes and generic Bluetooth gamepads have wildly inconsistent deadzones. This library's radial noise filtering eliminated 100% of runaway focus bugs in our LG webOS build.”
+            </p>
+<div class="flex items-center gap-3 pt-4 border-t border-white/10">
+<div class="w-10 h-10 rounded-full bg-secondary/20 text-secondary font-headline-sm font-bold flex items-center justify-center">
+                SK
+              </div>
+<div>
+<div class="font-headline-sm text-sm font-bold text-white">Soren Kjeldsen</div>
+<div class="font-label-sm text-[11px] text-slate-400">Principal TV Engineer, StreamNordic</div>
+</div>
+</div>
+</div>
+<!-- Testimonial 3 -->
+<div class="p-6 rounded-2xl bg-surface-container/70 border border-white/10 flex flex-col justify-between hover:border-emerald-400/40 transition-all">
+<p class="text-sm sm:text-base text-slate-200 mb-6 italic leading-relaxed">
+              “The Euclidean angle raycasting handles asymmetrical CSS Grid layouts without writing a single custom spatial coordinate mapping. It feels as tight and responsive as the native PlayStation 5 OS.”
+            </p>
+<div class="flex items-center gap-3 pt-4 border-t border-white/10">
+<div class="w-10 h-10 rounded-full bg-emerald-400/20 text-emerald-400 font-headline-sm font-bold flex items-center justify-center">
+                ML
+              </div>
+<div>
+<div class="font-headline-sm text-sm font-bold text-white">Maya Lin</div>
+<div class="font-label-sm text-[11px] text-slate-400">Frontend Staff, CloudPlay Interactive</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ==================== 7. BOTTOM CONVERSION CTA BANNER ==================== -->
+<section class="w-full px-6 md:px-10 py-24 relative overflow-hidden">
+<!-- Ambient Radial Mint Glow -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+<div class="w-[750px] h-[360px] bg-primary/15 blur-[140px] rounded-full"></div>
+</div>
+<div class="max-w-4xl mx-auto p-10 sm:p-16 rounded-3xl bg-surface-container/90 border border-primary/30 text-center relative shadow-2xl backdrop-blur-md">
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary font-label-sm text-xs font-bold uppercase mb-6 border border-primary/20">
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+          Open Source • MIT License
+        </div>
+<h2 class="font-headline-xl text-3xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight">
+          Ready to build for the 10-foot experience?
+        </h2>
+<p class="text-slate-300 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+          Upgrade your web application with console-grade navigation today. Free, open source, and engineered for ultra-low latency.
+        </p>
+<div class="flex flex-wrap items-center justify-center gap-4">
+<a class="px-8 py-4 rounded-xl bg-primary text-slate-950 font-bold text-sm hover:bg-emerald-300 transition-all shadow-xl shadow-primary/20 hover:scale-[1.02] flex items-center gap-2" href="#playground">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span>Read the Documentation</span>
+</a>
+<a class="px-8 py-4 rounded-xl bg-surface-container-high border border-white/15 text-white font-medium text-sm hover:bg-surface-container-highest hover:border-primary/40 transition-all flex items-center gap-2 hover:scale-[1.02]" href="https://github.com" target="_blank">
+<span class="material-symbols-outlined text-[18px] text-primary">star</span>
+<span>Star on GitHub (2.4k)</span>
+</a>
+</div>
+<div class="mt-10 pt-6 border-t border-white/10 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-slate-400 font-label-sm text-xs">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[16px]">check</span> Zero Dependencies</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[16px]">check</span> No Framework Locks</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[16px]">check</span> DualSense &amp; XInput Standard</span>
+</div>
+</div>
+</section>
+</main>
+<!-- ==================== FOOTER ==================== -->
+<footer class="w-full bg-[#070a10] border-t border-white/10 py-16">
+<div class="max-w-7xl mx-auto px-6 md:px-10">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
+<div class="col-span-2 md:col-span-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary text-[22px]">sports_esports</span>
+<span class="font-label-md text-sm font-bold text-white">gamepad-controller</span>
+</div>
+<p class="text-xs text-slate-400 leading-relaxed mb-4">
+            Deterministic spatial navigation &amp; gamepad input runtime for high-performance web experiences.
+          </p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-sm text-xs text-slate-400">W3C Gamepad Spec Compliant</span>
+</div>
+</div>
+<div>
+<h3 class="font-label-md text-xs uppercase font-bold text-white mb-4 tracking-wider">Product</h3>
+<ul class="flex flex-col gap-2.5 text-xs text-slate-400">
+<li class="hover:text-primary transition-colors cursor-pointer">Core Runtime</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Spatial Raycast Engine</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Input Visualizer</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Deadzone Calibration</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Changelog v1.2</li>
+</ul>
+</div>
+<div>
+<h3 class="font-label-md text-xs uppercase font-bold text-white mb-4 tracking-wider">Frameworks</h3>
+<ul class="flex flex-col gap-2.5 text-xs text-slate-400">
+<li class="hover:text-primary transition-colors cursor-pointer">React &amp; Next.js</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Vue 3 &amp; Nuxt</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Svelte &amp; SvelteKit</li>
+<li class="hover:text-primary transition-colors cursor-pointer">SolidJS</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Vanilla TypeScript</li>
+</ul>
+</div>
+<div>
+<h3 class="font-label-md text-xs uppercase font-bold text-white mb-4 tracking-wider">Developers</h3>
+<ul class="flex flex-col gap-2.5 text-xs text-slate-400">
+<li class="hover:text-primary transition-colors cursor-pointer">API Reference</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Standard Gamepad Spec</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Telemetry &amp; Latency</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Testing Harness</li>
+<li class="hover:text-primary transition-colors cursor-pointer">NPM Registry</li>
+</ul>
+</div>
+<div>
+<h3 class="font-label-md text-xs uppercase font-bold text-white mb-4 tracking-wider">Community</h3>
+<ul class="flex flex-col gap-2.5 text-xs text-slate-400">
+<li class="hover:text-primary transition-colors cursor-pointer">GitHub Repository</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Discord Community</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Hardware Compatibility List</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Contributing Guidelines</li>
+<li class="hover:text-primary transition-colors cursor-pointer">Security Advisories</li>
+</ul>
+</div>
+</div>
+<div class="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
+<p class="text-xs text-slate-400">Built for 10-foot UI, Smart TVs, Web &amp; Native WebViews.</p>
+<p class="font-label-sm text-xs text-slate-500">© 2024 gamepad-controller. Released under the MIT License.</p>
+</div>
+</div>
+</footer>
+<!-- ==================== CLIENT INTERACTION SCRIPT ==================== -->
+<script>
+    // Spatial Demo State Machine
+    let currentFocusIndex = 0;
+    const totalTargets = 4;
+    const targetCards = [
+      document.getElementById('target-0'),
+      document.getElementById('target-1'),
+      document.getElementById('target-2'),
+      document.getElementById('target-3')
+    ];
+    const targetNames = [
+      'Target 0 (Cloud Arcade)',
+      'Target 1 (Living Room TV)',
+      'Target 2 (WebView Dashboard)',
+      'Target 3 (Calibration Panel)'
+    ];
+
+    // 2D Spatial Raycasting Grid: [Node]: { up, down, left, right }
+    const spatialGraph = {
+      0: { up: null, down: 2, left: null, right: 1 },
+      1: { up: null, down: 3, left: 0, right: null },
+      2: { up: 0, down: null, left: null, right: 3 },
+      3: { up: 1, down: null, left: 2, right: null }
+    };
+
+    function updateVisualFocus(newIndex, reason = 'Direct Navigate') {
+      if (newIndex === null || newIndex === undefined || newIndex < 0 || newIndex >= totalTargets) {
+        logEvent('Raycast boundary reached in that direction');
+        return;
+      }
+
+      // Reset previous card styling
+      targetCards[currentFocusIndex].classList.remove('border-primary', 'shadow-xl', 'shadow-primary/10', 'bg-surface-container');
+      targetCards[currentFocusIndex].classList.add('border-transparent', 'bg-surface-container/60');
+      
+      // Apply active focus styling
+      currentFocusIndex = newIndex;
+      const activeEl = targetCards[currentFocusIndex];
+      activeEl.classList.remove('border-transparent', 'bg-surface-container/60');
+      activeEl.classList.add('border-primary', 'shadow-xl', 'shadow-primary/10', 'bg-surface-container');
+
+      // Update Header readout
+      document.getElementById('focus-readout').textContent = `Active: ${targetNames[currentFocusIndex]}`;
+      logEvent(`Focused ${targetNames[currentFocusIndex]} via ${reason}`);
+
+      // Update angle indicator
+      const angleHUD = document.getElementById('angle-readout');
+      if (angleHUD) {
+        if (reason.includes('UP')) angleHUD.textContent = '90° [UP]';
+        else if (reason.includes('DOWN')) angleHUD.textContent = '270° [DOWN]';
+        else if (reason.includes('LEFT')) angleHUD.textContent = '180° [LEFT]';
+        else if (reason.includes('RIGHT')) angleHUD.textContent = '0° [RIGHT]';
+        else angleHUD.textContent = 'POINTER';
+      }
+    }
+
+    function navigateSpatial(direction) {
+      const nextNode = spatialGraph[currentFocusIndex][direction];
+      if (nextNode !== null && nextNode !== undefined) {
+        updateVisualFocus(nextNode, `D-Pad [${direction.toUpperCase()}]`);
+      } else {
+        logEvent(`Boundary lock: No focus candidate at [${direction.toUpperCase()}]`);
+      }
+    }
+
+    function setManualFocus(index) {
+      updateVisualFocus(index, 'Pointer Click');
+    }
+
+    function triggerEnterAction() {
+      const activeCard = targetCards[currentFocusIndex];
+      activeCard.classList.add('scale-[0.98]', 'bg-primary/20');
+      setTimeout(() => {
+        activeCard.classList.remove('scale-[0.98]', 'bg-primary/20');
+      }, 150);
+      logEvent(`ACTION [A] Confirmed on: ${targetNames[currentFocusIndex]}`);
+    }
+
+    function logEvent(msg) {
+      const logEl = document.getElementById('log-output');
+      if (logEl) {
+        const time = new Date().toTimeString().split(' ')[0];
+        logEl.textContent = `[${time}] ${msg}`;
+      }
+    }
+
+    // NPM Copy Action
+    function copyNpmCommand() {
+      const cmd = "npm i gamepad-controller";
+      navigator.clipboard.writeText(cmd).then(() => {
+        const icon = document.getElementById('copy-icon');
+        const navIcon = document.getElementById('nav-copy-icon');
+        if (icon) {
+          icon.textContent = 'check';
+          icon.classList.add('text-primary');
+          setTimeout(() => {
+            icon.textContent = 'content_copy';
+            icon.classList.remove('text-primary');
+          }, 2000);
+        }
+        if (navIcon) {
+          navIcon.textContent = 'check';
+          navIcon.classList.add('text-primary');
+          setTimeout(() => {
+            navIcon.textContent = 'content_copy';
+            navIcon.classList.remove('text-primary');
+          }, 2000);
+        }
+        logEvent('Copied install command: npm i gamepad-controller');
+      });
+    }
+
+    // Code Tab Switcher
+    function switchCodeTab(tab) {
+      const tabs = ['vanilla', 'react', 'vue'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        const block = document.getElementById(`code-${t}`);
+        if (t === tab) {
+          btn.classList.add('bg-surface-container', 'text-primary', 'font-bold', 'border', 'border-primary/30');
+          btn.classList.remove('text-slate-400');
+          block.classList.remove('hidden');
+          block.classList.add('block');
+        } else {
+          btn.classList.remove('bg-surface-container', 'text-primary', 'font-bold', 'border', 'border-primary/30');
+          btn.classList.add('text-slate-400');
+          block.classList.remove('block');
+          block.classList.add('hidden');
+        }
+      });
+    }
+
+    // Keyboard Arrow Listeners
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+        e.preventDefault();
+        if (e.key === 'ArrowUp') navigateSpatial('up');
+        if (e.key === 'ArrowDown') navigateSpatial('down');
+        if (e.key === 'ArrowLeft') navigateSpatial('left');
+        if (e.key === 'ArrowRight') navigateSpatial('right');
+        if (e.key === 'Enter') triggerEnterAction();
+      }
+    });
+
+    // Hardware Gamepad API Hook
+    let lastPadButton = 0;
+    function pollHardwareGamepad() {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      if (gamepads && gamepads[0]) {
+        const gp = gamepads[0];
+        const statusEl = document.getElementById('gamepad-status-text');
+        if (statusEl && !statusEl.textContent.includes(gp.id.substring(0, 10))) {
+          statusEl.innerHTML = `<span class="material-symbols-outlined text-primary text-[15px]">gamepad</span> Hardware: ${gp.id.substring(0, 16)}...`;
+        }
+
+        const now = performance.now();
+        if (now - lastPadButton > 180) {
+          // Standard D-pad buttons
+          if (gp.buttons[12] && gp.buttons[12].pressed) { navigateSpatial('up'); lastPadButton = now; }
+          else if (gp.buttons[13] && gp.buttons[13].pressed) { navigateSpatial('down'); lastPadButton = now; }
+          else if (gp.buttons[14] && gp.buttons[14].pressed) { navigateSpatial('left'); lastPadButton = now; }
+          else if (gp.buttons[15] && gp.buttons[15].pressed) { navigateSpatial('right'); lastPadButton = now; }
+          
+          // Left thumbstick axes with 0.4 deadzone
+          else if (gp.axes[1] < -0.4) { navigateSpatial('up'); lastPadButton = now; }
+          else if (gp.axes[1] > 0.4) { navigateSpatial('down'); lastPadButton = now; }
+          else if (gp.axes[0] < -0.4) { navigateSpatial('left'); lastPadButton = now; }
+          else if (gp.axes[0] > 0.4) { navigateSpatial('right'); lastPadButton = now; }
+
+          // Action button (Button 0 = A / Cross)
+          else if (gp.buttons[0] && gp.buttons[0].pressed) { triggerEnterAction(); lastPadButton = now; }
+        }
+      }
+      requestAnimationFrame(pollHardwareGamepad);
+    }
+    requestAnimationFrame(pollHardwareGamepad);
+  </script>
+</body></html>

@@ -1,0 +1,48 @@
+.framework-code {
+    min-width: 0;
+}
+.framework-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-bottom: 10px;
+    padding: 4px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    width: fit-content;
+    margin-left: auto;
+    button {
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        padding: 8px 12px;
+        color: var(--muted);
+        font-size: 12px;
+    }
+    button[aria-selected='true'] {
+        color: var(--accent);
+        border-color: var(--accent-solid);
+        background: var(--subtle);
+    }
+}
+.snippet-note {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+    margin: 10px 0 0;
+}
+.reference-prose {
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+.reference-prose a,
+.doc-section td a {
+    color: var(--accent);
+    text-decoration: underline;
+}
+.doc-section:has(> .reference-prose):not(:has(> h2)),
+.doc-section:has(> .code-block):not(:has(> h2)) {
+    margin-top: 18px;
+}
