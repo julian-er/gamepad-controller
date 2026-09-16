@@ -22,7 +22,7 @@ function fakePlatform(overrides: Partial<PlatformAdapter> = {}): PlatformAdapter
 
 describe('NavigationPolicy', () => {
     describe('requestBack', () => {
-        it('emits backbutton when a subscriber is registered (no history fallback)', () => {
+        it('notifies backbutton subscribers and still performs the history action', () => {
             const emitter = new TypedEmitter<GamepadServiceEventMap>();
             const platform = fakePlatform();
             const onBack = vi.fn();
@@ -31,7 +31,7 @@ describe('NavigationPolicy', () => {
             new NavigationPolicy(emitter, platform).requestBack();
 
             expect(onBack).toHaveBeenCalledTimes(1);
-            expect(platform.historyBack).not.toHaveBeenCalled();
+            expect(platform.historyBack).toHaveBeenCalledTimes(1);
         });
 
         it('falls back to platform.historyBack() when nobody is subscribed', () => {
@@ -54,7 +54,7 @@ describe('NavigationPolicy', () => {
     });
 
     describe('requestNavigation', () => {
-        it('emits navigationrequest with href + element when subscribed (no location fallback)', () => {
+        it('notifies navigationrequest subscribers and still assigns location', () => {
             const emitter = new TypedEmitter<GamepadServiceEventMap>();
             const platform = fakePlatform();
             const onNav = vi.fn();
@@ -64,7 +64,7 @@ describe('NavigationPolicy', () => {
             new NavigationPolicy(emitter, platform).requestNavigation('/next', el);
 
             expect(onNav).toHaveBeenCalledWith('/next', el);
-            expect(platform.assignLocation).not.toHaveBeenCalled();
+            expect(platform.assignLocation).toHaveBeenCalledWith('/next');
         });
 
         it('falls back to platform.assignLocation() when nobody is subscribed', () => {

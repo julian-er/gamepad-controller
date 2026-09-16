@@ -5,7 +5,7 @@
 // "one navigation controller per page" case. For multiple independent controllers,
 // instantiate `new GamepadService(options)` directly — the class is not a singleton.
 
-import { GamepadService } from './core/GamepadService.js';
+import { GamepadService } from './service/GamepadService.js';
 import {
     addNavigationStyles,
     removeNavigationStyles,

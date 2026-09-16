@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { makeElementsVisible } from './helpers';
 import { GamepadService } from '../src/core/GamepadService';
 
 describe('GamepadService lifecycle', () => {
@@ -55,6 +56,7 @@ describe('GamepadService lifecycle', () => {
     });
 
     it('supports multiple independent focus subscribers via on()/off()', () => {
+        makeElementsVisible();
         const service = new GamepadService();
         const a = vi.fn();
         const b = vi.fn();
@@ -122,6 +124,7 @@ describe('GamepadService native loop — two controllers + headset', () => {
     let live: (Gamepad | null)[] = [];
 
     beforeEach(() => {
+        makeElementsVisible();
         rafCb = null;
         live = [];
         Object.defineProperty(navigator, 'getGamepads', {
@@ -134,13 +137,6 @@ describe('GamepadService native loop — two controllers + headset', () => {
             return 1 as unknown as number;
         });
         vi.spyOn(window, 'cancelAnimationFrame').mockReturnValue(undefined);
-        // jsdom lays everything out at 0x0; treat elements as visible so they're navigable.
-        Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
-            configurable: true,
-            get() {
-                return document.body;
-            },
-        });
         document.body.innerHTML = `
           <div class="container">
             <div class="card" tabindex="0">A</div>

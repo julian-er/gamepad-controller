@@ -85,6 +85,17 @@ export interface GamepadServiceOptions {
     customStateChangedEvent?: string;
 }
 
+/** A synchronous, cancellable request made before an automatic gamepad action. */
+export interface GamepadActionEvent {
+    readonly type: 'move' | 'select' | 'back' | 'shoulder' | 'scroll';
+    readonly gamepad: Gamepad;
+    readonly direction?: 'up' | 'down' | 'left' | 'right';
+    readonly button?: string;
+    readonly target: Element | null;
+    defaultPrevented: boolean;
+    preventDefault(): void;
+}
+
 // ---------------------------------------------------------------------------
 // Grouped options (recommended) — a nested, discoverable shape over the flat
 // options above. The flat fields remain fully supported for backward

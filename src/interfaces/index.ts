@@ -12,6 +12,7 @@ export type {
     ScrollingOptionsGroup,
     ContextOptionsGroup,
     CustomEventsOptionsGroup,
+    GamepadActionEvent,
 } from './GamepadServiceOptions.js';
 
 // Navigation context options interface

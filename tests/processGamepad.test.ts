@@ -92,17 +92,57 @@ describe('processGamepad — shoulder navigation (TD-1 regression)', () => {
     });
 });
 
+describe('processGamepad — primary action contract', () => {
+    it('activates once while primary is held, then again only after a release', () => {
+        const state = eventState();
+        const nav = navState({ enableDualContext: false, enableNavigation: true, selectedClass: 'selected' });
+        const target = document.createElement('button');
+        nav.elements = [target];
+        const select = vi.fn();
+        nav.onSelect = select;
+
+        processGamepad(gamepadWith([]), state, nav, 1);
+        processGamepad(gamepadWith([0]), state, nav, 2);
+        processGamepad(gamepadWith([0]), state, nav, 3);
+        processGamepad(gamepadWith([]), state, nav, 4);
+        processGamepad(gamepadWith([0]), state, nav, 5);
+
+        expect(select).toHaveBeenCalledTimes(2);
+    });
+
+    it('records a cancellable request but suppresses the default select effect', () => {
+        const state = eventState();
+        const nav = navState({ enableDualContext: false, enableNavigation: true, selectedClass: 'selected' });
+        const target = document.createElement('button');
+        nav.elements = [target];
+        const select = vi.fn();
+        nav.onSelect = select;
+        state.onBeforeAction = (action) => {
+            action.preventDefault();
+            return !action.defaultPrevented;
+        };
+        processGamepad(gamepadWith([]), state, nav, 1);
+        processGamepad(gamepadWith([0]), state, nav, 2);
+        expect(select).not.toHaveBeenCalled();
+    });
+});
+
 describe('processGamepad — selection', () => {
     it('delegates the primary button to the context manager in dual-context mode', () => {
         const handleSelection = vi.fn().mockReturnValue(true);
+        const target = document.createElement('button');
         const fakeContextManager = {
             handleShoulderNavigation: vi.fn(),
             handleStickNavigation: vi.fn(),
             handleSelection,
+            getActiveContext: () => ({ getCurrentElement: () => target }),
         };
 
-        // Button index 0 = A / primary on xbox.
-        processGamepad(gamepadWith([0]), eventState(), navState(), 1000, fakeContextManager as never);
+        // A first snapshot establishes baseline; the following press is the edge.
+        const state = eventState();
+        const navigation = navState({ enableDualContext: true });
+        processGamepad(gamepadWith([]), state, navigation, 900, fakeContextManager as never);
+        processGamepad(gamepadWith([0]), state, navigation, 1000, fakeContextManager as never);
 
         expect(handleSelection).toHaveBeenCalledTimes(1);
     });

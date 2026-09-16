@@ -6,6 +6,9 @@ describe('GamepadContextManager', () => {
     beforeEach(() => {
         document.body.innerHTML = '';
         makeElementsVisible();
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+            width: 40, height: 20, top: 0, left: 0, right: 40, bottom: 20, x: 0, y: 0, toJSON: () => ({}),
+        } as DOMRect);
     });
     afterEach(() => {
         vi.restoreAllMocks();
@@ -57,6 +60,9 @@ describe('GamepadNavigationContext', () => {
     beforeEach(() => {
         document.body.innerHTML = '';
         makeElementsVisible();
+        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+            width: 40, height: 20, top: 0, left: 0, right: 40, bottom: 20, x: 0, y: 0, toJSON: () => ({}),
+        } as DOMRect);
     });
     afterEach(() => {
         vi.restoreAllMocks();

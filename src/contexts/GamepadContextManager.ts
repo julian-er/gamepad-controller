@@ -5,11 +5,12 @@ import {
     removeGamepadDataAttributes,
 } from '../utils/index.js';
 import { logger } from '../utils/logger.js';
-import { TypedEmitter } from '../core/EventEmitter.js';
+import { TypedEmitter } from '../events/EventEmitter.js';
 
 import type { GamepadNavigationContextOptions } from '../interfaces/GamepadNavigationContextOptions.js';
 import type { GamepadContextManagerCallback } from '../interfaces/GamepadContextManagerCallback.js';
 import type { Direction, ShoulderButton } from '../interfaces/NavigationTypes.js';
+import { activeNativeModal, isEligibleElement } from '../dom/eligibility.js';
 
 /** Events emitted by a {@link GamepadNavigationContext}. */
 interface GamepadNavigationContextEventMap {
@@ -45,6 +46,9 @@ export class GamepadNavigationContext {
     focusedElementIndex: number;
     isActive: boolean;
     lastFocusedElement: Element | null;
+    private activeScope: Element | null = null;
+    private ownedTabindex = new Map<HTMLElement, string | null>();
+    private destroyed = false;
 
     private _emitter = new TypedEmitter<GamepadNavigationContextEventMap>();
 
@@ -111,7 +115,7 @@ export class GamepadNavigationContext {
             this.options.containerSelector ?? null,
             this.options.useGamepadIndex ?? false,
             this.options.onlyViewport ?? false
-        );
+        ).filter((element) => this.isEligible(element));
 
         if (this.focusedElementIndex >= this.elements.length) {
             this.focusedElementIndex = Math.max(0, this.elements.length - 1);
@@ -130,7 +134,7 @@ export class GamepadNavigationContext {
      * - Logs activation information
      */
     activate() {
-        if (this.isActive) return;
+        if (this.destroyed || this.isActive) return;
 
         this.isActive = true;
         this.updateFocus();
@@ -171,7 +175,7 @@ export class GamepadNavigationContext {
      * - Fires onFocus callback if set
      */
     updateFocus() {
-        if (!this.isActive) return;
+        if (this.destroyed || !this.isActive) return;
 
         // Remove focus from all elements in this context
         this.elements.forEach((element) => {
@@ -183,7 +187,12 @@ export class GamepadNavigationContext {
         });
 
         // Add focus to current element
-        const focusedElement = this.elements[this.focusedElementIndex];
+        let focusedElement = this.elements[this.focusedElementIndex];
+        if (focusedElement && !this.isEligible(focusedElement)) {
+            const fallback = this.elements.findIndex((element) => this.isEligible(element));
+            this.focusedElementIndex = fallback;
+            focusedElement = fallback >= 0 ? this.elements[fallback] : undefined;
+        }
         if (focusedElement) {
             if (this.options.useDataAttributes) {
                 addGamepadDataAttributes(focusedElement, 'focused');
@@ -201,6 +210,13 @@ export class GamepadNavigationContext {
             }
 
             this.lastFocusedElement = focusedElement;
+            if (focusedElement instanceof HTMLElement) {
+                if (!focusedElement.matches('a[href],button,input,select,textarea,[tabindex]')) {
+                    this.ownedTabindex.set(focusedElement, focusedElement.getAttribute('tabindex'));
+                    focusedElement.setAttribute('tabindex', '-1');
+                }
+                focusedElement.focus({ preventScroll: true });
+            }
 
             this._emit('focus', focusedElement, this.focusedElementIndex);
         }
@@ -267,7 +283,25 @@ export class GamepadNavigationContext {
             return false; // Only left/right supported in horizontal mode
         }
 
-        if (newIndex !== this.focusedElementIndex) {
+        const step = direction === 'left' ? -1 : direction === 'right' ? 1 : 0;
+        if (step === 0) return false;
+        for (
+            let attempts = 0;
+            attempts < this.elements.length && !this.isEligible(this.elements[newIndex]!);
+            attempts++
+        ) {
+            newIndex += step;
+            if (newIndex < 0) newIndex = this.options.wrapNavigation ? this.elements.length - 1 : 0;
+            if (newIndex >= this.elements.length) newIndex = this.options.wrapNavigation ? 0 : this.elements.length - 1;
+            if (
+                !this.options.wrapNavigation &&
+                (newIndex === 0 || newIndex === this.elements.length - 1) &&
+                !this.isEligible(this.elements[newIndex]!)
+            )
+                return false;
+        }
+
+        if (newIndex !== this.focusedElementIndex && this.isEligible(this.elements[newIndex]!)) {
             this.focusedElementIndex = newIndex;
             this.updateFocus();
             return true;
@@ -284,20 +318,25 @@ export class GamepadNavigationContext {
      * - Returns false if no element found
      */
     navigateSpatial(direction: Direction) {
-        const currentElement = this.elements[this.focusedElementIndex];
+        let currentElement = this.elements[this.focusedElementIndex];
+        if (currentElement && !this.isEligible(currentElement)) {
+            this.updateFocus();
+            currentElement = this.elements[this.focusedElementIndex];
+        }
         if (!currentElement) return false;
 
         // Try primary direction first
-        let nearestElement: Element | null = findNearestInDirection(currentElement, this.elements, direction);
+        const eligible = this.elements.filter((element) => this.isEligible(element));
+        let nearestElement: Element | null = findNearestInDirection(currentElement, eligible, direction);
 
         // If no element found, try simple wrapping (only for horizontal)
         if (!nearestElement && this.options.wrapNavigation) {
             if (direction === 'left') {
                 // Go to last element
-                nearestElement = this.elements[this.elements.length - 1] ?? null;
+                nearestElement = eligible[eligible.length - 1] ?? null;
             } else if (direction === 'right') {
                 // Go to first element
-                nearestElement = this.elements[0] ?? null;
+                nearestElement = eligible[0] ?? null;
             }
             // Don't wrap for vertical navigation - it's confusing
         }
@@ -327,7 +366,7 @@ export class GamepadNavigationContext {
         if (!this.isActive) return false;
 
         const focusedElement = this.elements[this.focusedElementIndex];
-        if (!focusedElement) return false;
+        if (!focusedElement || !this.isEligible(focusedElement)) return false;
 
         // Toggle selected state
         if (this.options.useDataAttributes) {
@@ -341,9 +380,6 @@ export class GamepadNavigationContext {
         } else {
             focusedElement.classList.toggle(this.options.selectedClass ?? '');
         }
-
-        // Fire callback
-        this._emit('select', focusedElement, this.focusedElementIndex);
 
         // Handle navigation menu links
         if (
@@ -359,14 +395,16 @@ export class GamepadNavigationContext {
             if (onNavigationRequest) {
                 onNavigationRequest(href, focusedElement);
             }
-            return true;
+            if (!this.destroyed && this.isActive) this._emit('select', focusedElement, this.focusedElementIndex);
+            return !this.destroyed;
         }
 
         // Handle regular click events
         if ('click' in focusedElement && typeof (focusedElement as HTMLElement).click === 'function') {
             (focusedElement as HTMLElement).click();
         }
-
+        if (this.destroyed || !this.isActive || !this.isEligible(focusedElement)) return false;
+        this._emit('select', focusedElement, this.focusedElementIndex);
         return true;
     }
 
@@ -379,7 +417,8 @@ export class GamepadNavigationContext {
      * - Returns false if navigation fails
      */
     navigateToIndex(index: number) {
-        if (!this.isActive || index < 0 || index >= this.elements.length) return false;
+        if (!this.isActive || index < 0 || index >= this.elements.length || !this.isEligible(this.elements[index]!))
+            return false;
 
         this.focusedElementIndex = index;
         this.updateFocus();
@@ -414,6 +453,41 @@ export class GamepadNavigationContext {
      */
     getElements(): Element[] {
         return [...this.elements];
+    }
+
+    /** Track external keyboard focus without triggering focus rendering. */
+    syncNativeFocus(element: Element): boolean {
+        const index = this.elements.indexOf(element);
+        if (index < 0 || !this.isEligible(element)) return false;
+        this.focusedElementIndex = index;
+        return true;
+    }
+
+    setActiveScope(scope: Element | null): void {
+        this.activeScope = scope;
+        this.detectElements();
+    }
+
+    private isEligible(element: Element): boolean {
+        return (
+            (!this.activeScope || this.activeScope.contains(element)) &&
+            isEligibleElement(element, this.options, activeNativeModal())
+        );
+    }
+
+    /** Release owned DOM state when a context is replaced or its manager is destroyed. */
+    dispose(): void {
+        if (this.destroyed) return;
+        this.deactivate();
+        this.destroyed = true;
+        for (const [element, original] of this.ownedTabindex) {
+            if (original === null) element.removeAttribute('tabindex');
+            else element.setAttribute('tabindex', original);
+        }
+        this.ownedTabindex.clear();
+        this.elements = [];
+        this.lastFocusedElement = null;
+        this._clearListeners();
     }
 
     /**
@@ -472,6 +546,7 @@ export class GamepadContextManager {
     activeContext: GamepadNavigationContext | null;
     lastActiveContext: GamepadNavigationContext | null;
     private _onContextSwitch: GamepadContextManagerCallback | null;
+    private generation = 0;
 
     constructor() {
         this.contexts = new Map();
@@ -505,10 +580,13 @@ export class GamepadContextManager {
             ...options,
             containerSelector: typeof options.containerSelector === 'string' ? options.containerSelector : null,
         };
+        this.contexts.get(id)?.dispose();
         const context = new GamepadNavigationContext(id, opts);
         this.contexts.set(id, context);
         context.on('activate', (ctx) => {
-            this.setActiveContext(ctx.id);
+            // Direct context activation is supported, while manager-owned activation has
+            // already assigned activeContext and must not re-enter/signal twice.
+            if (this.activeContext !== ctx) this.setActiveContext(ctx.id);
         });
         context.on('deactivate', (ctx) => {
             if (this.activeContext === ctx) {
@@ -540,6 +618,11 @@ export class GamepadContextManager {
         return Array.from(this.contexts.values());
     }
 
+    setActiveScope(scope: Element | null): void {
+        this.contexts.forEach((context) => context.setActiveScope(scope));
+        this.getActiveContext()?.updateFocus();
+    }
+
     /**
      * Sets the active context by activating it and deactivating the previous active context.
      *
@@ -552,21 +635,24 @@ export class GamepadContextManager {
      * @returns {boolean} True if the context was set successfully, false otherwise
      */
     setActiveContext(contextId: string): boolean {
+        const generation = this.generation;
         const context = this.contexts.get(contextId);
         if (!context) {
             logger.warn(`Context not found: ${contextId}`);
             return false;
         }
+        if (this.activeContext === context) return true;
         if (this.activeContext && this.activeContext !== context) {
             this.lastActiveContext = this.activeContext;
             this.activeContext.deactivate();
         }
         this.activeContext = context;
         context.activate();
+        if (this.generation !== generation || this.activeContext !== context) return false;
         if (this._onContextSwitch) {
             this._onContextSwitch(context, this.lastActiveContext);
         }
-        return true;
+        return this.generation === generation && this.activeContext === context;
     }
 
     /**
@@ -621,6 +707,8 @@ export class GamepadContextManager {
             this.setActiveContext(menuContext.id);
         }
 
+        if (this.activeContext !== menuContext) return false;
+
         // Navigate within menu context
         const direction = button === 'R1' ? 'right' : 'left';
         return menuContext.navigate(direction);
@@ -645,6 +733,8 @@ export class GamepadContextManager {
             this.setActiveContext(mainContext.id);
         }
 
+        if (this.activeContext !== mainContext) return false;
+
         // Navigate within main context
         return mainContext.navigate(direction);
     }
@@ -667,13 +757,10 @@ export class GamepadContextManager {
      * - Removes context switch callback
      */
     destroy(): void {
+        this.generation++;
         // Deactivate all contexts first
         this.contexts.forEach((context) => {
-            context.deactivate();
-            context._clearListeners();
-            // Clear element references
-            context.elements = [];
-            context.lastFocusedElement = null;
+            context.dispose();
         });
 
         // Clear all contexts

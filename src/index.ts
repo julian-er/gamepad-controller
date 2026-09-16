@@ -4,12 +4,12 @@
 // are intentionally NOT re-exported.
 
 // --- Core class & its event map ---
-export { GamepadService } from './core/GamepadService.js';
-export type { GamepadServiceEventMap } from './core/GamepadService.js';
+export { GamepadService } from './service/GamepadService.js';
+export type { GamepadServiceEventMap } from './service/GamepadService.js';
 
 // --- Platform seam (injectable via GamepadServiceConfig.platform) ---
-export { BrowserPlatformAdapter, defaultPlatformAdapter } from './core/platform/PlatformAdapter.js';
-export type { PlatformAdapter, WindowEventListener } from './core/platform/PlatformAdapter.js';
+export { BrowserPlatformAdapter, defaultPlatformAdapter } from './platform/PlatformAdapter.js';
+export type { PlatformAdapter, WindowEventListener } from './platform/PlatformAdapter.js';
 
 // --- Factory helpers & façade ---
 export {
@@ -60,6 +60,7 @@ export type {
     ScrollingOptionsGroup,
     ContextOptionsGroup,
     CustomEventsOptionsGroup,
+    GamepadActionEvent,
     GamepadNavigationContextOptions,
     NavigationState,
     GridDimensions,

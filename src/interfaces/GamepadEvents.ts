@@ -1,3 +1,5 @@
+import type { GamepadActionEvent } from './GamepadServiceOptions.js';
+
 // GamepadEvent interface for typed gamepad events
 export interface GamepadEvent extends Event {
     gamepad: Gamepad;
@@ -28,10 +30,16 @@ export interface PadInputState {
     lastScrollTime: number;
     /** Pressed state of every button on the previous frame (for onButtonDown/Up edges). */
     lastButtonStates: boolean[];
+    /** Previous primary state; selection is edge-triggered. */
+    lastPrimaryState: boolean;
 }
 
 export interface GamepadEventState {
     isRunning: boolean;
+    /** Monotonic lifecycle token; stale rAF closures must not revive a new init. */
+    generation?: number;
+    /** Reset token: stale in-flight frames must not process edges after resetInput(). */
+    inputEpoch?: number;
     gamepads: { [key: string]: Gamepad };
     /** Type of the most-recently-active controller (for status / getControllerType back-compat). */
     currentControllerType: string;
@@ -55,6 +63,8 @@ export interface GamepadEventState {
      * via the `gamepaderror` service event.
      */
     onError?: (error: Error) => void;
+    onBeforeAction?: (event: GamepadActionEvent) => boolean;
+    onAction?: (event: GamepadActionEvent) => void;
     /**
      * Set once `navigator.getGamepads()` has thrown so the polling loop warns/emits a single
      * time instead of every frame. The rAF loop keeps running — policy may be granted later.
@@ -72,4 +82,6 @@ export interface GamepadEventState {
         onDisconnected: (event: Event) => void;
         onStateChanged: (event: Event) => void;
     } | null;
+    /** Ordered host snapshots received between animation frames; preserves rapid taps. */
+    pendingSnapshots?: Gamepad[];
 }

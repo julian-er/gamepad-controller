@@ -78,6 +78,11 @@ export function makeElementsVisible(): void {
             return document.body;
         },
     });
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function () {
+        const index = Array.from(document.querySelectorAll('*')).indexOf(this);
+        const left = Math.max(0, index) * 20;
+        return { x: left, y: 0, left, top: 0, right: left + 10, bottom: 10, width: 10, height: 10, toJSON() {} } as DOMRect;
+    });
 }
 
 /** A minimal Element stub with a fixed bounding box — for pure geometry tests. */

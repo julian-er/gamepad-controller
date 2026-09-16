@@ -106,7 +106,7 @@ describe('PlatformAdapter seam', () => {
         svc.destroy();
     });
 
-    it('emits backbutton (and does NOT hit the adapter) when a subscriber is registered', () => {
+    it('notifies backbutton subscribers and performs the adapter fallback', () => {
         const platform = new FakePlatformAdapter();
         const svc = new GamepadService({ platform, debounceTime: 0, backButtonCooldown: 0 });
         const onBack = vi.fn();
@@ -118,7 +118,7 @@ describe('PlatformAdapter seam', () => {
         platform.frame();
 
         expect(onBack).toHaveBeenCalledTimes(1);
-        expect(platform.backs).toBe(0);
+        expect(platform.backs).toBe(1);
         svc.destroy();
     });
 

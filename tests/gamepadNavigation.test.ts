@@ -136,6 +136,11 @@ describe('handleScrolling', () => {
 
     it('scrolls the window by stick * 10 * speed', () => {
         const scrollBy = vi.spyOn(window, 'scrollBy').mockImplementation(() => {});
+        Object.defineProperty(document.documentElement, 'scrollHeight', { configurable: true, value: 1000 });
+        Object.defineProperty(document.documentElement, 'scrollWidth', { configurable: true, value: 1000 });
+        Object.defineProperty(document.documentElement, 'scrollTop', { configurable: true, value: 100 });
+        Object.defineProperty(window, 'innerHeight', { configurable: true, value: 100 });
+        Object.defineProperty(window, 'innerWidth', { configurable: true, value: 100 });
         handleScrolling(0.5, -0.2, 2);
         expect(scrollBy).toHaveBeenCalledWith(0.5 * 20, -0.2 * 20);
     });
@@ -147,6 +152,8 @@ describe('handleScrolling', () => {
         // jsdom doesn't implement Element.scrollBy — install a stub before asserting.
         const scrollBy = vi.fn();
         (div as unknown as { scrollBy: typeof scrollBy }).scrollBy = scrollBy;
+        Object.defineProperty(div, 'scrollWidth', { configurable: true, value: 200 });
+        Object.defineProperty(div, 'clientWidth', { configurable: true, value: 100 });
         handleScrolling(1, 0, 1, '#scroller');
         expect(scrollBy).toHaveBeenCalledWith(10, 0);
     });
@@ -155,11 +162,18 @@ describe('handleScrolling', () => {
 describe('handleShoulderNavigation', () => {
     beforeEach(() => (document.body.innerHTML = ''));
 
-    it('invokes onNavigationMenuOpen with the pressed button', () => {
+    it('invokes onNavigationMenuOpen only after a matching navigation effect', () => {
         const onOpen = vi.fn();
         const state = navState({ options: { navigationMenuSelector: '.nav' } });
-        handleShoulderNavigation(state, 'R1', undefined, onOpen);
+        const current = document.createElement('a'); current.className = 'nav-item'; current.href = '#one';
+        const next = document.createElement('a'); next.className = 'nav-item'; next.href = '#two';
+        const nav = document.createElement('nav'); nav.className = 'nav'; nav.append(current, next); document.body.append(nav);
+        state.elements = [current];
+        handleShoulderNavigation(state, 'R1', undefined, onOpen, () => {});
         expect(onOpen).toHaveBeenCalledWith('R1');
+        document.body.innerHTML = '';
+        handleShoulderNavigation(state, 'R1', undefined, onOpen, () => {});
+        expect(onOpen).toHaveBeenCalledTimes(1);
     });
 
     it('delegates to the context manager in dual-context mode', () => {

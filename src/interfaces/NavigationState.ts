@@ -8,4 +8,9 @@ export interface NavigationState {
     options: GamepadServiceOptions;
     onFocus: ((element: Element, index: number) => void) | null;
     onSelect: ((element: Element, index: number) => void) | null;
+    /** Runtime eligibility check supplied by the DOM owner; never trust stale candidates. */
+    isElementEligible?: (element: Element) => boolean;
+    /** Service lifecycle guard for effects that synchronously invoke consumer handlers. */
+    isRuntimeActive?: () => boolean;
+    runtimeGeneration?: () => number;
 }
