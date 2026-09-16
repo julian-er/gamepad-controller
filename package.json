@@ -16,17 +16,8 @@
   "files": [
     "dist",
     "README.md",
-    "CHANGELOG.md",
-    "BUILDING.md",
-    "USAGE_REACT.md",
-    "USAGE_ANGULAR.md",
-    "USAGE_VANILLA.md",
-    "MIGRATION.md",
-    "MIGRATION_1.0_TO_NEXT.md",
-    "API.md",
-    "ARCHITECTURE.md",
-    "GAMEPAD_ACTION_DETECTION.md",
-    "GAMEPAD_SERVICE_METHODS.md"
+    "docs",
+    "skills"
   ],
   "keywords": [
     "gamepad",
@@ -42,15 +33,15 @@
     "typescript"
   ],
   "license": "MIT",
-  "author": "julian-miracle",
+  "author": "julian-er",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/julian-miracle/gamepad-controller.git"
+    "url": "git+https://github.com/julian-er/gamepad-controller.git"
   },
   "bugs": {
-    "url": "https://github.com/julian-miracle/gamepad-controller/issues"
+    "url": "https://github.com/julian-er/gamepad-controller/issues"
   },
-  "homepage": "https://github.com/julian-miracle/gamepad-controller#readme",
+  "homepage": "https://github.com/julian-er/gamepad-controller#readme",
   "scripts": {
     "clean": "rimraf dist",
     "build": "rimraf dist && vite build",
@@ -70,15 +61,15 @@
     "@eslint/js": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
-    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.0.0",
     "http-server": "^14.1.1",
     "jsdom": "^25.0.0",
     "prettier": "^3.3.0",
     "rimraf": "^6.0.0",
     "typescript": "^5.5.0",
-    "vite": "^6.3.5",
+    "vite": "6.4.3",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^2.1.0"
+    "vitest": "^4.1.11"
   }
 }
