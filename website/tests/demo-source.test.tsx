@@ -1,7 +1,7 @@
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, it, vi } from 'vitest';
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 import { DemoPage } from '../src/demos/DemoPage';
 import { demos } from '../src/demos/registry';
 import * as sourceFiles from '../src/demos/source-files';

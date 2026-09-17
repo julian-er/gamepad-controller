@@ -1,4 +1,4 @@
-// gamepad-controller — public API surface.
+// gamepad-ui-engine — public API surface.
 // Only the symbols re-exported here are part of the package's supported API.
 // Internal modules (core/gamepadEventHandler, core/gamepadNavigation, utils/domUtils, …)
 // are intentionally NOT re-exported.

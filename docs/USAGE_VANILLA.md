@@ -1,6 +1,6 @@
 # Vanilla JavaScript / TypeScript
 
-Install with `npm install gamepad-controller`. To try unreleased changes, install the local tarball described in [BUILDING.md](BUILDING.md#testing-the-package-inside-another-project).
+Install with `npm install gamepad-ui-engine`. To try unreleased changes, install the local tarball described in [BUILDING.md](BUILDING.md#testing-the-package-inside-another-project).
 
 ## Mount a view
 
@@ -16,7 +16,7 @@ Use an ES-module bundler for the bare package import. In an unbundled browser pa
 The following is valid JavaScript and TypeScript (`catalog.js` or `catalog.ts`):
 
 ```js
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 // HTML: <main id="catalog"><button>Play</button><button>Library</button></main>
 export function mountCatalog() {
@@ -47,7 +47,7 @@ window.addEventListener('pageshow', (event) => {
 Use this setup instead of the preceding native setup when a host forwards input. The host must send full snapshots on every change, including releases:
 
 ```js
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 const service = new GamepadService({
   containerSelector: '#catalog', navigationMode: 'spatial',

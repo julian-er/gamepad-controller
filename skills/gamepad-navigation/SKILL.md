@@ -1,11 +1,11 @@
 ---
 name: gamepad-navigation
-description: Implement gamepad-controller 1.0.0 navigation policy, manual targets, dynamic focus, and explicit modal scopes.
+description: Implement gamepad-ui-engine 1.0.0 navigation policy, manual targets, dynamic focus, and explicit modal scopes.
 ---
 
 # Gamepad navigation behavior
 
-Use this skill for consumer-owned navigation behavior with `gamepad-controller` **1.0.0**. Keep application policy in the application and use the public event and service APIs below.
+Use this skill for consumer-owned navigation behavior with `gamepad-ui-engine` **1.0.0**. Keep application policy in the application and use the public event and service APIs below.
 
 Read [references/navigation.md](references/navigation.md) for runnable examples and invariants. `beforeaction` is synchronous: call `preventDefault()` before starting application work. An `action` event only reports an automatic action that already completed.
 

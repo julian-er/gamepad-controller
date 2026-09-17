@@ -1,12 +1,12 @@
 # React
 
-Install with `npm install gamepad-controller`. To try unreleased changes, install the local tarball described in [BUILDING.md](BUILDING.md#testing-the-package-inside-another-project).
+Install with `npm install gamepad-ui-engine`. To try unreleased changes, install the local tarball described in [BUILDING.md](BUILDING.md#testing-the-package-inside-another-project).
 
 ## Component lifecycle
 
 ```tsx
 import { useEffect } from 'react';
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 export function Catalog() {
   useEffect(() => {

@@ -1,4 +1,4 @@
-# Releasing `gamepad-controller`
+# Releasing `gamepad-ui-engine`
 
 This guide is for maintainers cutting a release. Contributors do not need it — see
 [CONTRIBUTING.md](CONTRIBUTING.md) for the day-to-day PR flow.
@@ -148,7 +148,7 @@ is stored anywhere.
 4. Same PR → CI → squash merge → tag flow as a standard release, but the tag is
    `vX.Y.0-rc.N`.
 5. Because the version string contains a `-`, `release.yml` computes `dist-tag=next` and
-   `prerelease=true` automatically — it publishes under `npm install gamepad-controller@next`
+   `prerelease=true` automatically — it publishes under `npm install gamepad-ui-engine@next`
    and marks the GitHub Release as a prerelease. No extra flag is needed.
 6. To promote a release candidate, do a normal **standard release** of `X.Y.0` — npm versions
    are immutable, so there is no "promote" command; it's a new version publish under the
@@ -191,7 +191,7 @@ In the order they run in `release.yml`:
   threshold miss.
 - **Build** (`pnpm run build`) — fails if the Vite library build errors.
 - **Check whether this version is already published** — runs `npm view
-  gamepad-controller@<version> version`; sets `published=true` if it resolves. Not a failure
+  gamepad-ui-engine@<version> version`; sets `published=true` if it resolves. Not a failure
   gate — just decides whether the next step runs.
 - **Publish to npm** — runs only `if: steps.check-published.outputs.published != 'true'`:
   `npm publish --provenance --access public --tag <latest|next>`. Fails on authentication/OIDC
@@ -210,7 +210,7 @@ In the order they run in `release.yml`:
 ## Troubleshooting & recovery
 
 - **A bad version was published.** Never unpublish. Run
-  `npm deprecate gamepad-controller@X.Y.Z "reason"` and ship a patch release through the
+  `npm deprecate gamepad-ui-engine@X.Y.Z "reason"` and ship a patch release through the
   standard flow.
 - **The workflow failed *before* "Publish to npm"** (a guard, lint, typecheck, tests, or the
   build). Merge the fix through a normal PR into `main`. What you can do with the failed tag
@@ -235,7 +235,7 @@ In the order they run in `release.yml`:
 
 ## Post-release checks
 
-- `npm view gamepad-controller version` and `npm view gamepad-controller dist-tags` — confirm
+- `npm view gamepad-ui-engine version` and `npm view gamepad-ui-engine dist-tags` — confirm
   the new version and that `latest`/`next` point where expected.
 - The npm version page shows a provenance badge (from `--provenance`) for versions 1.0.1 and later;
   the manually published 1.0.0 has no provenance.

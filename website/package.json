@@ -11,7 +11,7 @@
         "test": "vitest run --config vitest.config.ts"
     },
     "dependencies": {
-        "gamepad-controller": "workspace:*",
+        "gamepad-ui-engine": "workspace:*",
         "react": "^19.0.0",
         "react-dom": "^19.0.0"
     },

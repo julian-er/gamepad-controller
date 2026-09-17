@@ -1,9 +1,9 @@
-# Host snapshot protocol for gamepad-controller 1.0.0
+# Host snapshot protocol for gamepad-ui-engine 1.0.0
 
 ## Page setup
 
 ```ts
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 const service = new GamepadService({
   useCustomEvents: true,

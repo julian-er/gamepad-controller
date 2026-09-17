@@ -1,4 +1,4 @@
-import { getButtonName } from 'gamepad-controller';
+import { getButtonName } from 'gamepad-ui-engine';
 import { ArcadeArtwork } from './ArcadeArtwork';
 import { PlayStationArtwork } from './PlayStationArtwork';
 import { XboxArtwork } from './XboxArtwork';

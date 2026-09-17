@@ -72,18 +72,18 @@ describe('documentation app safeguards', () => {
         route('#/docs/introduction#' + anchor.id);
         await settle();
         expect(scrollIntoView).toHaveBeenCalled();
-        expect(document.title).toContain('gamepad-controller docs');
+        expect(document.title).toContain('gamepad-ui-engine docs');
 
         route('#/docs/api');
         await settle();
         expect(document.title).toContain('API reference');
         route('#/docs/introduction');
         await settle();
-        expect(document.title).toContain('gamepad-controller docs');
+        expect(document.title).toContain('gamepad-ui-engine docs');
 
         route('#/docs/not-a-document');
         await settle();
-        expect(document.title).toBe('Page not found — gamepad-controller docs');
+        expect(document.title).toBe('Page not found — gamepad-ui-engine docs');
         expect(document.querySelector('h1')!.textContent).toContain('off the map');
     });
 
@@ -96,7 +96,7 @@ describe('documentation app safeguards', () => {
 
         await traverseHistory(() => history.back());
         expect(location.hash).toBe('#/docs/introduction');
-        expect(document.title).toContain('gamepad-controller docs');
+        expect(document.title).toContain('gamepad-ui-engine docs');
 
         await traverseHistory(() => history.forward());
         expect(location.hash).toBe('#/docs/api');
@@ -104,7 +104,7 @@ describe('documentation app safeguards', () => {
 
         await traverseHistory(() => history.go(-1));
         expect(location.hash).toBe('#/docs/introduction');
-        expect(document.title).toContain('gamepad-controller docs');
+        expect(document.title).toContain('gamepad-ui-engine docs');
     });
 
     it('continues with optional theme storage unavailable for reads and writes', async () => {

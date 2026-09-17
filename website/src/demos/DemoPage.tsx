@@ -87,7 +87,7 @@ export function DemoPage({ id, suspended = false }: { id: DemoId; suspended?: bo
                     component runs inside the documentation host; it is not a standalone copy-and-run application.
                 </p>
                 <p>
-                    Run the website checkout with React, React DOM and gamepad-controller using the{' '}
+                    Run the website checkout with React, React DOM and gamepad-ui-engine using the{' '}
                     <a href="#/docs/building">local library build guide</a> and website README below. Vite provides raw
                     source loading, Sass compiles the styles, and the host supplies theme tokens and self-hosted fonts
                     from website/public/fonts. The registry references the other gallery apps; use the existing checkout

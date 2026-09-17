@@ -35,7 +35,7 @@ export const reactExamples: Examples = {
 export const angularExamples: Examples = {
     angular: {
         filename: 'catalog.component.ts',
-        note: 'This is an application-owned component. No Angular wrapper or directive is exported by gamepad-controller. Mount one catalog instance at a time with this unique container ID.',
+        note: 'This is an application-owned component. No Angular wrapper or directive is exported by gamepad-ui-engine. Mount one catalog instance at a time with this unique container ID.',
         code: setupCode(angularGuide),
     },
 };
@@ -52,7 +52,7 @@ export const integrationExamples: Examples = {
     },
     angular: {
         filename: 'catalog.component.ts',
-        note: 'This is an application-owned component. No Angular wrapper or directive is exported by gamepad-controller. Mount one catalog instance at a time with this unique container ID.',
+        note: 'This is an application-owned component. No Angular wrapper or directive is exported by gamepad-ui-engine. Mount one catalog instance at a time with this unique container ID.',
         code: setupCode(angularGuide),
     },
 };
@@ -66,7 +66,7 @@ export function sharedExamples(code: string): Examples {
         const header = [
             ...(imports.some((s) => /\bGamepadService\b/.test(s))
                 ? []
-                : ["import { GamepadService } from 'gamepad-controller';"]),
+                : ["import { GamepadService } from 'gamepad-ui-engine';"]),
             ...imports,
         ].join('\n');
         const setup = fragment;

@@ -39,7 +39,7 @@ export function LandingPlaygroundSection() {
         </div>
         <Playground />
         <div className="under-note">
-            <Icon name="code" size={16} /> This demo runs on gamepad-controller. So can yours.
+            <Icon name="code" size={16} /> This demo runs on gamepad-ui-engine. So can yours.
             <a href="#/docs/examples">Explore eight mini apps →</a>
             <a href="#/docs/react">View the integration <Icon name="arrow" size={14} /></a>
         </div>
@@ -110,6 +110,6 @@ export function SiteFooter({ repository }: { repository: string }) {
         <div><strong>Build</strong><a href="#/docs/installation">Get started</a><a href="#/docs/react">React guide</a><a href="#/docs/angular">Angular guide</a><a href="#/docs/vanilla">Vanilla JS / TS guide</a><a href="#/docs/agent-skills">AI skills</a><a href="#/docs/playground">Playground</a></div>
         <div><strong>Explore</strong><a href="#/docs/api">API reference</a><a href="#/docs/controllers">Controller mappings</a><a href="#/docs/host-bridge">Host integration</a></div>
         <div><strong>Open source</strong><a href={repository}>GitHub ↗</a><a href={repository + '/issues'}>Report an issue ↗</a><span>MIT licensed</span></div>
-        <div className="footer-bottom"><span>gamepad-controller · Built for the web, played your way.</span><span className="mono">v1.0.0</span></div>
+        <div className="footer-bottom"><span>gamepad-ui-engine · Built for the web, played your way.</span><span className="mono">v1.0.0</span></div>
     </footer>;
 }

@@ -9,17 +9,17 @@ export function InstallCommand() {
         className="install-command"
         onClick={async () => {
             try {
-                await navigator.clipboard.writeText('npm install gamepad-controller');
+                await navigator.clipboard.writeText('npm install gamepad-ui-engine');
                 setStatus('Copied!');
                 clearTimeout(timer.current);
                 timer.current = setTimeout(() => setStatus('Copy install command'), 1800);
             } catch {
-                setStatus('Select and copy: npm install gamepad-controller');
+                setStatus('Select and copy: npm install gamepad-ui-engine');
             }
         }}
         aria-label={status}
     >
-        <span>$</span><code>npm install gamepad-controller</code><Icon name="copy" size={15} />
+        <span>$</span><code>npm install gamepad-ui-engine</code><Icon name="copy" size={15} />
         {status !== 'Copy install command' && <span className="copy-feedback" role="status">{status}</span>}
     </button>;
 }

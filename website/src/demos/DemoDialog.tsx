@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
-import type { GamepadService } from 'gamepad-controller';
+import type { GamepadService } from 'gamepad-ui-engine';
 
 /** Requires native dialog support; explicit scope also covers browsers without :modal matching. */
 export function DemoDialog({

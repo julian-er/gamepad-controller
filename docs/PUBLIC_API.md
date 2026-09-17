@@ -1,6 +1,6 @@
 # Public API contracts
 
-Import these runtime values and types from `gamepad-controller`. Internal subpaths are not package exports. Start with [service lifecycle and host contracts](API.md) and [complete configuration](CONFIGURATION.md).
+Import these runtime values and types from `gamepad-ui-engine`. Internal subpaths are not package exports. Start with [service lifecycle and host contracts](API.md) and [complete configuration](CONFIGURATION.md).
 
 ## Service signatures
 

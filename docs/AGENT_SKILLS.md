@@ -1,6 +1,6 @@
 # Gamepad Controller consumer skills
 
-`gamepad-controller` **1.0.0** includes four portable consumer skills in the package’s `skills/` directory. They are guidance for an AI coding harness; installing the npm package does not register them automatically.
+`gamepad-ui-engine` **1.0.0** includes four portable consumer skills in the package’s `skills/` directory. They are guidance for an AI coding harness; installing the npm package does not register them automatically.
 
 | Skill | Use it for |
 | --- | --- |
@@ -24,7 +24,7 @@ Choose the skill and harness before copying. The following examples use `gamepad
 ### Windows PowerShell
 
 ```powershell
-$source = 'node_modules/gamepad-controller/skills/gamepad-integrate'
+$source = 'node_modules/gamepad-ui-engine/skills/gamepad-integrate'
 $destination = '.agents/skills/gamepad-integrate'
 
 if (Test-Path -LiteralPath $destination) {
@@ -40,7 +40,7 @@ For a repository checkout, set `$source` to `skills/gamepad-integrate` in that c
 ### macOS, Linux, or Git Bash
 
 ```sh
-source_dir='node_modules/gamepad-controller/skills/gamepad-integrate'
+source_dir='node_modules/gamepad-ui-engine/skills/gamepad-integrate'
 destination='.agents/skills/gamepad-integrate'
 
 test ! -e "$destination" || {
@@ -58,7 +58,7 @@ cp -R "$source_dir" "$destination"
 Place the folder in `.agents/skills/<skill-name>/`. Ask, for example:
 
 ```text
-Use $gamepad-integrate to add gamepad-controller to this React application and clean it up on unmount.
+Use $gamepad-integrate to add gamepad-ui-engine to this React application and clean it up on unmount.
 ```
 
 Codex skill support and automatic selection depend on the installed Codex version. Explicitly naming the skill is the most reliable invocation.

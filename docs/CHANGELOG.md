@@ -15,5 +15,6 @@ This is the first published package. No earlier package releases are documented.
 - Controller mapping helpers, typed configuration, an injectable platform adapter and optional focus styles.
 - An ES-module distribution with TypeScript declarations.
 - React, Angular and vanilla JavaScript/TypeScript guides, a documentation playground and four portable AI consumer skills.
+- Published to npm as `gamepad-ui-engine`.
 
 See [API.md](API.md) for the contracts, [BUILDING.md](BUILDING.md) for building and packing from source, and [AGENT_SKILLS.md](AGENT_SKILLS.md) for the consumer skills.

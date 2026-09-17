@@ -1,5 +1,5 @@
 {
-  "name": "gamepad-controller",
+  "name": "gamepad-ui-engine",
   "version": "1.0.0",
   "packageManager": "pnpm@12.4.2",
   "description": "Gamepad navigation controller for the web — spatial/grid navigation, dual-context (menu vs content), controller detection, and a custom-event mode for WinUI/host integrations. TypeScript-first.",

@@ -7,7 +7,7 @@ export const demoDocs: Doc[] = [
         group: 'CORE CONCEPTS',
         title: 'Example gallery',
         summary:
-            'Explore real interfaces powered by gamepad-controller. Try a challenge, inspect the code, and build your own.',
+            'Explore real interfaces powered by gamepad-ui-engine. Try a challenge, inspect the code, and build your own.',
         interactiveDemo: 'gallery',
         sections: [],
     },

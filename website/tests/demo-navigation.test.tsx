@@ -1,7 +1,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { GamepadService, type GamepadActionEvent } from 'gamepad-controller';
+import { GamepadService, type GamepadActionEvent } from 'gamepad-ui-engine';
 import { DemoShell } from '../src/demos/DemoShell';
 import Portfolio from '../src/demos/apps/Portfolio';
 import ProductExplorer from '../src/demos/apps/ProductExplorer';

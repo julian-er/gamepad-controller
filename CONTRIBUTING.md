@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for considering a contribution to `gamepad-controller`.
+Thanks for considering a contribution to `gamepad-ui-engine`.
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ Branch names use a `type/short-kebab-description` shape, for example `fix/axis-d
 
 ## Making changes
 
-- Consumer examples and website code import only from the `gamepad-controller` public entry
+- Consumer examples and website code import only from the `gamepad-ui-engine` public entry
   point — never private library modules.
 - Docs and sample claims must match the current public API (`src/index.ts`,
   `docs/API.md`).

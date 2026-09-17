@@ -208,7 +208,7 @@ importers:
 
   website:
     dependencies:
-      gamepad-controller:
+      gamepad-ui-engine:
         specifier: workspace:*
         version: link:..
       react:

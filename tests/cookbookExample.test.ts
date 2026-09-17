@@ -19,7 +19,7 @@ it('runs the cookbook starter with repeat protection, round reset, and cleanup',
     vi.spyOn(window, 'cancelAnimationFrame').mockReturnValue(undefined);
     vi.spyOn(Math, 'random').mockReturnValue(0);
     const mount = new Function('GamepadService', script
-        .replace("import { GamepadService } from 'gamepad-controller';", '')
+        .replace("import { GamepadService } from 'gamepad-ui-engine';", '')
         .replace('export function', 'function')
         .split('let dispose = mountTreasure();')[0] + '\nreturn mountTreasure;')(GamepadService);
     const dispose = mount();

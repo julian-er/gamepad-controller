@@ -1,6 +1,6 @@
 # Project cookbook
 
-Build something you can explore from the couch. These projects use gamepad-controller to move focus and activate ordinary web controls. Your application owns the content, state, routes, and game rules.
+Build something you can explore from the couch. These projects use gamepad-ui-engine to move focus and activate ordinary web controls. Your application owns the content, state, routes, and game rules.
 
 All eight projects are playable in the documentation site Example gallery, with controller simulation, challenges, API explanations, and source files. Try a project there, then use the briefs below to build your own version. The original interactive playground remains available for exploring basic controller input.
 
@@ -23,7 +23,7 @@ The gallery uses React components inside a shared documentation host; its source
 
 This small DOM game demonstrates a complete interaction: move between tiles, press the primary select button to reveal one, and use the back button to start a new round. Mouse clicks and keyboard Tab/Enter also work through native buttons. The library handles controller focus and activation; the application handles scoring and tile contents.
 
-Prerequisites: an existing vanilla JavaScript project with an ES-module bundler and gamepad-controller installed. Before the first release, follow [local tarball installation](BUILDING.md#testing-the-package-inside-another-project). See [the vanilla guide](USAGE_VANILLA.md) for setup, or port the mount/cleanup ownership using [React](USAGE_REACT.md) or [Angular](USAGE_ANGULAR.md).
+Prerequisites: an existing vanilla JavaScript project with an ES-module bundler and gamepad-ui-engine installed. Before the first release, follow [local tarball installation](BUILDING.md#testing-the-package-inside-another-project). See [the vanilla guide](USAGE_VANILLA.md) for setup, or port the mount/cleanup ownership using [React](USAGE_REACT.md) or [Angular](USAGE_ANGULAR.md).
 
 Create these three files in that project's served application directory. If your project already has an HTML entry point, put the markup into its body and adapt the asset paths. Render only one instance of this example at a time.
 
@@ -70,7 +70,7 @@ button[data-gamepad-focused="true"], button:focus-visible {
 ### JavaScript: treasure.js
 
 ```js
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 export function mountTreasure() {
   const root = document.querySelector('#treasure');
