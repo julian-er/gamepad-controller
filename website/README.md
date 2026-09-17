@@ -7,21 +7,20 @@ A React + TypeScript landing page and documentation site, styled with Sass and t
 From the repository root:
 
 ```sh
-npm install
-npm --prefix website install
-npm --prefix website run dev
+pnpm install
+pnpm --filter gamepad-controller-website run dev
 ```
 
 Open the local URL printed by Vite.
 
 ```sh
-npm --prefix website run typecheck
-npm --prefix website test
-npm --prefix website run build
-npm --prefix website run preview
+pnpm --filter gamepad-controller-website run typecheck
+pnpm --filter gamepad-controller-website run test
+pnpm --filter gamepad-controller-website run build
+pnpm --filter gamepad-controller-website run preview
 ```
 
-The test command reuses the repository's existing Vitest/jsdom development tooling. Install root dependencies before running it.
+The website has its own Vitest/jsdom development dependencies in the workspace.
 
 ## Structure
 
@@ -44,7 +43,7 @@ Runtime dependencies are only React, React DOM, and gamepad-controller. There is
 
 ## Local library integration
 
-The dependency is `gamepad-controller: file:..`. Vite and TypeScript resolve its public entry point to `../src/index.ts`, so the playground documents and exercises the current checkout without depending on a stale library build. It imports no private library modules.
+The dependency is `gamepad-controller: workspace:*`. Vite and TypeScript resolve its public entry point to `../src/index.ts`, so the playground documents and exercises the current checkout without depending on a stale library build. It imports no private library modules.
 
 ## Playground
 
@@ -57,6 +56,8 @@ Stop, route changes, configuration changes, and unmount destroy the owned servic
 ## Deployment
 
 Build to `website/dist/` and serve that directory with any static host over HTTPS. Hash routes support deep documentation links without server rewrites. Vite uses a relative asset base so the site can be hosted under a repository subdirectory. Never publish `design/stitch/` as executable site content: these raw reference exports include third-party CDN code.
+
+The `main` branch is deployed automatically to GitHub Pages at https://julian-er.github.io/gamepad-controller/ by `.github/workflows/pages.yml`.
 
 ## Documentation maintenance
 
