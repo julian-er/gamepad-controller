@@ -1,4 +1,4 @@
-# Building & Packaging `gamepad-controller`
+# Building & Packaging `gamepad-ui-engine`
 
 This guide covers building the library from source, packing it, and testing it locally
 inside another project. Version 1.0.0 is published on npm; use a local tarball to try unreleased changes.
@@ -45,7 +45,7 @@ dist/
 
 The package is **ESM-only**. Its `exports` map resolves `types` → `import` in that order, so modern
 bundlers and `node16`/`nodenext` TypeScript resolution pick up the correct entry and types.
-`require('gamepad-controller')` is intentionally unsupported — consume it with `import` (or a
+`require('gamepad-ui-engine')` is intentionally unsupported — consume it with `import` (or a
 dynamic `import()` from CommonJS).
 
 `"sideEffects": false` is declared, so bundlers can tree-shake any unused exports out of
@@ -76,9 +76,9 @@ Two options:
 
 ```bash
 pnpm run build
-pnpm pack                     # -> gamepad-controller-1.0.0.tgz
+pnpm pack                     # -> gamepad-ui-engine-1.0.0.tgz
 cd ../my-app
-npm install ../gamepad-controller/gamepad-controller-1.0.0.tgz
+npm install ../gamepad-controller/gamepad-ui-engine-1.0.0.tgz
 ```
 
 Note: The consuming app can use any package manager (npm, yarn, pnpm); the example above shows npm for cross-manager compatibility.

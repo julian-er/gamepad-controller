@@ -5,7 +5,7 @@ export const authoredDocs: Doc[] = [
     {
         id: 'introduction',
         group: 'GETTING STARTED',
-        title: 'gamepad-controller',
+        title: 'gamepad-ui-engine',
         summary:
             'A small, focused engine for controller-driven interfaces. Bring spatial navigation, native focus, and predictable input to your web application.',
         sections: [
@@ -20,7 +20,7 @@ export const authoredDocs: Doc[] = [
                 id: 'overview',
                 title: 'Built for the way you play',
                 body: [
-                    'Turn ordinary buttons, links, and inputs into a controller-navigable interface. gamepad-controller discovers eligible elements, routes directional input, and keeps browser focus in sync.',
+                    'Turn ordinary buttons, links, and inputs into a controller-navigable interface. gamepad-ui-engine discovers eligible elements, routes directional input, and keeps browser focus in sync.',
                     'Use it in Angular, React, a vanilla web application, or a native WebView. The library owns input and navigation; your application owns the experience.',
                 ],
             },
@@ -57,7 +57,7 @@ export const authoredDocs: Doc[] = [
             {
                 id: 'install',
                 title: 'Install from npm',
-                code: 'npm install gamepad-controller',
+                code: 'npm install gamepad-ui-engine',
                 language: 'Terminal',
             },
             {
@@ -66,7 +66,7 @@ export const authoredDocs: Doc[] = [
                 body: [
                     'To test changes that are not published yet, install dependencies in the repository checkout, build and pack; then install that tarball into your application. See [Building and packaging](#/docs/building) for the full procedure.',
                 ],
-                code: 'pnpm install\npnpm run build\npnpm pack\n# In your application directory:\nnpm install /path/to/gamepad-controller/gamepad-controller-1.0.0.tgz',
+                code: 'pnpm install\npnpm run build\npnpm pack\n# In your application directory:\nnpm install /path/to/gamepad-ui-engine/gamepad-ui-engine-1.0.0.tgz',
                 language: 'Terminal',
             },
             {
@@ -100,7 +100,7 @@ export const authoredDocs: Doc[] = [
                 examples: angularExamples,
                 body: [
                     'See [Angular lifecycle documentation](https://angular.dev/guide/components/lifecycle) for view initialization and teardown.',
-                    'Select Angular for a complete component with real focusable targets. Install gamepad-controller in your Angular project and import CatalogComponent into the parent standalone component.',
+                    'Select Angular for a complete component with real focusable targets. Install gamepad-ui-engine in your Angular project and import CatalogComponent into the parent standalone component.',
                     'Initialize on the client after the DOM exists. For server-rendered applications, guard browser-only initialization and wait until hydration is complete. Do not inject GamepadService as though it were an Angular-provided service.',
                 ],
             },
@@ -126,7 +126,7 @@ export const authoredDocs: Doc[] = [
                 examples: vanillaExamples,
                 body: [
                     'The Vanilla TS example is also valid plain JavaScript. Save it as catalog.js in a bundled ES-module app, create the shown HTML first, and call dispose() when removing the view.',
-                    'npm install gamepad-controller installs an ES module. A bare import needs a bundler or an explicit browser import map; it is not resolved by an unconfigured script tag.',
+                    'npm install gamepad-ui-engine installs an ES module. A bare import needs a bundler or an explicit browser import map; it is not resolved by an unconfigured script tag.',
                 ],
             },
             {
@@ -170,7 +170,7 @@ export const authoredDocs: Doc[] = [
         group: 'CORE CONCEPTS',
         title: 'Interactive playground',
         summary:
-            'Connect a controller or run the host-input simulation. Every focus movement is handled by gamepad-controller.',
+            'Connect a controller or run the host-input simulation. Every focus movement is handled by gamepad-ui-engine.',
         sections: [
             {
                 id: 'controls',
@@ -300,7 +300,7 @@ export const authoredDocs: Doc[] = [
             {
                 id: 'helpers',
                 title: 'Read labels from the library',
-                code: "import {\n  getButtonName, getAxisName, getDpadIndices,\n  getPrimaryActionButtonIndex, CONTROLLER_MAPPINGS,\n} from 'gamepad-controller';\n\ngetButtonName(0, 'playstation'); // 'Cross'\ngetAxisName(0, 'xbox');          // 'Left Stick X'\ngetDpadIndices('xbox');         // up, down, left, right\ngetPrimaryActionButtonIndex('xbox'); // 0",
+                code: "import {\n  getButtonName, getAxisName, getDpadIndices,\n  getPrimaryActionButtonIndex, CONTROLLER_MAPPINGS,\n} from 'gamepad-ui-engine';\n\ngetButtonName(0, 'playstation'); // 'Cross'\ngetAxisName(0, 'xbox');          // 'Left Stick X'\ngetDpadIndices('xbox');         // up, down, left, right\ngetPrimaryActionButtonIndex('xbox'); // 0",
                 body: [
                     'Detection considers device identifiers and minimum button/axis counts. Browser and device mappings can differ. The generic arcade preview does not imply that every physical arcade stick exposes a standard mapping.',
                 ],

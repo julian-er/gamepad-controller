@@ -20,7 +20,7 @@ let gamepadInstance: GamepadService | null = null;
 
 /**
  * Main gamepad service function for initializing gamepad navigation.
- * This is the primary API for the gamepad controller library.
+ * This is the primary API for the gamepad-ui-engine library.
  *
  * @param containerSelector - Optional selector to limit navigation scope
  * @param options - Optional configuration options to override defaults

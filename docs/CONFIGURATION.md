@@ -7,7 +7,7 @@ Use `GamepadServiceConfig` for constructor and factory input. `GamepadServiceOpt
 Flat keys and seven optional groups are supported. A defined grouped value overrides its flat equivalent. An undefined grouped field is ignored, so it cannot erase a flat value. Explicit flat undefined values do overwrite constructor defaults; omit optional fields instead of passing undefined. `service.options` is a readonly TypeScript view of the flattened options, not a deeply frozen live configuration API. Construct a new service when changing configuration.
 
 ```ts
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 const service = new GamepadService({
   navigation: { containerSelector: '#catalog', navigationMode: 'spatial' },

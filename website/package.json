@@ -1,5 +1,5 @@
 {
-    "name": "gamepad-controller-website",
+    "name": "gamepad-ui-engine-website",
     "version": "1.0.0",
     "private": true,
     "type": "module",
@@ -11,7 +11,7 @@
         "test": "vitest run --config vitest.config.ts"
     },
     "dependencies": {
-        "gamepad-controller": "workspace:*",
+        "gamepad-ui-engine": "workspace:*",
         "react": "^19.0.0",
         "react-dom": "^19.0.0"
     },

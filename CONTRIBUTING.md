@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for considering a contribution to `gamepad-controller`.
+Thanks for considering a contribution to `gamepad-ui-engine`.
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ Branch names use a `type/short-kebab-description` shape, for example `fix/axis-d
 
 ## Making changes
 
-- Consumer examples and website code import only from the `gamepad-controller` public entry
+- Consumer examples and website code import only from the `gamepad-ui-engine` public entry
   point — never private library modules.
 - Docs and sample claims must match the current public API (`src/index.ts`,
   `docs/API.md`).
@@ -65,12 +65,12 @@ Formatting fix: `pnpm run format`.
 ### Website checks — CI job `website`
 
 ```bash
-pnpm --filter gamepad-controller-website run typecheck
-pnpm --filter gamepad-controller-website run test
-pnpm --filter gamepad-controller-website run build
+pnpm --filter gamepad-ui-engine-website run typecheck
+pnpm --filter gamepad-ui-engine-website run test
+pnpm --filter gamepad-ui-engine-website run build
 ```
 
-Dev server: `pnpm --filter gamepad-controller-website run dev`.
+Dev server: `pnpm --filter gamepad-ui-engine-website run dev`.
 
 ## Commit messages and PR titles
 

@@ -1,4 +1,4 @@
-# gamepad-controller
+# gamepad-ui-engine
 
 Browser gamepad navigation for grid, spatial, and horizontal UI layouts. Version **1.0.0** uses the native Gamepad API by default and can accept a validated custom-event input transport for WinUI/WebView2 hosts.
 
@@ -7,13 +7,13 @@ Browser gamepad navigation for grid, spatial, and horizontal UI layouts. Version
 From npm:
 
 ```sh
-npm install gamepad-controller
+npm install gamepad-ui-engine
 ```
 
 Render a unique `#catalog` container with buttons, links or inputs before running this code.
 
 ```js
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 // HTML: <main id="catalog"><button>Play</button><button>Library</button></main>
 export function mountCatalog() {

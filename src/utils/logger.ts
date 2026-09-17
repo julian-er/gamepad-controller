@@ -1,9 +1,9 @@
 // logger.ts
-// Centralized, leveled logger for the gamepad-controller library.
+// Centralized, leveled logger for the gamepad-ui-engine library.
 // Replaces the ~80 inline `console.*` calls and the repeated emoji prefix literal.
 
 /** Prefix used by every log line emitted by the library. */
-export const LOG_PREFIX = '[🎮 🕹️ Gamepad Controller]';
+export const LOG_PREFIX = '[🎮 🕹️ gamepad-ui-engine]';
 
 /**
  * Log levels in order of increasing verbosity.

@@ -1,11 +1,11 @@
-# Integration examples for gamepad-controller 1.0.0
+# Integration examples for gamepad-ui-engine 1.0.0
 
-Install with `npm install gamepad-controller`. To try unreleased changes, build the library and install its local tarball instead. The snippets below render a unique #catalog container; do not mount overlapping instances.
+Install with `npm install gamepad-ui-engine`. To try unreleased changes, build the library and install its local tarball instead. The snippets below render a unique #catalog container; do not mount overlapping instances.
 
 ## Vanilla JavaScript or TypeScript
 
 ```js
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 // HTML: <main id="catalog"><button>Play</button><button>Library</button></main>
 export function mountCatalog() {
@@ -29,7 +29,7 @@ Create the service in an effect whose dependencies identify the UI it owns. Retu
 
 ```tsx
 import { useEffect } from 'react';
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 export function Catalog() {
   useEffect(() => {
@@ -55,7 +55,7 @@ Initialize after the view is available and clean up in `ngOnDestroy`.
 
 ```ts
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 @Component({
   selector: 'app-catalog',

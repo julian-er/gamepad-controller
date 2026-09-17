@@ -1,11 +1,11 @@
 # API reference
 
-This reference covers the public `gamepad-controller` **1.0.0** entry point.
+This reference covers the public `gamepad-ui-engine` **1.0.0** entry point.
 
 ## Create a service
 
 ```ts
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 
 // Render #catalog with focusable controls before initialization.
 const service = new GamepadService({

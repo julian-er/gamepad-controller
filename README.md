@@ -1,4 +1,4 @@
-# gamepad-controller
+# gamepad-ui-engine
 
 Browser gamepad navigation for spatial, grid, and horizontal layouts, with React, Angular, vanilla JavaScript/TypeScript, and custom-event host integration.
 
@@ -7,7 +7,7 @@ Browser gamepad navigation for spatial, grid, and horizontal layouts, with React
 From npm:
 
 ```sh
-npm install gamepad-controller
+npm install gamepad-ui-engine
 ```
 
 ## Documentation

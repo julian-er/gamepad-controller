@@ -93,7 +93,7 @@ it('keeps generated framework examples syntactically valid and uses the public p
                 output.diagnostics?.filter((d) => d.category === ts.DiagnosticCategory.Error),
                 example.code
             ).toEqual([]);
-            expect(example.code).not.toContain('gamepad-controller/react');
+            expect(example.code).not.toContain('gamepad-ui-engine/react');
             expect(example.code).not.toContain('[gamepadScope]');
         }
 });
@@ -169,7 +169,7 @@ it('runs the documented vanilla and React setup snippets with the real service a
         });
         const exports: Record<string, any> = {};
         new Function('require', 'exports', output.outputText)((name: string) => {
-            if (name === 'gamepad-controller') return gamepad;
+            if (name === 'gamepad-ui-engine') return gamepad;
             if (name === 'react') return React;
             if (name === 'react/jsx-runtime') return jsxRuntime;
             throw new Error('Unexpected example import: ' + name);

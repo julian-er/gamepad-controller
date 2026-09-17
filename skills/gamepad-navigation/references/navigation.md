@@ -1,4 +1,4 @@
-# Navigation patterns for gamepad-controller 1.0.0
+# Navigation patterns for gamepad-ui-engine 1.0.0
 
 ## Cancellable actions
 

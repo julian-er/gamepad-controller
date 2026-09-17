@@ -32,7 +32,7 @@ for consumer projects is documented in [Consumer skills](docs/AGENT_SKILLS.md).
 
 ## Public API and validation
 
-Consumer examples and website runtime code must import from the `gamepad-controller` public
+Consumer examples and website runtime code must import from the `gamepad-ui-engine` public
 entry point, not private library modules. Check behavior against the current
 [public exports](src/index.ts) and [API guide](docs/API.md).
 

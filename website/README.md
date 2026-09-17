@@ -1,4 +1,4 @@
-# gamepad-controller website
+# gamepad-ui-engine website
 
 A React + TypeScript landing page and documentation site, styled with Sass and the supplied Stitch design system.
 
@@ -8,16 +8,16 @@ From the repository root:
 
 ```sh
 pnpm install
-pnpm --filter gamepad-controller-website run dev
+pnpm --filter gamepad-ui-engine-website run dev
 ```
 
 Open the local URL printed by Vite.
 
 ```sh
-pnpm --filter gamepad-controller-website run typecheck
-pnpm --filter gamepad-controller-website run test
-pnpm --filter gamepad-controller-website run build
-pnpm --filter gamepad-controller-website run preview
+pnpm --filter gamepad-ui-engine-website run typecheck
+pnpm --filter gamepad-ui-engine-website run test
+pnpm --filter gamepad-ui-engine-website run build
+pnpm --filter gamepad-ui-engine-website run preview
 ```
 
 The website has its own Vitest/jsdom development dependencies in the workspace.
@@ -39,11 +39,11 @@ The website has its own Vitest/jsdom development dependencies in the workspace.
 - `design/stitch/`: original screen code, previews, token files, design systems, and source manifest.
 - `tests/`: React integration checks using the actual library.
 
-Runtime dependencies are only React, React DOM, and gamepad-controller. There is no Tailwind, router, UI kit, icon package, animation library, or syntax-highlighting dependency. Fonts and images are self-hosted.
+Runtime dependencies are only React, React DOM, and gamepad-ui-engine. There is no Tailwind, router, UI kit, icon package, animation library, or syntax-highlighting dependency. Fonts and images are self-hosted.
 
 ## Local library integration
 
-The dependency is `gamepad-controller: workspace:*`. Vite and TypeScript resolve its public entry point to `../src/index.ts`, so the playground documents and exercises the current checkout without depending on a stale library build. It imports no private library modules.
+The dependency is `gamepad-ui-engine: workspace:*`. Vite and TypeScript resolve its public entry point to `../src/index.ts`, so the playground documents and exercises the current checkout without depending on a stale library build. It imports no private library modules.
 
 ## Playground
 

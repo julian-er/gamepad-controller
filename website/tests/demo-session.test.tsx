@@ -1,7 +1,7 @@
 import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { GamepadService } from 'gamepad-controller';
+import { GamepadService } from 'gamepad-ui-engine';
 import { useDemoSession, type DemoSource } from '../src/demos/useDemoSession';
 import { snapshot, sendSnapshot } from '../src/simulation';
 import { DemoShell } from '../src/demos/DemoShell';

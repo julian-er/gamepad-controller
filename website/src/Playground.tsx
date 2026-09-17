@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import { getButtonName } from 'gamepad-controller';
+import { getButtonName } from 'gamepad-ui-engine';
 import { Controller, type Variant } from './components/molecules/Controller/Controller';
 import { useDemoSession, type DemoSource } from './demos/useDemoSession';
 import { Icon } from './components';

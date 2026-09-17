@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { GamepadService, type GamepadActionEvent } from 'gamepad-controller';
+import { GamepadService, type GamepadActionEvent } from 'gamepad-ui-engine';
 import type { Variant } from '../components/molecules/Controller/Controller';
 import { sendSnapshot } from '../simulation';
 

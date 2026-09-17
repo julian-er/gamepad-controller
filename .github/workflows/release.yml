@@ -112,12 +112,12 @@ jobs:
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
           set -euo pipefail
-          if npm view "gamepad-controller@${VERSION}" version >/dev/null 2>&1; then
+          if npm view "gamepad-ui-engine@${VERSION}" version >/dev/null 2>&1; then
             echo "published=true" >> "$GITHUB_OUTPUT"
-            echo "gamepad-controller@${VERSION} is already published; skipping npm publish."
+            echo "gamepad-ui-engine@${VERSION} is already published; skipping npm publish."
           else
             echo "published=false" >> "$GITHUB_OUTPUT"
-            echo "gamepad-controller@${VERSION} is not yet published."
+            echo "gamepad-ui-engine@${VERSION} is not yet published."
           fi
 
       - name: Publish to npm

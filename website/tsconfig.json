@@ -13,7 +13,7 @@
         "resolveJsonModule": true,
         "types": ["vite/client"],
         "paths": {
-            "gamepad-controller": ["../src/index.ts"]
+            "gamepad-ui-engine": ["../src/index.ts"]
         }
     },
     "include": ["src"]

@@ -25,8 +25,8 @@ export function App() {
         const anchor = route.split('#')[1];
         if (anchor) document.getElementById(anchor)?.scrollIntoView();
         document.title = isDocs
-            ? (doc?.title ?? 'Page not found') + ' — gamepad-controller docs'
-            : 'gamepad-controller — Console-grade navigation for the web';
+            ? (doc?.title ?? 'Page not found') + ' — gamepad-ui-engine docs'
+            : 'gamepad-ui-engine — Console-grade navigation for the web';
     }, [route, doc, isDocs]);
     useEffect(() => {
         const handler = (event: KeyboardEvent) => {

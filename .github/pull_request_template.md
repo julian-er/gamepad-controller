@@ -23,7 +23,7 @@
 - [ ] Library checks pass (`pnpm run lint`, `format:check`, `typecheck`, `test:coverage`,
       `build`, `pnpm pack --dry-run`)
 - [ ] Website checks pass (if `website/` or docs were touched):
-      `pnpm --filter gamepad-controller-website run typecheck / test / build`
+      `pnpm --filter gamepad-ui-engine-website run typecheck / test / build`
 - [ ] `docs/CHANGELOG.md` updated for user-facing changes
 - [ ] Docs updated and API claims verified against `src/index.ts` / `docs/API.md`
 - [ ] Browser verification recorded per `website/VERIFICATION.md` (for UI interaction changes)

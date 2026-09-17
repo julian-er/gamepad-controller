@@ -1,4 +1,4 @@
-# Diagnostics for gamepad-controller 1.0.0
+# Diagnostics for gamepad-ui-engine 1.0.0
 
 ## Add a temporary event probe
 

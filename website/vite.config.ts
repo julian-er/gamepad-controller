@@ -4,7 +4,7 @@ export default defineConfig({
     base: './',
     resolve: {
         alias: {
-            'gamepad-controller': fileURLToPath(new URL('../src/index.ts', import.meta.url)),
+            'gamepad-ui-engine': fileURLToPath(new URL('../src/index.ts', import.meta.url)),
         },
     },
     server: { fs: { allow: ['..'] } },
