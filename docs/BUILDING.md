@@ -1,7 +1,7 @@
 # Building & Packaging `gamepad-controller`
 
 This guide covers building the library from source, packing it, and testing it locally
-inside another project. Version 1.0.0 is the planned first package publication; use a local tarball until it is available from the registry.
+inside another project. Version 1.0.0 is published on npm; use a local tarball to try unreleased changes.
 
 ## Prerequisites
 

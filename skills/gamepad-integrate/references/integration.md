@@ -1,6 +1,6 @@
 # Integration examples for gamepad-controller 1.0.0
 
-Before publication, build the library and install its local tarball. The npm registry command applies after the first publication. The snippets below render a unique #catalog container; do not mount overlapping instances.
+Install with `npm install gamepad-controller`. To try unreleased changes, build the library and install its local tarball instead. The snippets below render a unique #catalog container; do not mount overlapping instances.
 
 ## Vanilla JavaScript or TypeScript
 

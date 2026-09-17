@@ -2,7 +2,9 @@
 
 Browser gamepad navigation for spatial, grid, and horizontal layouts, with React, Angular, vanilla JavaScript/TypeScript, and custom-event host integration.
 
-**Release status:** 1.0.0 is being prepared as the first published package. Before publication, [build and install a local tarball](docs/BUILDING.md#testing-the-package-inside-another-project). After publication:
+**Install:** 1.0.0 is the first published release. To try unreleased changes, [build and install a local tarball](docs/BUILDING.md#testing-the-package-inside-another-project).
+
+From npm:
 
 ```sh
 npm install gamepad-controller

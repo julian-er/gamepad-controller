@@ -5,7 +5,7 @@ description: Integrate gamepad-controller 1.0.0 in a vanilla JavaScript, React, 
 
 # Integrate gamepad-controller
 
-Use this skill when the user wants to add or initialize `gamepad-controller` in a browser application. It covers the planned first-release public API in version **1.0.0**. Use imports from `gamepad-controller`; do not rely on package internals.
+Use this skill when the user wants to add or initialize `gamepad-controller` in a browser application. It covers the public API of version **1.0.0**. Use imports from `gamepad-controller`; do not rely on package internals.
 
 Create a service after the target DOM exists, subscribe before `init()`, and call `destroy()` when that application feature is discarded. `destroy()` clears subscriptions, input state, and manual targets. A later `init()` starts a fresh lifecycle, so re-register them first.
 
