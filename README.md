@@ -17,6 +17,7 @@ npm install gamepad-controller
 - [Building and packaging](docs/BUILDING.md)
 - [First-release notes](docs/CHANGELOG.md)
 - [AI consumer skills](docs/AGENT_SKILLS.md)
+- [Contributing](CONTRIBUTING.md)
 
 Library guides live in `docs/`. Portable AI skill folders remain self-contained in `skills/`.
 

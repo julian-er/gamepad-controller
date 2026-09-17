@@ -1,0 +1,172 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Guard - tag matches package.json version
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          EXPECTED_TAG="v${PKG_VERSION}"
+          if [ "${GITHUB_REF_NAME}" != "${EXPECTED_TAG}" ]; then
+            echo "::error::Tag '${GITHUB_REF_NAME}' does not match package.json version '${PKG_VERSION}' (expected tag '${EXPECTED_TAG}')." >&2
+            exit 1
+          fi
+          echo "Tag '${GITHUB_REF_NAME}' matches package.json version '${PKG_VERSION}'."
+
+      - name: Guard - commit is merged into main
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "::error::Commit ${GITHUB_SHA} is not an ancestor of origin/main; refusing to release from an unmerged commit." >&2
+            exit 1
+          fi
+          echo "Commit ${GITHUB_SHA} is on origin/main."
+
+      - name: Compute release metadata
+        id: meta
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          if [[ "${VERSION}" == *-* ]]; then
+            DIST_TAG="next"
+            PRERELEASE="true"
+          else
+            DIST_TAG="latest"
+            PRERELEASE="false"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "dist-tag=${DIST_TAG}" >> "$GITHUB_OUTPUT"
+          echo "prerelease=${PRERELEASE}" >> "$GITHUB_OUTPUT"
+          echo "Version: ${VERSION}, dist-tag: ${DIST_TAG}, prerelease: ${PRERELEASE}"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24.x"
+          registry-url: https://registry.npmjs.org
+
+      - name: Ensure npm >= 11.5.1
+        run: |
+          set -euo pipefail
+          CURRENT="$(npm --version)"
+          REQUIRED="11.5.1"
+          SMALLEST="$(printf '%s\n%s\n' "$REQUIRED" "$CURRENT" | sort -V | head -n1)"
+          if [ "${SMALLEST}" != "${REQUIRED}" ]; then
+            echo "npm ${CURRENT} is older than the required ${REQUIRED}; upgrading."
+            npm install -g npm@11
+          else
+            echo "npm ${CURRENT} already satisfies the minimum required version ${REQUIRED}."
+          fi
+          npm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Test with coverage
+        run: pnpm run test:coverage
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Check whether this version is already published
+        id: check-published
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          if npm view "gamepad-controller@${VERSION}" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "gamepad-controller@${VERSION} is already published; skipping npm publish."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "gamepad-controller@${VERSION} is not yet published."
+          fi
+
+      - name: Publish to npm
+        if: steps.check-published.outputs.published != 'true'
+        env:
+          DIST_TAG: ${{ steps.meta.outputs.dist-tag }}
+        run: npm publish --provenance --access public --tag "${DIST_TAG}"
+
+      - name: Extract release notes
+        id: notes
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          CHANGELOG="docs/CHANGELOG.md"
+          NOTES_FILE="release-notes.md"
+          awk -v ver="${VERSION}" '
+            BEGIN { found = 0 }
+            /^## / {
+              if (found) { exit }
+              rest = substr($0, 4)
+              split(rest, parts, " ")
+              if (parts[1] == ver) {
+                found = 1
+                print
+                next
+              }
+              next
+            }
+            found { print }
+          ' "${CHANGELOG}" > "${NOTES_FILE}"
+          if [ ! -s "${NOTES_FILE}" ]; then
+            echo "Release ${VERSION}." > "${NOTES_FILE}"
+          fi
+          echo "path=${NOTES_FILE}" >> "$GITHUB_OUTPUT"
+          echo "--- release notes ---"
+          cat "${NOTES_FILE}"
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          NOTES_FILE: ${{ steps.notes.outputs.path }}
+          PRERELEASE: ${{ steps.meta.outputs.prerelease }}
+        run: |
+          set -euo pipefail
+          PRERELEASE_FLAG=""
+          if [ "${PRERELEASE}" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          gh release create "${TAG}" --notes-file "${NOTES_FILE}" --title "${TAG}" ${PRERELEASE_FLAG} \
+            || gh release edit "${TAG}" --notes-file "${NOTES_FILE}" --title "${TAG}" ${PRERELEASE_FLAG}
