@@ -1,6 +1,6 @@
 # Angular
 
-Install the local tarball described in [BUILDING.md](BUILDING.md#testing-the-package-inside-another-project) before publication. After the first release is published, use `npm install gamepad-controller`.
+Install with `npm install gamepad-controller`. To try unreleased changes, install the local tarball described in [BUILDING.md](BUILDING.md#testing-the-package-inside-another-project).
 
 ## Component lifecycle
 

@@ -17,7 +17,7 @@ export function Documentation({ doc, suspended = false }: { doc: Doc; suspended?
             <h1>{doc.title}<span className="mint">.</span></h1>
             <p className="doc-lede">{doc.summary}</p>
             <div className="doc-meta">
-                <Badge>First release · unreleased</Badge><Badge>TypeScript first</Badge><Badge>Zero runtime dependencies</Badge><Badge>MIT license</Badge>
+                <Badge>Version 1.0.0</Badge><Badge>TypeScript first</Badge><Badge>Zero runtime dependencies</Badge><Badge>MIT license</Badge>
             </div>
             {(doc.id === 'introduction' || doc.id === 'playground') && <section id="interactive-preview" className="doc-section">
                 <Playground /><p><a href="#/docs/examples">Explore eight complete mini apps →</a></p>

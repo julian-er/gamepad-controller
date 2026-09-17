@@ -1,8 +1,8 @@
 # Release notes
 
-## 1.0.0 — Unreleased
+## 1.0.0 — 2026-09-17
 
-This is the planned first published package. No earlier package releases are documented.
+This is the first published package. No earlier package releases are documented.
 
 ### Included in the first release
 
@@ -16,4 +16,4 @@ This is the planned first published package. No earlier package releases are doc
 - An ES-module distribution with TypeScript declarations.
 - React, Angular and vanilla JavaScript/TypeScript guides, a documentation playground and four portable AI consumer skills.
 
-See [API.md](API.md) for the contracts, [BUILDING.md](BUILDING.md) for local installation before publication, and [AGENT_SKILLS.md](AGENT_SKILLS.md) for the consumer skills.
+See [API.md](API.md) for the contracts, [BUILDING.md](BUILDING.md) for building and packing from source, and [AGENT_SKILLS.md](AGENT_SKILLS.md) for the consumer skills.

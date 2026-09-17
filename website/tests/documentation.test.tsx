@@ -105,7 +105,7 @@ it('keeps recovery and teardown fragments intact instead of inventing a new serv
     expect(docs.some((doc) => /migration/i.test(doc.id + doc.title))).toBe(false);
     expect(referenceSources.some(([source]) => /MIGRATION/.test(source))).toBe(false);
     expect(
-        docs.find((doc) => doc.id === 'release-notes')?.sections.some((section) => section.title.includes('Unreleased'))
+        docs.find((doc) => doc.id === 'release-notes')?.sections.some((section) => /^1\.0\.0 — \d{4}-\d{2}-\d{2}$/.test(section.title))
     ).toBe(true);
 });
 

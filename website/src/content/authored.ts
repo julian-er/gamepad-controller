@@ -11,9 +11,9 @@ export const authoredDocs: Doc[] = [
         sections: [
             {
                 id: 'release-status',
-                title: 'First release in preparation',
+                title: 'First release: 1.0.0',
                 body: [
-                    'Version 1.0.0 is the planned first package publication. Until it is published, build and install a local tarball using the [building guide](#/docs/building).',
+                    'Version 1.0.0 is the first published release. Install it from npm, or build a local tarball to try unreleased changes using the [building guide](#/docs/building).',
                 ],
             },
             {
@@ -55,18 +55,18 @@ export const authoredDocs: Doc[] = [
         summary: 'From your first install to the first focus ring.',
         sections: [
             {
-                id: 'local-install',
-                title: 'Try it before publication',
-                body: [
-                    'Version 1.0.0 has not been published yet. From the repository checkout, install dependencies, build and pack; then install that tarball into your application. See [Building and packaging](#/docs/building) for the full procedure.',
-                ],
-                code: 'npm install\nnpm run build\nnpm pack\n# In your application directory:\nnpm install /path/to/gamepad-controller/gamepad-controller-1.0.0.tgz',
+                id: 'install',
+                title: 'Install from npm',
+                code: 'npm install gamepad-controller',
                 language: 'Terminal',
             },
             {
-                id: 'install',
-                title: 'Install after publication',
-                code: 'npm install gamepad-controller',
+                id: 'local-install',
+                title: 'Try unreleased changes',
+                body: [
+                    'To test changes that are not published yet, install dependencies in the repository checkout, build and pack; then install that tarball into your application. See [Building and packaging](#/docs/building) for the full procedure.',
+                ],
+                code: 'pnpm install\npnpm run build\npnpm pack\n# In your application directory:\nnpm install /path/to/gamepad-controller/gamepad-controller-1.0.0.tgz',
                 language: 'Terminal',
             },
             {
@@ -126,7 +126,7 @@ export const authoredDocs: Doc[] = [
                 examples: vanillaExamples,
                 body: [
                     'The Vanilla TS example is also valid plain JavaScript. Save it as catalog.js in a bundled ES-module app, create the shown HTML first, and call dispose() when removing the view.',
-                    'After publication, npm install gamepad-controller installs an ES module. Until then, install the local tarball. A bare import needs a bundler or an explicit browser import map; it is not resolved by an unconfigured script tag.',
+                    'npm install gamepad-controller installs an ES module. A bare import needs a bundler or an explicit browser import map; it is not resolved by an unconfigured script tag.',
                 ],
             },
             {
