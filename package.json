@@ -1,6 +1,7 @@
 {
   "name": "gamepad-controller",
   "version": "1.0.0",
+  "packageManager": "pnpm@12.4.2",
   "description": "Gamepad navigation controller for the web — spatial/grid navigation, dual-context (menu vs content), controller detection, and a custom-event mode for WinUI/host integrations. TypeScript-first.",
   "type": "module",
   "main": "./dist/index.js",
@@ -53,9 +54,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
-    "prepublishOnly": "npm run lint && npm run typecheck && npm run test && npm run build",
-    "serve": "http-server . -c-1 -o pages/home-page",
-    "example-test": "rimraf dist && npm run build && npm pack && cd examples && npm i && npm run dev"
+    "prepublishOnly": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -63,7 +62,6 @@
     "@typescript-eslint/parser": "^8.0.0",
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.0.0",
-    "http-server": "^14.1.1",
     "jsdom": "^25.0.0",
     "prettier": "^3.3.0",
     "rimraf": "^6.0.0",
