@@ -1,4 +1,4 @@
-# Gamepad Controller consumer skills
+# gamepad-ui-engine consumer skills
 
 `gamepad-ui-engine` **1.0.0** includes four portable consumer skills in the package’s `skills/` directory. They are guidance for an AI coding harness; installing the npm package does not register them automatically.
 

@@ -46,6 +46,6 @@ jobs:
           node-version: '24.x'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter gamepad-controller-website run typecheck
-      - run: pnpm --filter gamepad-controller-website run test
-      - run: pnpm --filter gamepad-controller-website run build
+      - run: pnpm --filter gamepad-ui-engine-website run typecheck
+      - run: pnpm --filter gamepad-ui-engine-website run test
+      - run: pnpm --filter gamepad-ui-engine-website run build

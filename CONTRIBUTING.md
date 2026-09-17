@@ -65,12 +65,12 @@ Formatting fix: `pnpm run format`.
 ### Website checks — CI job `website`
 
 ```bash
-pnpm --filter gamepad-controller-website run typecheck
-pnpm --filter gamepad-controller-website run test
-pnpm --filter gamepad-controller-website run build
+pnpm --filter gamepad-ui-engine-website run typecheck
+pnpm --filter gamepad-ui-engine-website run test
+pnpm --filter gamepad-ui-engine-website run build
 ```
 
-Dev server: `pnpm --filter gamepad-controller-website run dev`.
+Dev server: `pnpm --filter gamepad-ui-engine-website run dev`.
 
 ## Commit messages and PR titles
 

@@ -66,7 +66,7 @@ export const authoredDocs: Doc[] = [
                 body: [
                     'To test changes that are not published yet, install dependencies in the repository checkout, build and pack; then install that tarball into your application. See [Building and packaging](#/docs/building) for the full procedure.',
                 ],
-                code: 'pnpm install\npnpm run build\npnpm pack\n# In your application directory:\nnpm install /path/to/gamepad-controller/gamepad-ui-engine-1.0.0.tgz',
+                code: 'pnpm install\npnpm run build\npnpm pack\n# In your application directory:\nnpm install /path/to/gamepad-ui-engine/gamepad-ui-engine-1.0.0.tgz',
                 language: 'Terminal',
             },
             {

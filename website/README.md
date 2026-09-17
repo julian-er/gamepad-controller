@@ -8,16 +8,16 @@ From the repository root:
 
 ```sh
 pnpm install
-pnpm --filter gamepad-controller-website run dev
+pnpm --filter gamepad-ui-engine-website run dev
 ```
 
 Open the local URL printed by Vite.
 
 ```sh
-pnpm --filter gamepad-controller-website run typecheck
-pnpm --filter gamepad-controller-website run test
-pnpm --filter gamepad-controller-website run build
-pnpm --filter gamepad-controller-website run preview
+pnpm --filter gamepad-ui-engine-website run typecheck
+pnpm --filter gamepad-ui-engine-website run test
+pnpm --filter gamepad-ui-engine-website run build
+pnpm --filter gamepad-ui-engine-website run preview
 ```
 
 The website has its own Vitest/jsdom development dependencies in the workspace.

@@ -42,10 +42,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Test website
-        run: pnpm --filter gamepad-controller-website run test
+        run: pnpm --filter gamepad-ui-engine-website run test
 
       - name: Build website
-        run: pnpm --filter gamepad-controller-website run build
+        run: pnpm --filter gamepad-ui-engine-website run build
 
       - name: Guard against publishing design source
         run: |

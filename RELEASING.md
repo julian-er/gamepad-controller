@@ -126,9 +126,9 @@ is stored anywhere.
    pnpm run test:coverage
    pnpm run build
    pnpm pack --dry-run
-   pnpm --filter gamepad-controller-website run typecheck
-   pnpm --filter gamepad-controller-website run test
-   pnpm --filter gamepad-controller-website run build
+   pnpm --filter gamepad-ui-engine-website run typecheck
+   pnpm --filter gamepad-ui-engine-website run test
+   pnpm --filter gamepad-ui-engine-website run build
    ```
 6. Commit: `git commit -m "chore(release): vX.Y.Z"`.
 7. `git push -u origin release/vX.Y.Z`.
