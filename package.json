@@ -42,7 +42,11 @@
   "bugs": {
     "url": "https://github.com/julian-er/gamepad-controller/issues"
   },
-  "homepage": "https://github.com/julian-er/gamepad-controller#readme",
+  "homepage": "https://julian-er.github.io/gamepad-controller/",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "clean": "rimraf dist",
     "build": "rimraf dist && vite build",
