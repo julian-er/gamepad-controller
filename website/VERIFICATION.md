@@ -1,5 +1,72 @@
 # Website verification record
 
+## Three.js controller playground — 2026-09-19
+
+This record covers the integrated home and documentation playground at the current working-tree
+artifact. Earlier sections remain historical baselines.
+
+### Automated and build checks
+
+- `pnpm --filter gamepad-ui-engine-website run typecheck`: passed (exit 0).
+- `pnpm --filter gamepad-ui-engine-website run test`: passed (exit 0): 14 files, 95 tests.
+- `pnpm --filter gamepad-ui-engine-website run build`: passed (exit 0): 180 modules transformed.
+- `git diff --check`: passed (exit 0).
+- The source-viewer dependency manifest includes `controller-preview.ts` alongside the shared demo
+  session and simulation sources.
+
+The production build keeps the relative Vite base. The main JavaScript is recorded by Vite as
+148.20 kB gzip, compared with the accepted 144.90 kB gzip baseline: a 3.30 kB initial delta,
+within the 10 kB limit. The deferred renderer, shared rig/Three, and model adapters total about
+150 kB gzip, within the 250 KiB deferred limit. Vite reports decimal kB; these values are not
+labelled KiB.
+
+### Production browser verification
+
+- The production preview was mounted at `/gamepad-controller/`, where relative JavaScript chunks,
+  CSS, fonts, and both GLBs resolved from that non-root path.
+- Chrome 153 and Edge 140 were exercised at 1280 × 800 and 390 × 844 CSS pixels. The home CTA
+  reached the idle Start control without starting input. Home and documentation playgrounds
+  started simulation, moved focus, selected a tile, released input, stopped, and removed the
+  canvas/service on route teardown. No horizontal overflow or page error was observed.
+- All eight gallery routes—Treasure Tiles, film catalog, portfolio, focus timer, recipe browser,
+  product explorer, plan chooser, and quiz night—started simulation, moved focus, selected or
+  changed the app, released input, stopped, and tore down on navigation. Treasure Tiles was also
+  checked for its complete snapshot simulation path and preserved app state across Stop.
+- Screenshots and raw browser evidence are retained with the T6 run evidence. These desktop/mobile
+  checks use desktop Chrome and Edge viewport emulation; they are not physical mobile-device runs.
+
+### 3D budgets and supplied-asset exceptions
+
+The models load only after Start, a visible preview, and an explicit 3D choice. Cold and running
+2D journeys request no Three.js or GLB resources; selecting one style does not fetch the other.
+
+| Model | Original bytes | Source triangles | Rendered triangles | Draw calls | 30 s active-input runs |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Xbox Elite | 15,218,700 | 109,702 | 113,926 | 38 | median 8.3/8.3/8.3 ms; p95 9.1/9.0/9.0 ms |
+| PS5 | 17,035,156 | 138,544 | 131,503 | 39 | median 8.3/8.3/8.3 ms; p95 9.0/8.9/8.9 ms |
+
+Both models remain within the limits of 60 draw calls, 20 ms median, and 33 ms p95 on the test
+machine (Windows, Chrome 153 headless, ANGLE/D3D11, NVIDIA GeForce RTX 4060 Ti, DPR 1.5). Their
+bytes and triangle counts are documented exceptions to the original asset limits and are managed
+through explicit opt-in loading. Xbox geometry is grouped into semantic controls at runtime and
+its transmission is disabled. PS5 transparent double-sided materials use a single rendering pass
+and transmission is disabled. No environment map, shadow, or postprocessing cost is added.
+
+Deterministic tests cover sustained slow-render demand lowering DPR and then returning to the 2D
+fallback. No actual slow-GPU stress test was performed, so this is a tested policy rather than a
+hardware performance claim.
+
+### Limits and unverified hardware
+
+- No physical Xbox controller or DualSense was available. Physical compatibility, reconnect,
+  transport-specific identifiers, multi-pad behavior on real devices, and browser/OS interception
+  of system buttons remain unverified. This does not replace the deterministic complete-snapshot
+  and multi-pad software coverage.
+- Visual labels describe a selected style or conservative family hint, never exact detected
+  hardware or official endorsement. Gamepad API exposure and identifiers vary by browser, OS,
+  connection, and permission state.
+- Chrome/Edge desktop browser evidence does not establish universal browser or mobile GPU support.
+
 ## Integrated refactor verification — 2026-09-16
 
 This verification covers the completed atomic-design extraction as an integrated website and
