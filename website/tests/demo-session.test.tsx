@@ -174,6 +174,25 @@ describe('owned demo sessions using the public service', () => {
         frame();
         expect(selected).toHaveBeenCalledTimes(1);
     });
+    it('neutralizes a held native preview when later polling loses gamepad access', () => {
+        let denied = false;
+        const active = snapshot('xbox', [0]) as unknown as Gamepad;
+        Object.defineProperty(navigator, 'getGamepads', {
+            configurable: true,
+            value: () => {
+                if (denied) throw new DOMException('Gamepad access denied', 'SecurityError');
+                return [active];
+            },
+        });
+        act(() => root.render(<Harness id="one" source="native" />));
+        start();
+        expect(sessions.one!.preview.buttons[0]?.pressed).toBe(true);
+        denied = true;
+        frame();
+        expect(sessions.one!.error).toBeTruthy();
+        expect(sessions.one!.preview.connected).toBe(false);
+        expect(sessions.one!.preview.buttons[0]).toEqual({ pressed: false, value: 0 });
+    });
     it('stays idle and isolates channels across two running instances', () => {
         expect(frames.size).toBe(0);
         start();
@@ -217,6 +236,51 @@ describe('owned demo sessions using the public service', () => {
         expect(document.activeElement).toBe(focused);
         expect(sessions.one!.axes).toEqual([0, 0, 0, 0]);
         expect(sessions.one!.pressed).toEqual([]);
+    });
+    it('preserves analog button values through complete simulation snapshots', () => {
+        const values: number[] = [];
+        start();
+        window.addEventListener(sessions.one!.channel, ((event: CustomEvent) => {
+            values.push(event.detail.gamepad.buttons[6].value);
+        }) as EventListener);
+        for (const value of [0, 0.25, 0.5, 1]) {
+            act(() => sessions.one!.setButtonValue(6, value));
+            expect(sessions.one!.preview.buttons[6].value).toBe(value);
+        }
+        expect(values).toEqual([0, 0.25, 0.5, 1]);
+        expect(sessions.one!.pressed).toEqual([6]);
+    });
+    it('reflects every valid complete snapshot dispatched on its owned simulation channel', () => {
+        start();
+        act(() => sendSnapshot('xbox', [6], [0.25, 0.5, 0.75, 1], sessions.one!.channel, { 6: 0.5 }));
+        expect(sessions.one!.preview.buttons[6]).toEqual({ pressed: true, value: 0.5 });
+        expect(sessions.one!.preview.axes).toEqual([0.25, 0.5, 0.75, 1]);
+        expect(sessions.one!.pressed).toEqual([6]);
+    });
+    it('does not let malformed channel snapshots replace the last coherent preview', () => {
+        start();
+        act(() => sendSnapshot('xbox', [7], [0, 0, 0.5, 0], sessions.one!.channel, { 7: 0.25 }));
+        const before = sessions.one!.preview;
+        const malformed = snapshot('xbox', [6], [1, 1, 1, 1]);
+        malformed.buttons[6]!.value = Number.NaN;
+        act(() =>
+            window.dispatchEvent(new CustomEvent(sessions.one!.channel, { detail: { gamepad: malformed } }))
+        );
+        expect(sessions.one!.preview).toBe(before);
+        expect(sessions.one!.preview.buttons[7]).toEqual({ pressed: true, value: 0.25 });
+        expect(sessions.one!.preview.axes).toEqual([0, 0, 0.5, 0]);
+    });
+    it('changes the visual override without replacing the native service', () => {
+        act(() => root.render(<Harness id="one" source="native" />));
+        start();
+        const owned = sessions.one!.service;
+        const ownedFrames = frames.size;
+        act(() => sessions.one!.setVisualOverride('ps5'));
+        // A disconnected native session may still show the user's chosen model;
+        // connected nonstandard hardware is forced back to raw/generic.
+        expect(sessions.one!.visualStyle).toBe('playstation');
+        expect(sessions.one!.service).toBe(owned);
+        expect(frames.size).toBe(ownedFrames);
     });
     it('clears queued and held input at reset and disconnect, then baselines held primary safely', () => {
         start();

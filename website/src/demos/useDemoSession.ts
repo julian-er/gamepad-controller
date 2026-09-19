@@ -2,6 +2,13 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { GamepadService, type GamepadActionEvent } from 'gamepad-ui-engine';
 import type { Variant } from '../components/molecules/Controller/Controller';
 import { sendSnapshot } from '../simulation';
+import {
+    controllerPreviewFromSnapshot,
+    NativePreviewSelector,
+    neutralControllerPreview,
+    resolvePreviewVisualStyle,
+    type PreviewVisualChoice,
+} from './controller-preview';
 
 export type DemoSource = 'simulation' | 'native';
 export type DemoMode = 'spatial' | 'grid' | 'horizontal';
@@ -37,14 +44,17 @@ export function useDemoSession({
     const [channel, setChannel] = useState('');
     const [running, setRunning] = useState(false);
     const [service, setService] = useState<GamepadService | null>(null);
-    const [device, setDevice] = useState('');
-    const [pressed, setPressed] = useState<number[]>([]);
-    const [axes, setAxes] = useState([0, 0, 0, 0]);
+    const [preview, setPreview] = useState(() => neutralControllerPreview(source));
+    // The model selector is useful before a session starts, so begin with the Xbox
+    // presentation instead of a neutral arcade fallback.
+    const [visualOverride, setVisualOverride] = useState<PreviewVisualChoice>('xbox');
     const [focused, setFocused] = useState(-1);
     const [log, setLog] = useState<string[]>([]);
     const [error, setError] = useState('');
     const held = useRef(new Set<number>());
+    const heldValues = useRef(new Map<number, number>());
     const heldAxes = useRef([0, 0, 0, 0]);
+    const nativeSelector = useRef(new NativePreviewSelector());
     const serviceRef = useRef<GamepadService | null>(null);
     const prepareRef = useRef(prepare);
     prepareRef.current = prepare;
@@ -80,54 +90,49 @@ export function useDemoSession({
         setError('');
 
         setLog([]);
-        setDevice('');
-        setAxes([0, 0, 0, 0]);
-        setPressed([]);
+        nativeSelector.current.reset();
+        setPreview(neutralControllerPreview(source));
         service.on('focus', (_, index) => setFocused(index));
         service.on('action', (event) => logEvent(event.type + (event.direction ? ' · ' + event.direction : '')));
         service.on('controllerconnect', (gp) => {
-            setDevice(gp.id);
             logEvent('controller connected');
         });
         service.on('controllerdisconnect', () => {
             held.current.clear();
+            heldValues.current.clear();
             heldAxes.current = [0, 0, 0, 0];
-            setDevice('');
-            setPressed([]);
-            setAxes([0, 0, 0, 0]);
+            if (source === 'simulation') setPreview(neutralControllerPreview(source));
             logEvent('controller disconnected');
-        });
-        service.on('buttondown', (index) => {
-            setPressed((p) => [...new Set([...p, index])]);
-        });
-        service.on('buttonup', (index) => {
-            setPressed((p) => p.filter((i) => i !== index));
         });
         service.on('gamepaderror', (e) => setError(e.message));
         service.on('beforeaction', (event) => handlers.current.forEach((handler) => handler(event)));
         const disposeApp = prepareRef.current?.(service);
         service.init();
         setService(service);
+        const receivePreviewSnapshot = (event: Event) => {
+            const next = controllerPreviewFromSnapshot(
+                'simulation',
+                (event as CustomEvent<{ gamepad?: unknown }>).detail?.gamepad
+            );
+            if (next) setPreview(next);
+        };
+        if (source === 'simulation') window.addEventListener(channel, receivePreviewSnapshot);
         if (source === 'simulation') {
             sendSnapshot(variant, [], [0, 0, 0, 0], channel);
-            setDevice('Simulated ' + (variant === 'unknown' ? 'arcade' : variant));
         }
         let frame = 0;
         let previous = '';
         const readHardware = () => {
             try {
-                const pads = Array.from(navigator.getGamepads?.() ?? []).filter((pad): pad is Gamepad => !!pad);
-                const pad =
-                    pads.find((p) => p.buttons.some((b) => b.pressed) || p.axes.some((a) => Math.abs(a) > 0.1)) ??
-                    pads[0];
-                const value = JSON.stringify(pad ? [pad.id, ...pad.axes.map((a) => +a.toFixed(2))] : []);
+                const next = nativeSelector.current.update(navigator.getGamepads?.() ?? []);
+                const value = JSON.stringify(next);
                 if (value !== previous) {
                     previous = value;
-                    setDevice(pad?.id ?? '');
-                    setAxes(pad ? [...pad.axes] : [0, 0, 0, 0]);
-                    if (!pad) setPressed([]);
+                    setPreview(next);
                 }
             } catch (e) {
+                nativeSelector.current.reset();
+                setPreview(neutralControllerPreview('native'));
                 setError(e instanceof Error ? e.message : 'Gamepad input is unavailable.');
                 return;
             }
@@ -136,10 +141,10 @@ export function useDemoSession({
         if (source === 'native') frame = requestAnimationFrame(readHardware);
         const release = () => {
             held.current.clear();
+            heldValues.current.clear();
             heldAxes.current = [0, 0, 0, 0];
             if (source === 'simulation') sendSnapshot(variant, [], [0, 0, 0, 0], channel);
-            setPressed([]);
-            setAxes([0, 0, 0, 0]);
+            setPreview(neutralControllerPreview(source));
         };
         const visibility = () => {
             if (document.hidden) suspend();
@@ -153,17 +158,18 @@ export function useDemoSession({
         return () => {
             window.removeEventListener('blur', suspend);
             document.removeEventListener('visibilitychange', visibility);
+            if (source === 'simulation') window.removeEventListener(channel, receivePreviewSnapshot);
             held.current.clear();
+            heldValues.current.clear();
             heldAxes.current = [0, 0, 0, 0];
+            nativeSelector.current.reset();
             cancelAnimationFrame(frame);
             if (source === 'simulation') sendSnapshot(variant, [], [0, 0, 0, 0], channel);
             disposeApp?.();
             service.destroy();
             setService(null);
-            setPressed([]);
-            setAxes([0, 0, 0, 0]);
+            setPreview(neutralControllerPreview(source));
             setFocused(-1);
-            setDevice('');
             serviceRef.current = null;
         };
     }, [
@@ -181,22 +187,29 @@ export function useDemoSession({
         useDataAttributes,
         logEvent,
     ]);
-    const press = (index: number) => {
+    const publishSimulation = () => {
+        sendSnapshot(variant, held.current, heldAxes.current, channel, heldValues.current);
+    };
+    const press = (index: number, value = 1) => {
         if (!serviceRef.current || source !== 'simulation') return;
+        if (!Number.isFinite(value) || value < 0 || value > 1) {
+            throw new RangeError('Button value must be finite within 0–1.');
+        }
         held.current.add(index);
-        sendSnapshot(variant, held.current, heldAxes.current, channel);
+        heldValues.current.set(index, value);
+        publishSimulation();
     };
     const release = (index: number) => {
         held.current.delete(index);
-        if (serviceRef.current && source === 'simulation')
-            sendSnapshot(variant, held.current, heldAxes.current, channel);
+        heldValues.current.delete(index);
+        if (serviceRef.current && source === 'simulation') publishSimulation();
     };
     const releaseAll = () => {
         held.current.clear();
+        heldValues.current.clear();
         heldAxes.current = [0, 0, 0, 0];
-        if (serviceRef.current && source === 'simulation') sendSnapshot(variant, [], heldAxes.current, channel);
-        setAxes([0, 0, 0, 0]);
-        setPressed([]);
+        if (serviceRef.current && source === 'simulation') publishSimulation();
+        else setPreview(neutralControllerPreview(source));
     };
     const setAxis = (index: number, value: number) => {
         if (!serviceRef.current || source !== 'simulation') return;
@@ -204,20 +217,34 @@ export function useDemoSession({
             throw new RangeError('Axis index must be 0–3 and value must be finite within -1–1.');
         }
         heldAxes.current[index] = value;
-        setAxes([...heldAxes.current]);
-        sendSnapshot(variant, held.current, heldAxes.current, channel);
+        publishSimulation();
+    };
+    const setButtonValue = (index: number, value: number) => {
+        if (!Number.isInteger(index) || index < 0 || index > 16 || !Number.isFinite(value) || value < 0 || value > 1) {
+            throw new RangeError('Button index must be 0–16 and value must be finite within 0–1.');
+        }
+        if (value === 0) release(index);
+        else press(index, value);
     };
     const resetInput = () => {
         releaseAll();
         serviceRef.current?.resetInput();
         if (serviceRef.current && source === 'simulation') sendSnapshot(variant, [], [0, 0, 0, 0], channel);
     };
+    const pressed = preview.buttons.flatMap((button, index) => (button.pressed ? [index] : []));
+    const axes = [...preview.axes];
     return {
         running,
         service,
-        device,
+        device:
+            source === 'simulation' && preview.connected
+                ? 'Simulated ' + (variant === 'unknown' ? 'arcade' : variant)
+                : preview.id,
         pressed,
         axes,
+        preview,
+        visualOverride,
+        visualStyle: resolvePreviewVisualStyle(preview, visualOverride),
         focused,
         log,
         error,
@@ -234,6 +261,8 @@ export function useDemoSession({
         release,
         releaseAll,
         setAxis,
+        setButtonValue,
+        setVisualOverride,
         resetInput,
         registerAction,
         logEvent,

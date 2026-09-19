@@ -13,11 +13,13 @@
     "dependencies": {
         "gamepad-ui-engine": "workspace:*",
         "react": "^19.0.0",
-        "react-dom": "^19.0.0"
+        "react-dom": "^19.0.0",
+        "three": "0.180.0"
     },
     "devDependencies": {
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
+        "@types/three": "0.180.0",
         "jsdom": "^25.0.0",
         "sass": "^1.83.0",
         "typescript": "^5.5.0",
