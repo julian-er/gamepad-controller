@@ -53,6 +53,25 @@
         border: 1px solid var(--line);
     }
 }
+.visual-style-choices {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    button {
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: var(--well);
+        color: var(--muted);
+        padding: 5px 8px;
+        font: 9px var(--mono);
+        cursor: pointer;
+        &[aria-pressed='true'] {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: var(--subtle);
+        }
+    }
+}
 .segmented {
     display: inline-flex;
     gap: 2px;
@@ -103,6 +122,105 @@
     display: block;
     margin: 4px auto;
     max-width: 470px;
+}
+.controller-stage {
+    position: relative;
+    height: 250px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .controller-stage,
+    .controller-stage * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+.controller-canvas {
+    position: absolute;
+    inset: 0;
+    canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+}
+.controller-display-options {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 12px;
+    button {
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: var(--well);
+        color: var(--muted);
+        padding: 5px 8px;
+        font: 10px var(--mono);
+        cursor: pointer;
+        &[aria-pressed='true'] {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        &:hover {
+            background: var(--subtle);
+        }
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+    }
+    span {
+        margin-left: auto;
+        font: 8px var(--mono);
+        color: var(--muted);
+    }
+}
+.controller-render-status {
+    min-height: 18px;
+    margin: 0;
+    font: 10px var(--mono);
+    color: var(--muted);
+    button {
+        color: var(--accent);
+        background: none;
+        border: 0;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+}
+.prototype-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    margin-top: 16px;
+    label {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 4px;
+        font: 9px var(--mono);
+        color: var(--muted);
+    }
+    input {
+        width: 100%;
+        margin: 0;
+        accent-color: var(--accent);
+    }
+    button {
+        font-size: 9px;
+        align-self: end;
+    }
+}
+.standard-button-controls {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+    margin-top: 12px;
+    .pad-key {
+        height: auto;
+        min-height: 30px;
+        padding: 5px 6px;
+        font-size: 8px;
+    }
 }
 .stitch-controller {
     .art-control.is-pressed,
@@ -497,4 +615,13 @@ pre {
 }
 .code-comment {
     color: #8191a5;
+}
+.controller-credits {
+    font: 9px var(--mono);
+    color: var(--muted);
+    line-height: 1.5;
+    a {
+        color: var(--accent);
+        text-decoration: underline;
+    }
 }

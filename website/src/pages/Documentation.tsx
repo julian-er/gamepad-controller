@@ -20,7 +20,7 @@ export function Documentation({ doc, suspended = false }: { doc: Doc; suspended?
                 <Badge>Version 1.0.0</Badge><Badge>TypeScript first</Badge><Badge>Zero runtime dependencies</Badge><Badge>MIT license</Badge>
             </div>
             {(doc.id === 'introduction' || doc.id === 'playground') && <section id="interactive-preview" className="doc-section">
-                <Playground /><p><a href="#/docs/examples">Explore eight complete mini apps →</a></p>
+                <Playground suspended={suspended} /><p><a href="#/docs/examples">Explore eight complete mini apps →</a></p>
             </section>}
             {doc.id === 'project-cookbook' && <p><a className="button primary" href="#/docs/examples">Try all eight projects in the example gallery →</a></p>}
             {doc.interactiveDemo === 'gallery' ? <DemoGallery /> : doc.interactiveDemo ? <DemoPage key={doc.interactiveDemo} id={doc.interactiveDemo} suspended={suspended} /> : null}

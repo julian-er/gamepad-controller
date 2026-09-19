@@ -1,6 +1,7 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { getButtonName } from 'gamepad-ui-engine';
-import { Controller, type Variant } from './components/molecules/Controller/Controller';
+import { type Variant } from './components/molecules/Controller/Controller';
+import { Controller3D } from './components/molecules/Controller3D/Controller3D';
 import { useDemoSession, type DemoSource } from './demos/useDemoSession';
 import { Icon } from './components';
 type Mode = 'spatial' | 'grid' | 'horizontal';
@@ -10,14 +11,70 @@ const tiles = [
     { icon: 'layers', name: 'Your library', sub: 'All your worlds, together' },
     { icon: 'bolt', name: 'Quick settings', sub: 'Make yourself at home' },
 ];
-export function Playground() {
+export function Playground({ suspended = false, home = false }: { suspended?: boolean; home?: boolean }) {
     const id = 'demo-' + useId().replace(/[^a-zA-Z0-9]/g, '');
     const [variant, setVariant] = useState<Variant>('xbox');
     const [mode, setMode] = useState<Mode>('spatial');
     const [source, setSource] = useState<DemoSource>('simulation');
     const [selected, setSelected] = useState('');
-    const { running, device, pressed, axes, focused, log, error, start, stop, press, release, releaseAll, logEvent } =
-        useDemoSession({ containerId: id, variant, mode, source, stopOnSuspend: false });
+    const {
+        running,
+        device,
+        pressed,
+        axes,
+        preview,
+        visualStyle,
+        setAxis,
+        setButtonValue,
+        setVisualOverride,
+        focused,
+        log,
+        error,
+        start,
+        stop,
+        press,
+        release,
+        releaseAll,
+        logEvent,
+        registerAction,
+    } = useDemoSession({ containerId: id, variant, mode, source });
+    useEffect(() => {
+        if (suspended && running) stop();
+    }, [suspended, running]);
+    useEffect(
+        () =>
+            registerAction((event) => {
+                const active = document.activeElement;
+                if (
+                    active instanceof HTMLElement &&
+                    active.closest('.prototype-controls, .standard-button-controls')
+                ) {
+                    event.preventDefault();
+                }
+            }),
+        [registerAction]
+    );
+    const artVariant: Variant =
+        visualStyle === 'playstation' ? 'playstation' : visualStyle === 'xbox' ? 'xbox' : 'unknown';
+    const standardLabels = [
+        artVariant === 'playstation' ? 'Cross' : artVariant === 'xbox' ? 'A' : 'Button 0',
+        artVariant === 'playstation' ? 'Circle' : artVariant === 'xbox' ? 'B' : 'Button 1',
+        artVariant === 'playstation' ? 'Square' : artVariant === 'xbox' ? 'X' : 'Button 2',
+        artVariant === 'playstation' ? 'Triangle' : artVariant === 'xbox' ? 'Y' : 'Button 3',
+        'Left bumper',
+        'Right bumper',
+        'Left trigger',
+        'Right trigger',
+        'Back / Create',
+        'Start / Options',
+        'Left stick click',
+        'Right stick click',
+        'D-pad up',
+        'D-pad down',
+        'D-pad left',
+        'D-pad right',
+        'System button',
+    ];
     const simulatedButton = (index: number, label: string) => (
         <button
             key={index}
@@ -67,6 +124,8 @@ export function Playground() {
                 </div>
                 <button
                     className={'button small ' + (running ? 'secondary' : 'primary')}
+                    data-home-playground-start={home ? '' : undefined}
+                    disabled={suspended}
                     onClick={() => {
                         if (running) stop();
                         else {
@@ -80,9 +139,21 @@ export function Playground() {
                 </button>
             </div>
             <div className="playground-controls">
-                <div className="segmented" aria-label="Controller preview">
+                <div className="segmented" aria-label="Controller model">
                     {(['xbox', 'playstation', 'unknown'] as Variant[]).map((v) => (
-                        <button key={v} aria-pressed={variant === v} onClick={() => setVariant(v)}>
+                        <button
+                            key={v}
+                            aria-pressed={
+                                (v === 'xbox' && visualStyle === 'xbox') ||
+                                (v === 'playstation' && visualStyle === 'playstation') ||
+                                (v === 'unknown' && visualStyle === 'generic')
+                            }
+                            onClick={() => {
+                                if (source === 'simulation') setVariant(v);
+                                // Keep the selected model and its visible controller in sync.
+                                setVisualOverride(v === 'playstation' ? 'ps5' : v === 'xbox' ? 'xbox' : 'generic');
+                            }}
+                        >
                             {v === 'unknown' ? 'Arcade' : v === 'xbox' ? 'Xbox' : 'PlayStation'}
                         </button>
                     ))}
@@ -107,9 +178,9 @@ export function Playground() {
                 <div className="hardware-preview">
                     <div className="panel-eyebrow">
                         <span>CONTROLLER INPUT</span>
-                        <span>{variant === 'unknown' ? 'GENERIC' : variant.toUpperCase()}</span>
+                        <span>{visualStyle === 'playstation' ? 'PS5 STYLE' : visualStyle.toUpperCase()}</span>
                     </div>
-                    <Controller variant={variant} pressed={pressed} axes={axes} />
+                    <Controller3D running={running} variant={artVariant} visualStyle={visualStyle} preview={preview} />
                     <div className="axis-readouts">
                         <span>
                             LX <b>{(axes[0] || 0).toFixed(2)}</b>
@@ -129,6 +200,43 @@ export function Playground() {
                             ? device || 'Connect a controller and press any button.'
                             : 'Start a session to see input in real time.'}
                     </p>
+                    <div className="prototype-controls">
+                        {['Left stick X', 'Left stick Y', 'Right stick X', 'Right stick Y'].map((label, index) => (
+                            <label key={label}>
+                                <span>{label}</span>
+                                <input
+                                    type="range"
+                                    min="-1"
+                                    max="1"
+                                    step="0.05"
+                                    value={axes[index] || 0}
+                                    disabled={!running || source !== 'simulation'}
+                                    onChange={(event) => setAxis(index, Number(event.target.value))}
+                                />
+                            </label>
+                        ))}
+                        {['Left trigger', 'Right trigger'].map((label, offset) => (
+                            <label key={label}>
+                                <span>{label}: {(preview.buttons[offset + 6]?.value || 0).toFixed(2)}</span>
+                                <input
+                                    aria-label={label + ' analog value'}
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.05"
+                                    value={preview.buttons[offset + 6]?.value || 0}
+                                    disabled={!running || source !== 'simulation'}
+                                    onChange={(event) => setButtonValue(offset + 6, Number(event.target.value))}
+                                />
+                            </label>
+                        ))}
+                        <button className="pad-key" disabled={!running || source !== 'simulation'} onClick={releaseAll}>
+                            Center controls
+                        </button>
+                    </div>
+                    <div className="standard-button-controls" aria-label="Standard controller buttons">
+                        {standardLabels.map((label, index) => simulatedButton(index, label))}
+                    </div>
                 </div>
                 <div className="navigation-preview">
                     <div className="panel-eyebrow">

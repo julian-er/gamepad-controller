@@ -13,7 +13,16 @@ export function LandingHero() {
         <p className="hero-lede">Great interfaces deserve more than a mouse.<br />Turn any web experience into a world you can navigate with a gamepad.</p>
         <div className="hero-actions">
             <a className="button primary" href="#/docs/installation">Start building <Icon name="arrow" size={18} /></a>
-            <a className="button secondary" href="#/docs/playground"><Icon name="pad" size={18} />Try the playground</a>
+            <a
+                className="button secondary"
+                href="#/#playground"
+                onClick={(event) => {
+                    if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                    event.preventDefault();
+                    document.getElementById('playground')?.scrollIntoView();
+                    document.querySelector<HTMLButtonElement>('[data-home-playground-start]')?.focus();
+                }}
+            ><Icon name="pad" size={18} />Try the playground</a>
         </div>
         <InstallCommand />
         <p className="snippet-note">Registry install is available after the first publication.{' '}<a href="#/docs/building">Build and install locally →</a></p>
@@ -31,13 +40,13 @@ export function LandingHero() {
     </section>;
 }
 
-export function LandingPlaygroundSection() {
+export function LandingPlaygroundSection({ suspended = false }: { suspended?: boolean }) {
     return <section className="section-shell landing-section" id="playground">
         <div className="section-heading">
             <div><span className="eyebrow">LESS READING. MORE PLAYING.</span><h2>Feel the difference.</h2></div>
             <p>A real controller. Real focus. Your interface.<br />Try the engine before writing your first line.</p>
         </div>
-        <Playground />
+        <Playground suspended={suspended} home />
         <div className="under-note">
             <Icon name="code" size={16} /> This demo runs on gamepad-ui-engine. So can yours.
             <a href="#/docs/examples">Explore eight mini apps →</a>

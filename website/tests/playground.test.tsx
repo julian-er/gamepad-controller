@@ -94,23 +94,38 @@ describe('React playground with the real GamepadService', () => {
         frame();
         expect(document.querySelector('.controller')!.getAttribute('aria-label')).toContain('Pressed: none');
     });
-    it('stops held simulation on blur and cleans up every frame on stop', () => {
+    it('stops held simulation on blur and requires an explicit restart', () => {
         click('Start demo');
         frame();
         key(tiles()[0], 'keydown', 'ArrowRight');
         frame();
         act(() => window.dispatchEvent(new Event('blur')));
         frame();
-        const focused = document.querySelector('.demo-focused');
-        frame();
-        frame();
-        expect(document.querySelector('.demo-focused')).toBe(focused);
-        click('Stop demo');
+        expect(button('Start demo')).toBeTruthy();
         expect(frames.size).toBe(0);
         expect(document.querySelector('.demo-focused')).toBeNull();
         act(() => sendSnapshot('xbox', [15]));
         frame();
         expect(document.querySelector('.demo-focused')).toBeNull();
+        click('Start demo');
+        frame();
+        expect(document.querySelector('.demo-focused')).not.toBeNull();
+    });
+    it('keeps keyboard focus on simulator controls while their input drives the preview', () => {
+        click('Start demo');
+        frame();
+        const range = document.querySelector<HTMLInputElement>('.prototype-controls input[type="range"]')!;
+        act(() => range.focus());
+        act(() => {
+            range.value = '1';
+            range.dispatchEvent(new Event('input', { bubbles: true }));
+            range.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        frame();
+        frame();
+        frame();
+        expect(document.activeElement).toBe(range);
+        expect(document.querySelector('.demo-focused')).not.toBeNull();
     });
     it('recreates the service when changing controller skin without phantom selection', () => {
         click('Start demo');
@@ -118,6 +133,7 @@ describe('React playground with the real GamepadService', () => {
         click('PlayStation');
         frame();
         expect(document.querySelector('.device-label')!.textContent).toContain('Simulated playstation');
+        expect(button('PlayStation').getAttribute('aria-pressed')).toBe('true');
         expect(document.querySelector('.selection-output')!.textContent).not.toContain('Selected:');
         expect(frames.size).toBe(1);
         key(tiles()[0], 'keydown', 'ArrowDown');
@@ -135,6 +151,19 @@ describe('React playground with the real GamepadService', () => {
         click('Start demo');
         frame();
         expect(frames.size).toBe(1);
+        expect(document.querySelector('.demo-focused')).not.toBeNull();
+    });
+    it('stops while suspended and requires an explicit restart after resuming', () => {
+        click('Start demo');
+        frame();
+        act(() => root.render(<Playground suspended />));
+        expect(button('Start demo').disabled).toBe(true);
+        expect(frames.size).toBe(0);
+        act(() => root.render(<Playground />));
+        expect(button('Start demo').disabled).toBe(false);
+        expect(frames.size).toBe(0);
+        click('Start demo');
+        frame();
         expect(document.querySelector('.demo-focused')).not.toBeNull();
     });
 });

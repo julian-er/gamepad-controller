@@ -23,7 +23,11 @@ export function App() {
         setMenuOpen(false);
         document.getElementById('main-content')?.focus({ preventScroll: true });
         const anchor = route.split('#')[1];
-        if (anchor) document.getElementById(anchor)?.scrollIntoView();
+        if (anchor) {
+            document.getElementById(anchor)?.scrollIntoView();
+            if (anchor === 'playground')
+                document.querySelector<HTMLButtonElement>('[data-home-playground-start]')?.focus({ preventScroll: true });
+        }
         document.title = isDocs
             ? (doc?.title ?? 'Page not found') + ' — gamepad-ui-engine docs'
             : 'gamepad-ui-engine — Console-grade navigation for the web';
@@ -83,7 +87,7 @@ export function App() {
                             <a href="#/docs/react">React integration</a>
                         </nav>
                     )}
-                    <Landing repository={repository} />
+                    <Landing repository={repository} suspended={searchOpen || menuOpen} />
                 </>
             )}
             {searchOpen && <Search onClose={() => setSearchOpen(false)} />}

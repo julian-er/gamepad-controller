@@ -8,11 +8,11 @@ import {
     SiteFooter,
 } from '../components/organisms/LandingSections';
 
-export function Landing({ repository }: { repository: string }) {
+export function Landing({ repository, suspended = false }: { repository: string; suspended?: boolean }) {
     return <>
         <main id="main-content" tabIndex={-1}>
             <LandingHero />
-            <LandingPlaygroundSection />
+            <LandingPlaygroundSection suspended={suspended} />
             <LandingExperiencesSection />
             <LandingArchitectureSection />
             <LandingIntegrationSection />
