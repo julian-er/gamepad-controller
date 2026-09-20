@@ -25,7 +25,7 @@ export async function createModel(): Promise<ControllerRig> {
     root.quaternion.copy(orientation);
     // Turn the authored upside-down camera presentation around the presenter's view axis.
     root.quaternion.premultiply(
-        new Quaternion().setFromAxisAngle(new Vector3(0, -3.82, -9).normalize(), Math.PI)
+        new Quaternion().setFromAxisAngle(new Vector3(0, -4, -5.5).normalize(), Math.PI)
     );
     const byParent = new Map<string, Mesh[]>();
     for (const mesh of meshes) {
@@ -102,7 +102,7 @@ export async function createModel(): Promise<ControllerRig> {
             root.add(mesh);
         }
     }
-    return { root, buttons, sticks, triggers, owned: ownership.adopt(root) };
+    return { root, cameraZoom: 0.8, buttons, sticks, triggers, owned: ownership.adopt(root) };
     } catch (error) {
         ownership.track(root);
         ownership.dispose();

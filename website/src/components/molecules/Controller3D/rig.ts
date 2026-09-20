@@ -20,6 +20,7 @@ export type OwnedRigResources = {
 };
 export type ControllerRig = {
     root: Group;
+    cameraZoom?: number;
     buttons: Map<number, RigPart>;
     sticks: [RigPart, RigPart];
     triggers: [RigPart, RigPart];

@@ -47,6 +47,8 @@ export function createPresenter(host: HTMLElement, rig: ControllerRig, onError: 
     }
     const scene = new Scene();
     const camera = new OrthographicCamera(-3.2, 3.2, 2.25, -2.25, 0.1, 30);
+    camera.zoom = rig.cameraZoom ?? 1;
+    camera.updateProjectionMatrix();
     camera.position.set(0, 3.7, 9);
     camera.lookAt(0, -0.12, 0);
     scene.add(new HemisphereLight(0xecfff8, 0x263343, 2.5));
