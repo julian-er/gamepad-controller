@@ -108,8 +108,10 @@ export function LandingIntegrationSection() {
 export function LandingCallToAction({ repository }: { repository: string }) {
     return <section className="section-shell cta-section">
         <span className="eyebrow">PRESS START ON SOMETHING GREAT</span><h2>Ready to take control?</h2><p>Your next interface is just a few lines away.</p>
+        <div className="button-wrapper-home-box">
         <a className="button primary" href="#/docs/installation">Get started <Icon name="arrow" size={18} /></a>
         <a className="button secondary" href={repository}><Icon name="github" size={18} />Explore on GitHub</a>
+        </div>
     </section>;
 }
 
