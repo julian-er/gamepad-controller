@@ -51,11 +51,11 @@ export function createPresenter(host: HTMLElement, rig: ControllerRig, onError: 
     camera.updateProjectionMatrix();
     camera.position.set(0, 3.7, 9);
     camera.lookAt(0, -0.12, 0);
-    scene.add(new HemisphereLight(0xecfff8, 0x263343, 2.5));
-    const key = new DirectionalLight(0xffffff, 3);
+    scene.add(new HemisphereLight(0xecfff8, 0x263343, rig.lighting?.hemisphere ?? 2.5));
+    const key = new DirectionalLight(0xffffff, rig.lighting?.key ?? 3);
     key.position.set(-3, 5, 7);
     scene.add(key);
-    const rim = new DirectionalLight(0x8ae1cb, 1.5);
+    const rim = new DirectionalLight(0x8ae1cb, rig.lighting?.rim ?? 1.5);
     rim.position.set(4, 0, -1);
     scene.add(rim);
     scene.add(rig.root);
