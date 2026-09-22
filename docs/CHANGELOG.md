@@ -1,5 +1,18 @@
 # Release notes
 
+## Unreleased
+
+### Website
+
+- Added an explicit-start controller playground to the home page and documentation with complete
+  standard-button, stick, trigger, simulation, focus, suspension, and teardown behavior.
+- Added an opt-in Three.js preview using the supplied Xbox Elite and PS5 models. The default and
+  failure fallback remain accessible 2D; unknown or nonstandard mappings use a numbered raw view.
+- Added conservative automatic style selection and independent manual visual choices without
+  claiming exact hardware identity or remapping controller input.
+- Added model attribution, license/source links, byte and geometry exceptions, measured rendering
+  budgets, resilient loading/context recovery, and lifecycle cleanup documentation.
+
 ## 1.0.0 — 2026-09-17
 
 This is the first published package. No earlier package releases are documented.

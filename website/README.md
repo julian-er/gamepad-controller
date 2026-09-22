@@ -31,15 +31,21 @@ The website has its own Vitest/jsdom development dependencies in the workspace.
 - `src/reference.ts`: compatibility facade for allowlisted local consumer Markdown guides and skills; parsing and link implementations live in `src/utils/markdown.ts` and `src/utils/reference-link.ts`. Markdown is content only; raw HTML and embedded instructions are not executed.
 - `src/components/{atoms,molecules,organisms}/`: atomic implementations for the site's UI; `src/components.tsx` is the six-export compatibility facade for keyboard-accessible framework tabs, selected-code copying, and inline source links.
 - `src/Playground.tsx`: real GamepadService integration and lifecycle.
+- `src/components/molecules/Controller3D/`: opt-in Three.js presenter, supplied-model rigs, loading fallback, and renderer cleanup.
 - `src/Controller.tsx` and `src/ControllerArtwork.tsx`: compatibility facades for the controller previews and artwork; geometry and bindings are implemented in `src/components/molecules/Controller/`.
 - `src/simulation.ts`: complete, ordered custom-event snapshots for the demo.
 - `src/styles/site.scss`: ordered Sass facade; `_*.scss` files in `src/styles/` contain the token and application-style implementations.
 - `src/demos/source-files.ts`: lazy source-viewer manifest.
 - `public/images/`: three full-resolution Stitch marketing images.
+- `public/models/`: user-supplied Xbox Elite and PS5 GLBs plus their attribution and runtime-modification record.
 - `design/stitch/`: original screen code, previews, token files, design systems, and source manifest.
 - `tests/`: React integration checks using the actual library.
 
-Runtime dependencies are only React, React DOM, and gamepad-ui-engine. There is no Tailwind, router, UI kit, icon package, animation library, or syntax-highlighting dependency. Fonts and images are self-hosted.
+The website runtime depends on React, React DOM, `gamepad-ui-engine`, and Three.js. Three.js is
+loaded in deferred chunks only when a running, visible playground explicitly selects 3D. The
+published `gamepad-ui-engine` library itself keeps zero runtime dependencies. The website has no
+Tailwind, router, UI kit, icon package, animation library, or syntax-highlighting dependency.
+Fonts, images, and controller models are self-hosted.
 
 ## Local library integration
 
@@ -47,9 +53,28 @@ The dependency is `gamepad-ui-engine: workspace:*`. Vite and TypeScript resolve 
 
 ## Playground
 
-Select **Simulated input** and **Start demo**. Use the on-screen buttons, or focus a tile and use arrow keys and Enter. Simulation sends complete baseline/press/release snapshots through the library's custom-event transport, with website-specific event names. The library handles geometry, focus, and selection.
+Select **Simulated input** and **Start demo**. Use the on-screen buttons, stick and trigger ranges,
+or focus a tile and use arrow keys and Enter. Simulation sends complete
+baseline/press/release snapshots through the library's custom-event transport, with
+website-specific event names. The library handles geometry, focus, and selection.
 
-Select **Native controller**, start the demo, connect hardware, and press a controller button. Controller visibility and Gamepad API permissions are browser-dependent. Native telemetry reads the browser's axes; input actions and focus come from the service. Skins change the preview and simulated device identity; they do not remap physical hardware.
+Select **Native controller**, start the demo, connect hardware, and press a controller button.
+Controller visibility, identifiers, and Gamepad API permissions are browser- and
+transport-dependent. Native telemetry reads the browser's axes; input actions and focus come
+from the service. Auto chooses only a conservative visual family. Xbox style and PS5 style are
+manual presentation choices, not proof of an exact device and not a remapping of physical
+hardware. Nonstandard mappings stay in numbered raw 2D mode.
+
+The preview starts in 2D. Choosing 3D while the running preview is visible downloads the selected
+supplied model: Xbox Elite is 15,218,700 bytes and PS5 is 17,035,156 bytes. These large model and
+triangle counts are explicit opt-in exceptions to the normal site budgets. Each supplied rig
+provides feedback for the full standard 17-button layout, both sticks, and analog triggers.
+Credits, licenses, source links, hashes, and runtime material/rig modifications are recorded in
+`public/models/ATTRIBUTION.md` and shown beside the 3D preview.
+
+The Xbox, PlayStation, and Arcade model selector is available before Start. Selecting 3D loads a
+neutral model immediately; Start is only needed for live input and navigation. Arcade is the
+explicit Generic/raw fallback, rather than an automatic replacement for a selected model.
 
 Stop, route changes, configuration changes, and unmount destroy the owned service. Simulation releases held inputs when focus leaves the sandbox, on pointer cancellation, window blur, or page hiding.
 

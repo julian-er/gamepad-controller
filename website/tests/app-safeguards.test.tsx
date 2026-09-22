@@ -65,6 +65,27 @@ afterAll(() => {
 });
 
 describe('documentation app safeguards', () => {
+    it('keeps the home playground CTA on the landing page and focuses its idle Start control', async () => {
+        route('#/');
+        await settle();
+        const link = [...document.querySelectorAll<HTMLAnchorElement>('a')].find((item) =>
+            item.textContent?.includes('Try the playground')
+        )!;
+        expect(link.getAttribute('href')).toBe('#/#playground');
+        const before = location.hash;
+        act(() => link.click());
+        expect(location.hash).toBe(before);
+        expect(document.activeElement).toBe(document.querySelector('[data-home-playground-start]'));
+        expect(document.querySelector('[data-home-playground-start]')!.textContent).toContain('Start demo');
+
+        route('#/#playground');
+        await settle();
+        expect(document.querySelector('#playground')).not.toBeNull();
+        expect(document.title).toContain('Console-grade navigation');
+        expect(document.activeElement).toBe(document.querySelector('[data-home-playground-start]'));
+        route('#/docs/introduction');
+        await settle();
+    });
     it('handles routes, history-style hash changes, anchors, and unknown documents', async () => {
         const anchor = document.getElementById('getting-started') ?? document.querySelector<HTMLElement>('.doc-section')!;
         const scrollIntoView = vi.spyOn(anchor, 'scrollIntoView').mockImplementation(() => undefined);
