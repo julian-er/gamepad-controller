@@ -1,6 +1,6 @@
 {
   "name": "gamepad-ui-engine",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "packageManager": "pnpm@12.4.2",
   "description": "Gamepad UI Engine (gamepad-controller) adds spatial navigation and controller-driven UI to JavaScript and TypeScript web apps.",
   "type": "module",

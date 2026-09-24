@@ -99,7 +99,7 @@ message.
 ## Changelog
 
 User-facing changes add a bullet under the topmost section in
-[docs/CHANGELOG.md](docs/CHANGELOG.md), currently `## 1.0.0 — Unreleased`.
+[docs/CHANGELOG.md](docs/CHANGELOG.md), currently `## Unreleased`.
 
 ## Releases
 

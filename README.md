@@ -24,12 +24,12 @@ For a browser page without a bundler, import the versioned ESM build from a CDN 
 
 ```html
 <script type="module">
-  import { GamepadService } from 'https://cdn.jsdelivr.net/npm/gamepad-ui-engine@1.0.0/dist/index.js';
+  import { GamepadService } from 'https://cdn.jsdelivr.net/npm/gamepad-ui-engine@1.0.1/dist/index.js';
   // Create the service after the navigation elements exist.
 </script>
 ```
 
-The package is ESM only; the CDN URL is a module import, not a classic script with a global variable. Version 1.0.0 is the first published release. To try unreleased changes, [build and install a local tarball](docs/BUILDING.md#testing-the-package-inside-another-project).
+The package is ESM only; the CDN URL is a module import, not a classic script with a global variable. Version 1.0.0 was the first published release. To try unreleased changes, [build and install a local tarball](docs/BUILDING.md#testing-the-package-inside-another-project).
 
 ## Quick Start
 
