@@ -19,18 +19,32 @@ This installs both the library workspace and the `website/` workspace.
 
 ## Branches
 
-This project is trunk-based. `main` is always releasable and is protected by a repository
-ruleset (see [RELEASING.md](RELEASING.md#one-time-setup)): no direct pushes, every change lands
-through a pull request with green required checks.
+`main` contains released library code and the live documentation website. `development`
+collects library changes for the next release. Choose the starting branch and PR target by
+what the change needs:
 
-Fork contributors: fork the repo, branch from `main`, and open a PR against `main`.
+| Change | Branch from | PR target |
+| --- | --- | --- |
+| Library source, tests, root package/build configuration, or a website example needing unreleased library behavior | `development` | `development` |
+| Website-only change that works with the library on `main` | `main` | `main` |
+| Repository guidance or CI-only change that does not change library behavior | `main` | `main` |
+| Release preparation (maintainers) | `development` | `main`, from `release/vX.Y.Z` |
+| Urgent fix to released library code (maintainers) | `main` | `main`, from `hotfix/vX.Y.Z` |
+
+Fork contributors should create their branch from the appropriate upstream branch and target
+the same branch in their PR. `main` is protected by a repository ruleset (see
+[RELEASING.md](RELEASING.md#one-time-setup)): no direct pushes, every change lands through a
+PR with green required checks. CI rejects library-affecting PRs to `main` unless they come
+from a maintainer's `release/vX.Y.Z` or `hotfix/vX.Y.Z` branch in this repository. The
+library-affecting path list is maintained in `.github/scripts/check-pr-target.mjs`.
 
 Branch names use a `type/short-kebab-description` shape, for example `fix/axis-deadzone`:
 
 - `feat/`, `fix/`, `docs/`, `chore/`, `refactor/`, `test/`
 
 `release/vX.Y.Z` and `hotfix/vX.Y.Z` branches are maintainer-only; see
-[RELEASING.md](RELEASING.md).
+[RELEASING.md](RELEASING.md). After a website-only PR or release reaches `main`, bring
+`main` back into `development` before preparing another release.
 
 ## Making changes
 
@@ -88,9 +102,10 @@ message.
 ## Opening a pull request
 
 - Draft PRs are welcome for early feedback.
+- Check that the PR targets the branch specified under [Branches](#branches).
 - Keep PRs focused on one change.
 - Fill out the PR template.
-- CI must be green before merge: `library (20.x)`, `library (24.x)`, and `website`.
+- CI must be green before merge: `branch policy`, `library (20.x)`, `library (24.x)`, and `website`.
 - Merges are squash merges; the PR title becomes the commit message, so it must be a
   Conventional Commit.
 - `main` is protected by a repository ruleset (see
@@ -103,6 +118,7 @@ User-facing changes add a bullet under the topmost section in
 
 ## Releases
 
-Releases are tag-driven and handled by the maintainer; CI runs on every PR and push to `main`,
-and `main` is deployed automatically to GitHub Pages. See [RELEASING.md](RELEASING.md) for the
-full release process.
+Releases are tag-driven and handled by the maintainer. A release PR brings library changes
+from `development` to `main`; a tag on the merged commit publishes the package. CI runs on
+every PR and push to `main`, and `main` is deployed automatically to GitHub Pages. See
+[RELEASING.md](RELEASING.md) for the full release process.

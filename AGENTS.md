@@ -4,9 +4,11 @@ Preserve unrelated working-tree changes. Read the relevant source and existing t
 editing, and keep changes within the requested task.
 
 Agents proposing branches or pull requests must follow [CONTRIBUTING.md](CONTRIBUTING.md) for
-branch naming, required checks, commit/PR title format, and the PR template — `main` is
-protected by a repository ruleset (see [RELEASING.md](RELEASING.md#one-time-setup)) and only
-takes changes through a green PR.
+branch targets and naming, required checks, commit/PR title format, and the PR template.
+Library changes target `development`; website-only and repository workflow changes that do
+not change the library may target `main`. The protected `main` branch only takes changes
+through a green PR
+(see [RELEASING.md](RELEASING.md#one-time-setup)).
 
 ## Consumer skills
 
