@@ -2,6 +2,10 @@
 
 <!-- What does this PR change, and why? -->
 
+## Target branch
+
+- [ ] This PR targets the branch specified in `CONTRIBUTING.md`.
+
 ## Type of change
 
 - [ ] feat

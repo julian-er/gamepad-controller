@@ -5,15 +5,18 @@ This guide is for maintainers cutting a release. Contributors do not need it —
 
 ## Overview
 
-Releases are prepared on a `release/*` branch, merged into `main` through the normal PR
-process, then triggered by pushing a `vX.Y.Z` tag on the merge commit. The tag push runs
+Library contributions merge into `development`. Releases are prepared on a `release/*`
+branch cut from `development`, merged into `main` through the normal PR process, then
+triggered by pushing a `vX.Y.Z` tag on the merge commit. Website-only changes that work
+with the library on `main` can merge directly into `main`; bring them back into
+`development` before cutting a release. The tag push runs
 [`.github/workflows/release.yml`](.github/workflows/release.yml), which re-verifies the
 release, publishes to npm, and creates the GitHub Release.
 
 ```
-release/vX.Y.Z (bump version + CHANGELOG heading)
+feature PRs → development → release/vX.Y.Z (version + CHANGELOG heading)
         │
-        ▼  PR → CI: library (20.x), library (24.x), website
+        ▼  PR → CI: branch policy, library (20.x), library (24.x), website
       main  ◄──────────────────────────────── squash merge
         │
         ▼  maintainer: git tag -a vX.Y.Z on the merge commit, then push the tag
@@ -39,6 +42,13 @@ push tag vX.Y.Z
 ```
 
 `main` is protected once the [One-time setup](#one-time-setup) rulesets exist: every change, including a release branch, lands through a pull request with green required checks. Nothing in this guide pushes to `main` directly.
+
+The `branch policy` CI job checks PRs to `main`: changes to library source, tests, or root
+package/build configuration must come from a `release/vX.Y.Z` or `hotfix/vX.Y.Z` branch
+in this repository. Add `branch policy` to the required checks for `main` after the new
+workflow runs. Protect `development` with PRs and the library and website checks as well.
+This CI check validates the PR route, not whether the release branch was cut from
+`development`; maintainers must check that when preparing the release.
 
 ## Versioning
 
@@ -110,10 +120,15 @@ re-checking. Do them in this order:
 From `1.0.1` on, the workflow publishes with OIDC and npm provenance — no long-lived npm token
 is stored anywhere.
 
+Before using the ongoing `development` flow, create the shared `development` branch from
+the current `main` commit and apply its PR/check ruleset. A local `development` branch
+from an older release is not a suitable starting point.
+
 ## Standard release
 
-1. `git switch main && git pull`
-2. `git switch -c release/vX.Y.Z`
+1. Bring the latest `main` into `development` through a PR if `main` has changed since
+   the last sync. Resolve conflicts and wait for green CI.
+2. `git switch development && git pull`, then `git switch -c release/vX.Y.Z`.
 3. `pnpm version X.Y.Z --no-git-tag-version`
 4. Move the `## X.Y.Z — Unreleased` entries in `docs/CHANGELOG.md` under a dated heading:
    `## X.Y.Z — YYYY-MM-DD`. Update any other "unreleased" or "before publication" wording
@@ -132,17 +147,18 @@ is stored anywhere.
    ```
 6. Commit: `git commit -m "chore(release): vX.Y.Z"`.
 7. `git push -u origin release/vX.Y.Z`.
-8. Open a PR titled `chore(release): vX.Y.Z` (the PR title becomes the squash commit message).
-9. Wait for CI to go green (`library (20.x)`, `library (24.x)`, `website`), then squash merge.
+8. Open a PR to `main` titled `chore(release): vX.Y.Z` (the PR title becomes the squash commit message).
+9. Wait for CI to go green (`branch policy`, `library (20.x)`, `library (24.x)`, `website`), then squash merge.
 10. `git switch main && git pull`.
 11. Tag the merge commit: `git tag -a vX.Y.Z -m "vX.Y.Z"`.
 12. `git push origin vX.Y.Z`.
 13. Watch the **Release** workflow run in the Actions tab (see
     [Post-release checks](#post-release-checks) for what to verify once it finishes).
+14. Bring `main` back into `development` through a PR and wait for green CI.
 
 ## Release candidates
 
-1. Branch from `main`: `release/vX.Y.0-rc.N`.
+1. Sync `main` into `development`, then branch from `development`: `release/vX.Y.0-rc.N`.
 2. `pnpm version X.Y.0-rc.N --no-git-tag-version`.
 3. CHANGELOG heading: `## X.Y.0-rc.N — YYYY-MM-DD`.
 4. Same PR → CI → squash merge → tag flow as a standard release, but the tag is
@@ -156,9 +172,10 @@ is stored anywhere.
 
 ## Hotfixes
 
-Branch `hotfix/vX.Y.Z` from `main`, then follow the same PR → CI → squash merge → tag flow as
-a standard release (steps 3–13 above). There are no maintenance branches for old versions —
-every hotfix lands on top of current `main`.
+Branch `hotfix/vX.Y.Z` from `main`, then follow the same version/changelog → PR to `main` →
+CI → squash merge → tag flow as a standard release. Bring the resulting `main` back into
+`development`. There are no maintenance branches for old versions — every hotfix lands on top
+of current `main`.
 
 ## What the release workflow checks
 
