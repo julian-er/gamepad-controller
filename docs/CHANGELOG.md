@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.0.1 — 2026-09-24
+
+### Package and documentation
+
+- Improved npm search metadata, README onboarding, and GitHub Pages metadata for the Gamepad UI Engine identity.
+- Updated the README CDN example to use the 1.0.1 package release.
+
 ### Website
 
 - Added an explicit-start controller playground with complete standard-button, stick, trigger,
