@@ -1,4 +1,6 @@
-# Navigation patterns for gamepad-ui-engine 1.0.0
+# Navigation patterns for gamepad-ui-engine 1.0.1
+
+These patterns also apply to the public API introduced in 1.0.0.
 
 ## Cancellable actions
 

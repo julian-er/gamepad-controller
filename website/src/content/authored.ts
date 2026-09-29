@@ -1,19 +1,21 @@
 import type { Doc } from './types';
 import { angularExamples, reactExamples, vanillaExamples, integrationExamples } from '../examples';
+import { packageName, packageVersion } from '../package-info';
 
 export const authoredDocs: Doc[] = [
     {
         id: 'introduction',
         group: 'GETTING STARTED',
-        title: 'gamepad-ui-engine',
+        title: packageName,
         summary:
             'A small, focused engine for controller-driven interfaces. Bring spatial navigation, native focus, and predictable input to your web application.',
         sections: [
             {
                 id: 'release-status',
-                title: 'First release: 1.0.0',
+                title: 'Package version: ' + packageVersion,
                 body: [
-                    'Version 1.0.0 is the first published release. Install it from npm, or build a local tarball to try unreleased changes using the [building guide](#/docs/building).',
+                    `These guides describe ${packageName} ${packageVersion}. Install the published package from npm, or try checkout changes using the [building guide](#/docs/building).`,
+                    'Version 1.0.0 was the first published release. See [Release notes](#/docs/release-notes) for the package history.',
                 ],
             },
             {
@@ -57,7 +59,7 @@ export const authoredDocs: Doc[] = [
             {
                 id: 'install',
                 title: 'Install from npm',
-                code: 'npm install gamepad-ui-engine',
+                code: 'npm install ' + packageName,
                 language: 'Terminal',
             },
             {
@@ -66,7 +68,7 @@ export const authoredDocs: Doc[] = [
                 body: [
                     'To test changes that are not published yet, install dependencies in the repository checkout, build and pack; then install that tarball into your application. See [Building and packaging](#/docs/building) for the full procedure.',
                 ],
-                code: 'pnpm install\npnpm run build\npnpm pack\n# In your application directory:\nnpm install /path/to/gamepad-ui-engine/gamepad-ui-engine-1.0.0.tgz',
+                code: `pnpm install\npnpm run build\npnpm pack\n# In your application directory:\nnpm install /path/to/gamepad-controller/${packageName}-${packageVersion}.tgz`,
                 language: 'Terminal',
             },
             {
@@ -341,7 +343,7 @@ export const authoredDocs: Doc[] = [
         id: 'api',
         group: 'API & INTEGRATION',
         title: 'API reference',
-        summary: 'The public service surface, grounded in the local 1.0.0 source.',
+        summary: 'The public service surface, grounded in the local ' + packageVersion + ' source.',
         sections: [
             {
                 id: 'lifecycle',

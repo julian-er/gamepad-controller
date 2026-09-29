@@ -5,6 +5,12 @@
 ### Documentation
 
 - Updated installation and local tarball examples for 1.0.1, then organized current guides with OKF metadata and category indexes.
+- Clarified that the portable consumer skills cover 1.0.1 and retain compatibility with the public API introduced in 1.0.0.
+
+### Website
+
+- Corrected the shared brand to `gamepad-ui-engine` and derived current version labels and tarball examples from the library manifest.
+- Updated npm availability, release navigation, and search/social descriptions while preserving historical release notes and existing repository URLs.
 
 ## 1.0.1 — 2026-09-24
 

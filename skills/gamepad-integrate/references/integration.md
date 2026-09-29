@@ -1,4 +1,6 @@
-# Integration examples for gamepad-ui-engine 1.0.0
+# Integration examples for gamepad-ui-engine 1.0.1
+
+These examples also apply to the public API introduced in 1.0.0.
 
 Install with `npm install gamepad-ui-engine`. To try unreleased changes, build the library and install its local tarball instead. The snippets below render a unique #catalog container; do not mount overlapping instances.
 
