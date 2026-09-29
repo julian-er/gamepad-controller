@@ -1,5 +1,51 @@
 # Website verification record
 
+## Documentation visual refresh — 2026-09-29
+
+The shared documentation template now has a separated title block, 16px prose, 14px
+navigation, larger code/table text, and responsive reading gutters. Search results and
+shared scrollbars follow the existing themes. API table scroll containers are named,
+keyboard-focusable regions. Routes, navigation labels, section IDs, authored/source
+content, SEO metadata, and library/demo integration code remain unchanged.
+
+### Checks
+
+- `pnpm --filter gamepad-ui-engine-website run typecheck`: passed.
+- `pnpm --filter gamepad-ui-engine-website run test`: passed after final changes;
+  14 files, 96 tests.
+- `pnpm --filter gamepad-ui-engine-website run build`: passed after final changes;
+  188 modules. Main JS: 151.32 kB gzip; main CSS: 9.44 kB gzip. The existing 500 kB
+  chunk warning remains. No runtime dependency or media was added.
+- Prettier check of the three changed Sass files: passed.
+- `git diff --check`: passed.
+
+### Browser evidence
+
+The Codex in-app browser inspected development at `http://127.0.0.1:5173/` and the final
+production preview at `http://127.0.0.1:4173/`. Installation captures cover 1280, 768,
+and 375 × 900 CSS pixels in both themes. The production captures showed zero horizontal
+page overflow at each width. [Before/after images and rubric](design/docs-refresh/README.md)
+are retained with the website design sources.
+
+Development interaction checks covered mobile drawer opening and closing on navigation,
+API tables at 320px, keyboard table scrolling with visible focus, empty search and filtered
+results, Enter activation of a search-result link, End selecting Angular in framework tabs,
+copy success feedback, and page-index section scrolling. Introduction's shared template and
+idle playground were visually inspected on desktop. Table overflow remained inside its
+scroll region; an ArrowRight keyboard action moved its scroll position. Clipboard content
+was not independently read back.
+
+Computed production text/background contrast: prose 7.53:1 dark and 7.24:1 light;
+navigation 7.25:1 dark and 7.58:1 light. The final production page emitted no warning/error
+logs in this check. Native semantics and names were inspected through browser trees.
+
+This is a focused visual/accessibility pass, not a full WCAG conformance audit. A screen
+reader, forced-colors rendering, reduced-motion emulation, 200% text resize, additional
+browser engines, physical mobile devices/controllers, and hardware/3D performance were
+not exercised. Existing reduced-motion rules are preserved. The historical search
+focus-restoration defect remains outside this refresh. No field performance data was
+available. No release/version change is needed for this website-only work.
+
 ## Package identity and documentation migration — 2026-09-29
 
 The website uses the root library manifest for its shared brand and current-version labels.

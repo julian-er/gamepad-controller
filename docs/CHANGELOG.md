@@ -9,6 +9,7 @@
 
 ### Website
 
+- Refreshed documentation typography, navigation, code and tables, including keyboard-scrollable API tables and theme-aware scrollbars.
 - Corrected the shared brand to `gamepad-ui-engine` and derived current version labels and tarball examples from the library manifest.
 - Updated npm availability, release navigation, and search/social descriptions while preserving historical release notes and existing repository URLs.
 

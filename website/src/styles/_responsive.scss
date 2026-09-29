@@ -1,8 +1,6 @@
 @media (min-width: 1650px) {
     .docs-content {
-        margin-inline: auto;
-        padding-left: 110px;
-        padding-right: 110px;
+        margin-left: max(var(--doc-rail-width), calc((100vw - 1000px) / 2));
     }
 }
 @media (max-width: 1250px) {
@@ -65,11 +63,11 @@
         font-size: 35px;
     }
     .docs-sidebar {
-        width: 210px;
+        width: 240px;
     }
     .docs-content {
-        margin-left: 210px;
-        padding: 35px 26px;
+        margin-left: 240px;
+        padding: 32px 24px;
     }
     .docs-content .playground-body {
         grid-template-columns: 1fr;
@@ -350,17 +348,17 @@
     .docs-content {
         margin: 0;
         padding: 32px 18px;
-        > h1 {
+        .doc-header h1 {
             font-size: 33px;
             overflow-wrap: anywhere;
         }
         .doc-lede {
-            font-size: 14px;
+            font-size: 17px;
         }
         .doc-meta {
             gap: 5px;
             .badge {
-                font-size: 8px;
+                font-size: 10px;
             }
         }
     }
@@ -374,15 +372,16 @@
         margin-left: 24px;
     }
     .doc-eyebrow {
-        font-size: 8px;
+        font-size: 10px;
+        gap: 12px;
     }
-    table {
+    .docs-content table {
         min-width: 680px;
         overflow-wrap: normal;
         code {
             white-space: nowrap;
         }
-        font-size: 11px;
+        font-size: 14px;
         th,
         td {
             padding: 10px;
@@ -394,6 +393,20 @@
     pre {
         font-size: 10px;
         padding: 16px 10px;
+    }
+    .docs-content pre {
+        font-size: 12px;
+        padding: 20px 16px;
+    }
+    .pagination {
+        gap: 8px;
+        a {
+            padding: 16px 12px;
+            overflow-wrap: anywhere;
+        }
+        strong {
+            font-size: 14px;
+        }
     }
     .line-number {
         min-width: 18px;
@@ -417,7 +430,7 @@
         margin-top: 24px;
     }
     .search-footer {
-        font-size: 8px;
+        font-size: 11px;
     }
     .search-footer kbd {
         font-size: 8px;

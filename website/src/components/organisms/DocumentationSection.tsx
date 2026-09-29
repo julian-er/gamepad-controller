@@ -23,7 +23,7 @@ export function DocumentationSection({ doc, section }: { doc: Doc; section: Sect
                 ? <FrameworkCode examples={sharedExamples(section.code)} />
                 : <CodeBlock code={section.code} language={section.language} />)
         )}
-        {section.rows && <div className="table-scroll"><table>
+        {section.rows && <div className="table-scroll" tabIndex={0} role="region" aria-label={section.title || 'Reference table'}><table>
             <thead><tr>{section.headers?.map((header) => <th key={header} scope="col"><InlineText text={header} source={doc.source} /></th>)}</tr></thead>
             <tbody>{section.rows.map((row, rowIndex) => <tr key={rowIndex}>{row.map((cell, cellIndex) => <td key={cellIndex}><InlineText text={cell} source={doc.source} /></td>)}</tr>)}</tbody>
         </table></div>}
