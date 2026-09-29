@@ -1,3 +1,9 @@
+.docs-app {
+    --doc-body-size: 16px;
+    --doc-label-size: 11px;
+    --doc-rail-width: 272px;
+    --doc-radius: 8px;
+}
 .docs-app .header-inner {
     max-width: none;
     padding: 0 24px;
@@ -7,20 +13,20 @@
     top: 72px;
     bottom: 0;
     left: 0;
-    width: 240px;
+    width: var(--doc-rail-width);
     border-right: 1px solid var(--line);
     background: var(--panel);
-    padding: 25px 14px 20px;
+    padding: 32px 16px 24px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
     z-index: 35;
 }
 .nav-group {
-    margin-bottom: 25px;
+    margin-bottom: 28px;
     h2 {
         margin: 0 10px 10px;
-        font-size: 9px;
+        font-size: var(--doc-label-size);
         color: var(--muted);
         font-family: var(--mono);
         letter-spacing: 1px;
@@ -30,10 +36,11 @@
         display: flex;
         align-items: center;
         gap: 9px;
-        padding: 8px 10px;
+        padding: 10px 12px;
         margin: 2px 0;
-        font-size: 11px;
-        border-radius: 5px;
+        font-size: 14px;
+        line-height: 1.45;
+        border-radius: var(--doc-radius);
         color: var(--muted);
         &[aria-current='page'] {
             background: var(--subtle);
@@ -47,7 +54,7 @@
     }
 }
 .nav-live {
-    font-size: 7px;
+    font-size: 9px;
     font-family: var(--mono);
     margin-left: auto;
     color: var(--accent);
@@ -59,7 +66,7 @@
     margin-top: auto;
     padding: 20px 10px 0;
     border-top: 1px solid var(--line);
-    font-size: 9px;
+    font-size: 12px;
     color: var(--muted);
     > span {
         margin-right: 4px;
@@ -67,29 +74,30 @@
     a {
         display: block;
         padding-top: 9px;
-        font-size: 10px;
+        font-size: 12px;
     }
 }
 .docs-content {
-    margin-left: 240px;
-    margin-right: 210px;
-    padding: 50px 42px 60px;
-    max-width: 1120px;
+    margin-left: var(--doc-rail-width);
+    margin-right: 224px;
+    padding: 48px 48px 64px;
+    max-width: 1000px;
     min-width: 0;
-    > h1 {
-        font-size: 39px;
-        margin: 16px 0;
-    }
+    font-size: var(--doc-body-size);
     .doc-lede {
-        font-size: 15px;
-        line-height: 1.8;
-        max-width: 650px;
+        font-size: 18px;
+        line-height: 1.65;
+        max-width: 60ch;
     }
     .doc-meta {
         display: flex;
-        gap: 6px;
+        gap: 8px;
         flex-wrap: wrap;
-        margin: 21px 0 35px;
+        margin: 24px 0 0;
+        .badge {
+            font-size: 10px;
+            padding: 4px 8px;
+        }
     }
     .playground-body {
         gap: 12px;
@@ -135,39 +143,89 @@
         font-size: 8px;
     }
 }
+.doc-header {
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--line);
+    h1 {
+        font-size: clamp(34px, 3.5vw, 48px);
+        margin: 20px 0 16px;
+        overflow-wrap: anywhere;
+    }
+}
 .doc-eyebrow {
     display: flex;
     justify-content: space-between;
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: var(--doc-label-size);
     letter-spacing: 0.8px;
     color: var(--accent);
     > span:last-child {
         color: var(--muted);
-        font-size: 8px;
+        font-size: inherit;
     }
 }
 .doc-section {
     margin: 40px 0;
     scroll-margin-top: 100px;
     > h2 {
-        font-size: 23px;
+        font-size: 26px;
         margin: 0 0 20px;
         letter-spacing: -0.03em;
     }
     > p {
-        font-size: 13px;
-        line-height: 1.9;
+        font-size: var(--doc-body-size);
+        line-height: 1.8;
+        max-width: 72ch;
     }
     .code-block {
         margin-top: 20px;
+    }
+}
+.docs-content {
+    .reference-prose code {
+        font-size: 0.875em;
+        color: var(--text);
+        background: var(--well);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 1px 4px;
+        box-decoration-break: clone;
+    }
+    .code-block {
+        border-radius: var(--doc-radius);
+    }
+    .code-header {
+        min-height: 44px;
+        font-size: 12px;
+        button {
+            min-height: 32px;
+            font-size: 12px;
+        }
+    }
+    pre {
+        font-size: 13px;
+        line-height: 1.8;
+        padding: 24px 20px;
+        &:focus-visible {
+            outline-offset: -4px;
+        }
+    }
+    .line-number {
+        color: #8d9bb0;
+    }
+    .snippet-note {
+        font-size: 13px;
+    }
+    .framework-tabs {
+        margin-left: 0;
+        margin-top: 24px;
     }
 }
 .heading-anchor {
     margin-left: 9px;
     font-size: 16px;
     color: var(--muted);
-    opacity: 0;
+    opacity: 0.65;
     h2:hover &,
     &:focus {
         opacity: 1;
@@ -177,25 +235,29 @@
     width: 100%;
     overflow-x: auto;
     border: 1px solid var(--line);
-    border-radius: 7px;
+    border-radius: var(--doc-radius);
     margin-top: 20px;
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 4px;
+    }
 }
-table {
+.docs-content table {
     border-collapse: collapse;
     width: 100%;
-    font-size: 12px;
+    font-size: 14px;
     text-align: left;
     th {
-        padding: 10px 14px;
+        padding: 12px 16px;
         color: var(--muted);
         font-family: var(--mono);
         font-weight: 400;
-        font-size: 9px;
+        font-size: 11px;
         background: var(--well);
     }
     td {
         border-top: 1px solid var(--line);
-        padding: 13px 14px;
+        padding: 16px;
         color: var(--muted);
         vertical-align: top;
         line-height: 1.75;
@@ -205,32 +267,37 @@ table {
         min-width: 130px;
     }
     td code {
-        font-size: 10px;
+        font-size: 12px;
+    }
+    tbody tr:hover {
+        background: var(--well);
     }
 }
 .table-of-contents {
-    max-height: calc(100vh - 145px);
+    max-height: calc(100dvh - 136px);
     overflow-y: auto;
     position: fixed;
-    top: 121px;
-    right: 20px;
-    width: 170px;
+    top: 120px;
+    right: 24px;
+    width: 176px;
     h2 {
         color: var(--muted);
-        font-size: 9px;
+        font-size: var(--doc-label-size);
         font-family: var(--mono);
         letter-spacing: 0.8px;
         margin-bottom: 20px;
     }
     > button {
         display: block;
+        width: 100%;
         background: none;
         border: 0;
         border-left: 1px solid var(--line);
-        padding: 8px 12px;
+        padding: 10px 12px;
         color: var(--muted);
         text-align: left;
-        font-size: 10px;
+        font-size: 13px;
+        line-height: 1.5;
         &:hover {
             color: var(--accent);
             border-left-color: var(--accent);
@@ -239,23 +306,24 @@ table {
 }
 .toc-note {
     border: 1px solid var(--line);
-    padding: 15px;
-    margin-top: 40px;
-    border-radius: 6px;
+    padding: 16px;
+    margin-top: 32px;
+    border-radius: var(--doc-radius);
+    background: var(--panel);
     > svg {
         color: var(--accent);
         margin-bottom: 13px;
     }
     strong {
         display: block;
-        font-size: 11px;
+        font-size: 14px;
     }
     p {
-        font-size: 10px;
+        font-size: 13px;
         margin-top: 8px;
     }
     a {
-        font-size: 10px;
+        font-size: 13px;
         color: var(--accent);
     }
 }
@@ -263,7 +331,7 @@ table {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 10px;
+    font-size: 12px;
     color: var(--muted);
     border-top: 1px solid var(--line);
     padding: 22px 0;
@@ -280,8 +348,8 @@ table {
     a {
         border: 1px solid var(--line);
         background: var(--panel);
-        border-radius: 7px;
-        padding: 15px;
+        border-radius: var(--doc-radius);
+        padding: 20px;
         &:last-child {
             text-align: right;
         }
@@ -290,12 +358,12 @@ table {
         }
     }
     span {
-        font-size: 10px;
+        font-size: 12px;
         color: var(--muted);
         display: block;
     }
     strong {
-        font-size: 12px;
+        font-size: 15px;
         font-weight: 550;
     }
 }
@@ -341,7 +409,7 @@ table {
 }
 .search-count {
     font-family: var(--mono);
-    font-size: 9px;
+    font-size: 11px;
     padding: 16px 18px 0;
 }
 .search-results {
@@ -363,10 +431,10 @@ table {
             background: var(--well);
         }
         strong {
-            font-size: 13px;
+            font-size: 15px;
         }
         p {
-            font-size: 11px;
+            font-size: 13px;
             margin: 3px 0 0;
         }
     }
@@ -377,10 +445,9 @@ table {
     gap: 10px;
     padding: 13px 18px;
     border-top: 1px solid var(--line);
-    font-size: 9px;
+    font-size: 11px;
     color: var(--muted);
 }
 .search-empty {
     padding: 25px 15px;
 }
-

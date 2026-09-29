@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Documentation
+
+- Updated installation and local tarball examples for 1.0.1, then organized current guides with OKF metadata and category indexes.
+- Clarified that the portable consumer skills cover 1.0.1 and retain compatibility with the public API introduced in 1.0.0.
+
+### Website
+
+- Refreshed documentation typography, navigation, code and tables, including keyboard-scrollable API tables and theme-aware scrollbars.
+- Improved the home page with a split desktop hero, clearer installation control, larger text and controls, full-width mobile actions, and stronger light-theme button contrast.
+- Corrected the shared brand to `gamepad-ui-engine` and derived current version labels and tarball examples from the library manifest.
+- Updated npm availability, release navigation, and search/social descriptions while preserving historical release notes and existing repository URLs.
+
 ## 1.0.1 — 2026-09-24
 
 ### Package and documentation
@@ -37,4 +49,4 @@ This is the first published package. No earlier package releases are documented.
 - React, Angular and vanilla JavaScript/TypeScript guides, a documentation playground and four portable AI consumer skills.
 - Published to npm as `gamepad-ui-engine`.
 
-See [API.md](API.md) for the contracts, [BUILDING.md](BUILDING.md) for building and packing from source, and [AGENT_SKILLS.md](AGENT_SKILLS.md) for the consumer skills.
+See [API.md](knowledge/foundations/api.md) for the contracts, [BUILDING.md](knowledge/operations/building-and-packaging.md) for building and packing from source, and [AGENT_SKILLS.md](knowledge/integrations/consumer-skills.md) for the consumer skills.

@@ -1,6 +1,29 @@
+---
+type: "Reference"
+title: "API reference"
+description: "Use the public service lifecycle, events, focus methods, and host transport."
+tags: ["api", "events"]
+where: ["gamepad-ui-engine"]
+sources:
+  - title: "Public package exports"
+    resource: "../../../src/index.ts"
+  - title: "Service implementation"
+    resource: "../../../src/service/GamepadService.ts"
+  - title: "Action dispatch"
+    resource: "../../../src/actions/ActionDispatcher.ts"
+generated:
+  by: process:maintain-documentation
+  at: "2026-09-24T05:34:57.831Z"
+doc_version: 1
+status: draft
+---
 # API reference
 
-This reference covers the public `gamepad-ui-engine` **1.0.0** entry point.
+Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
+
+Latest change: Organized this guide in the OKF knowledge base.
+
+This reference covers the public `gamepad-ui-engine` **1.0.1** entry point. Version 1.0.1 retains the 1.0.0 library API.
 
 ## Create a service
 
@@ -84,7 +107,7 @@ The `backbutton` and `navigationrequest` events are notifications: subscribing d
 
 ## Options
 
-See [Configuration](CONFIGURATION.md) for every flat/grouped key, effective default, validation rule and factory override. See [Complete public contracts](PUBLIC_API.md) for all method signatures, event payloads, helpers and types.
+See [Configuration](configuration.md) for every flat/grouped key, effective default, validation rule and factory override. See [Complete public contracts](public-api.md) for all method signatures, event payloads, helpers and types.
 
 ## Custom-event host transport
 
@@ -103,4 +126,4 @@ type HostSnapshot = { gamepad: {
 
 The host sends a full initial baseline snapshot and full snapshots whenever a button or axis changes, including releases. The baseline establishes edge state without a phantom primary selection: a primary button held in it must be released and pressed again before automatic selection, while held directional and scroll input can continue repeating. The host preserves delivery order, signals disconnect/reset explicitly, and supplies a fresh snapshot after recovery. `index` must be a nonnegative safe integer; button values must be finite in `[0, 1]`; axes must be finite in `[-1, 1]`; supplied `touched`/`connected` values must be booleans; `mapping` is `''` or `'standard'`; and supplied timestamps are finite and nonnegative. Malformed state is rejected without partial mutation. Silence is normal in a changes-only stream, so it does not release held directional/scroll input; release, disconnect, or `resetInput()` does.
 
-See [USAGE_VANILLA.md](USAGE_VANILLA.md) for a dispatch example and [AGENT_SKILLS.md](AGENT_SKILLS.md) for portable host guidance.
+See [USAGE_VANILLA.md](../integrations/vanilla.md) for a dispatch example and [AGENT_SKILLS.md](../integrations/consumer-skills.md) for portable host guidance.

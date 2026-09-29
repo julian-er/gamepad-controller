@@ -30,15 +30,15 @@ host protocol. Read navigation guidance when the demo adds custom actions or dia
 These links are repository guidance, not automatic harness skill registration. Read the
 existing `skills/` folders directly here; keep them self-contained and do not copy them into
 `.agents/skills` or change harness configuration for repository work. Optional installation
-for consumer projects is documented in [Consumer skills](docs/AGENT_SKILLS.md).
+for consumer projects is documented in [Consumer skills](docs/knowledge/integrations/consumer-skills.md).
 
 ## Public API and validation
 
 Consumer examples and website runtime code must import from the `gamepad-ui-engine` public
 entry point, not private library modules. Check behavior against the current
-[public exports](src/index.ts) and [API guide](docs/API.md).
+[public exports](src/index.ts) and [API guide](docs/knowledge/foundations/api.md).
 
-Use the existing commands and maintenance guidance in [Building](docs/BUILDING.md) for
+Use the existing commands and maintenance guidance in [Building](docs/knowledge/operations/building-and-packaging.md) for
 library changes and the [website README](website/README.md) for documentation-site changes.
 Run checks appropriate to the affected behavior; UI interactions need browser verification
 as well as automated tests. Record actual results and unverified hardware/browser limits,

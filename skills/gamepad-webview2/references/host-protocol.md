@@ -1,4 +1,6 @@
-# Host snapshot protocol for gamepad-ui-engine 1.0.0
+# Host snapshot protocol for gamepad-ui-engine 1.0.1
+
+This protocol also applies to the public API introduced in 1.0.0.
 
 ## Page setup
 

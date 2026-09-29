@@ -1,5 +1,6 @@
 import { act } from 'react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { name as packageName, version as packageVersion } from '../../package.json';
 
 const flush = (delay = 0) => new Promise<void>((resolve) => setTimeout(resolve, delay));
 
@@ -65,6 +66,25 @@ afterAll(() => {
 });
 
 describe('documentation app safeguards', () => {
+    it('keeps the rendered package identity and installation aligned with the library manifest', async () => {
+        route('#/');
+        await settle();
+        expect([...document.querySelectorAll('.brand')].map((brand) => brand.textContent)).toEqual([
+            packageName + '.', packageName + '.',
+        ]);
+        expect(document.querySelector('.site-header .version')!.textContent).toBe('v' + packageVersion);
+        expect(document.querySelector('.footer-bottom .mono')!.textContent).toBe('v' + packageVersion);
+        expect(document.querySelector('.install-command code')!.textContent).toBe('npm install ' + packageName);
+
+        route('#/docs/installation');
+        await settle();
+        expect(document.querySelector('.brand')!.textContent).toBe(packageName + '.');
+        expect(document.querySelector('.doc-eyebrow .mono')!.textContent).toBe('VERSION ' + packageVersion);
+        expect(document.querySelector('.doc-meta')!.textContent).toContain('Version ' + packageVersion);
+        expect(document.querySelector('#local-install pre')!.textContent).toContain(packageName + '-' + packageVersion + '.tgz');
+        route('#/docs/introduction');
+        await settle();
+    });
     it('keeps the home playground CTA on the landing page and focuses its idle Start control', async () => {
         route('#/');
         await settle();

@@ -1,8 +1,8 @@
 # gamepad-ui-engine
 
-Browser gamepad navigation for grid, spatial, and horizontal UI layouts. Version **1.0.0** uses the native Gamepad API by default and can accept a validated custom-event input transport for WinUI/WebView2 hosts.
+Browser gamepad navigation for grid, spatial, and horizontal UI layouts. The current package version is **1.0.1**. It uses the native Gamepad API by default and can accept a validated custom-event input transport for WinUI/WebView2 hosts.
 
-**Install:** 1.0.0 is the first published release. To try unreleased changes, [build and install a local tarball](BUILDING.md#testing-the-package-inside-another-project).
+**Install:** Install the published package from npm. To try unreleased changes, [build and install a local tarball](knowledge/operations/building-and-packaging.md#testing-the-package-inside-another-project).
 
 From npm:
 
@@ -33,7 +33,7 @@ const dispose = mountCatalog();
 
 ## Projects to try
 
-Explore the [project cookbook](PROJECT_COOKBOOK.md) for websites, small apps, landing pages, and mini games. Start with a complete Treasure Tiles game, then try a film catalog, portfolio, focus timer, recipe browser, product explorer, plan chooser, or quiz.
+Explore the [project cookbook](knowledge/features/project-cookbook.md) for websites, small apps, landing pages, and mini games. Start with a complete Treasure Tiles game, then try a film catalog, portfolio, focus timer, recipe browser, product explorer, plan chooser, or quiz.
 
 ## Navigation targets and dialogs
 
@@ -54,19 +54,18 @@ The active scope limits automatic navigation to descendants. Open native `<dialo
 
 ## Custom hosts
 
-Enable `useCustomEvents: true` when a native host sends gamepad state. Send a complete initial baseline snapshot and complete snapshots for every input change, including releases. The baseline does not select when primary is initially held; release and press it again to select. Preserve press/release ordering, dispatch disconnect/reset explicitly, call `resetInput()` around recovery, then send a fresh snapshot. See [API.md](API.md#custom-event-host-transport) and [USAGE_VANILLA.md](USAGE_VANILLA.md).
+Enable `useCustomEvents: true` when a native host sends gamepad state. Send a complete initial baseline snapshot and complete snapshots for every input change, including releases. The baseline does not select when primary is initially held; release and press it again to select. Preserve press/release ordering, dispatch disconnect/reset explicitly, call `resetInput()` around recovery, then send a fresh snapshot. See [API.md](knowledge/foundations/api.md#custom-event-host-transport) and [USAGE_VANILLA.md](knowledge/integrations/vanilla.md).
 
 Custom DOM events are a transport, not a trust boundary. A WebView2 host must validate the intended document origin and its native payload before forwarding it.
 
-## Framework guides and agent skills
+## Knowledge base
 
-- [Vanilla JavaScript](USAGE_VANILLA.md)
-- [React](USAGE_REACT.md)
-- [Angular](USAGE_ANGULAR.md)
-- [API reference](API.md)
-- [Architecture](ARCHITECTURE.md)
-- [First-release notes](CHANGELOG.md)
-- [Portable consumer skills](AGENT_SKILLS.md)
+Browse the [knowledge base](knowledge/index.md) by category:
 
-- [Complete configuration](CONFIGURATION.md)
-- [Complete public contracts](PUBLIC_API.md)
+- [Architecture](knowledge/architecture/index.md) — service and runtime boundaries.
+- [Features](knowledge/features/index.md) — action behavior and project examples.
+- [Foundations](knowledge/foundations/index.md) — public API, service, and configuration contracts.
+- [Integrations](knowledge/integrations/index.md) — framework setup and consumer skills.
+- [Operations](knowledge/operations/index.md) — building and packaging.
+
+See the [release notes](CHANGELOG.md) for package history.

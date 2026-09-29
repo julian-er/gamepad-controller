@@ -1,6 +1,6 @@
-import vanillaGuide from '../../docs/USAGE_VANILLA.md?raw';
-import reactGuide from '../../docs/USAGE_REACT.md?raw';
-import angularGuide from '../../docs/USAGE_ANGULAR.md?raw';
+import vanillaGuide from '../../docs/knowledge/integrations/vanilla.md?raw';
+import reactGuide from '../../docs/knowledge/integrations/react.md?raw';
+import angularGuide from '../../docs/knowledge/integrations/angular.md?raw';
 
 function setupCode(guide: string): string {
     const code = /```(?:js|ts|tsx)\r?\n([\s\S]*?)```/.exec(guide)?.[1];

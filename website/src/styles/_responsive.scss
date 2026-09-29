@@ -1,8 +1,6 @@
 @media (min-width: 1650px) {
     .docs-content {
-        margin-inline: auto;
-        padding-left: 110px;
-        padding-right: 110px;
+        margin-left: max(var(--doc-rail-width), calc((100vw - 1000px) / 2));
     }
 }
 @media (max-width: 1250px) {
@@ -47,10 +45,15 @@
         width: calc(100% - 48px);
     }
     .hero {
-        padding-top: 60px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+        padding-top: 48px;
+    }
+    .hero-copy {
+        max-width: 680px;
     }
     .hero h1 {
-        font-size: 57px;
+        font-size: clamp(40px, 6vw, 56px);
     }
     .hero-stage img {
         height: 360px;
@@ -65,11 +68,11 @@
         font-size: 35px;
     }
     .docs-sidebar {
-        width: 210px;
+        width: 240px;
     }
     .docs-content {
-        margin-left: 210px;
-        padding: 35px 26px;
+        margin-left: 240px;
+        padding: 32px 24px;
     }
     .docs-content .playground-body {
         grid-template-columns: 1fr;
@@ -121,11 +124,12 @@
         width: calc(100% - 36px);
     }
     .hero {
-        padding-top: 46px;
+        padding-top: 32px;
+        gap: 28px;
     }
     .hero-eyebrow {
-        font-size: 8px;
-        letter-spacing: 0.6px;
+        font-size: 10px;
+        letter-spacing: 0;
         padding-inline: 10px;
         margin-bottom: 22px;
     }
@@ -136,26 +140,28 @@
         display: none;
     }
     .hero-lede {
-        font-size: 14px;
-        padding-inline: 6px;
+        font-size: 16px;
+        padding-inline: 0;
     }
     .hero-actions {
         gap: 8px;
+        flex-direction: column;
     }
     .hero-actions .button {
         padding: 11px 14px;
-        font-size: 10px;
+        font-size: 14px;
+        width: 100%;
     }
     .install-command {
-        font-size: 10px;
-        margin-bottom: 24px;
+        font-size: 11px;
+        padding-inline: 12px;
     }
     .hero-stage img {
         height: 285px;
     }
     .stage-caption {
         gap: 17px;
-        font-size: 8px;
+        font-size: 10px;
         bottom: 17px;
     }
     .stage-caption span:last-child {
@@ -164,14 +170,20 @@
     .stage-label {
         top: 12px;
         left: 12px;
-        font-size: 7px;
+        font-size: 9px;
         padding: 4px 7px;
     }
     .proof-strip {
         grid-template-columns: repeat(2, 1fr);
         gap: 25px 0;
-        margin-top: 27px;
-        padding-bottom: 27px;
+        margin-top: 0;
+        padding: 24px 0;
+        > div {
+            padding-inline: 12px;
+        }
+        > div:nth-child(odd) {
+            padding-left: 0;
+        }
         > div:nth-child(2) {
             border: 0;
         }
@@ -179,7 +191,7 @@
             font-size: 20px;
         }
         span {
-            font-size: 8px;
+            font-size: 10px;
         }
     }
     .landing-section {
@@ -193,14 +205,14 @@
             margin-bottom: 16px;
         }
         > p {
-            font-size: 12px;
+            font-size: 16px;
         }
         .text-link {
             margin-top: 5px;
         }
     }
     .eyebrow {
-        font-size: 9px;
+        font-size: 10px;
     }
     .playground-toolbar {
         padding: 13px;
@@ -283,7 +295,7 @@
             font-size: 18px;
         }
         p {
-            font-size: 13px;
+            font-size: 16px;
         }
     }
     .feature-grid {
@@ -302,6 +314,9 @@
             font-size: 35px;
         }
     }
+    .landing-app .integration-section pre {
+        font-size: 12px;
+    }
     .cta-section {
         margin-top: 60px;
         padding: 38px 15px;
@@ -309,12 +324,12 @@
             font-size: 29px;
         }
         p {
-            font-size: 12px;
+            font-size: 16px;
         }
         .button {
             padding-inline: 13px;
-            font-size: 11px;
-            margin: 4px;
+            font-size: 14px;
+            margin: 0;
         }
     }
     .site-footer {
@@ -350,17 +365,17 @@
     .docs-content {
         margin: 0;
         padding: 32px 18px;
-        > h1 {
+        .doc-header h1 {
             font-size: 33px;
             overflow-wrap: anywhere;
         }
         .doc-lede {
-            font-size: 14px;
+            font-size: 17px;
         }
         .doc-meta {
             gap: 5px;
             .badge {
-                font-size: 8px;
+                font-size: 10px;
             }
         }
     }
@@ -374,15 +389,16 @@
         margin-left: 24px;
     }
     .doc-eyebrow {
-        font-size: 8px;
+        font-size: 10px;
+        gap: 12px;
     }
-    table {
+    .docs-content table {
         min-width: 680px;
         overflow-wrap: normal;
         code {
             white-space: nowrap;
         }
-        font-size: 11px;
+        font-size: 14px;
         th,
         td {
             padding: 10px;
@@ -394,6 +410,20 @@
     pre {
         font-size: 10px;
         padding: 16px 10px;
+    }
+    .docs-content pre {
+        font-size: 12px;
+        padding: 20px 16px;
+    }
+    .pagination {
+        gap: 8px;
+        a {
+            padding: 16px 12px;
+            overflow-wrap: anywhere;
+        }
+        strong {
+            font-size: 14px;
+        }
     }
     .line-number {
         min-width: 18px;
@@ -417,7 +447,7 @@
         margin-top: 24px;
     }
     .search-footer {
-        font-size: 8px;
+        font-size: 11px;
     }
     .search-footer kbd {
         font-size: 8px;
@@ -434,4 +464,3 @@
         animation: none !important;
     }
 }
-

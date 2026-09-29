@@ -2,6 +2,9 @@
 
 A React + TypeScript landing page and documentation site, styled with Sass and the supplied Stitch design system.
 
+See [DESIGN.md](DESIGN.md) for the maintained visual direction and runtime token ownership,
+including the documentation reading layout and its before/after evidence.
+
 ## Run locally
 
 From the repository root:
@@ -86,9 +89,11 @@ The `main` branch is deployed automatically to GitHub Pages at https://julian-er
 
 ## Documentation maintenance
 
-Verify changes against the local public API in `../src/index.ts`, `../docs/API.md`, and the service options/events. Keep authored copy in `src/content/authored.ts`, reference routes and the allowlist in `src/content/reference-sources.ts`, assembly and ordering in `src/content/registry.ts`, and parsing and links in `src/utils/markdown.ts` and `src/utils/reference-link.ts`. Version 1.0.0 is the first published release, and the site labels it accordingly. The design's sample performance numbers were deliberately excluded because they were not measurements of this library.
+Verify changes against the local public API in `../src/index.ts`, `../docs/knowledge/foundations/api.md`, and the service options/events. Keep authored copy in `src/content/authored.ts`, reference routes and the allowlist in `src/content/reference-sources.ts`, assembly and ordering in `src/content/registry.ts`, and parsing and links in `src/utils/markdown.ts` and `src/utils/reference-link.ts`. The design's sample performance numbers were deliberately excluded because they were not measurements of this library.
 
-The site includes dedicated Angular and vanilla guides, all consumer guides listed in `referenceSources`, and four AI consumer skills with their references. Source Markdown changes are incorporated at build time. The three primary framework examples are read directly from `../docs/USAGE_VANILLA.md`, `../docs/USAGE_REACT.md` and `../docs/USAGE_ANGULAR.md`. Internal Markdown links resolve to local documentation routes, including section anchors. The site uses the public library entry point; it does not advertise an Angular directive or a React package subpath.
+`src/package-info.ts` reads the library name and version from the root `../package.json` for the shared brand, header/footer, documentation badges, current-version copy, and local tarball example. These describe the library checkout used to build the site, not a live lookup of npm's latest release or the private website workspace version. The Pages workflow rebuilds when the root manifest changes. Preserve historical release numbers in the changelog and explicit API compatibility notes in the portable skills; review current-version prose in Markdown when preparing a release.
+
+The site includes the category indexes and guides under `../docs/knowledge/`, plus four AI consumer skills with their references. Source Markdown changes are incorporated at build time. The three primary framework examples are read directly from `../docs/knowledge/integrations/vanilla.md`, `../docs/knowledge/integrations/react.md` and `../docs/knowledge/integrations/angular.md`. Internal Markdown links resolve to local documentation routes, including section anchors. The site uses the public library entry point; it does not advertise an Angular directive or a React package subpath.
 
 Framework tabs support Left/Right, Home/End, selection with a mouse, and copying the active example. Terminal, CSS, schema text, and harness commands retain their own language labels. Framework-neutral fragments preserve their source execution order; complete service-construction examples can show framework-specific lifecycle placement. Reset, teardown and other fragments do not create a new service implicitly. Recipes still require the application elements and handlers described in their guide.
 
@@ -100,7 +105,7 @@ Open `#/docs/examples` after starting the website. All eight cookbook projects a
 
 The app owns content, scoring, timers, and local views. `DemoShell` and `useDemoSession` own controller input. Stop preserves app state; Reset remounts fresh app state. Leaving the route, hiding the page, blurring the window, or opening documentation search/navigation stops input. The focus timer also pauses. Nothing resumes automatically.
 
-Every app page includes its challenge, library concepts, cookbook section, and a source viewer. Source files load individually on demand: the actual app, shared host and dialog where applicable, controller/artwork modules, simulation, `site.scss` plus every ordered Sass partial, theme tokens, and checkout configuration. Copy copies exactly the selected source text. These components require the existing website checkout; they are not standalone bundles. `registry.ts` references the other app modules, fonts live under `public/fonts`, and Sass resolves its partials through `site.scss`. The standalone vanilla Treasure Tiles starter is in `../docs/PROJECT_COOKBOOK.md`.
+Every app page includes its challenge, library concepts, cookbook section, and a source viewer. Source files load individually on demand: the actual app, shared host and dialog where applicable, controller/artwork modules, simulation, `site.scss` plus every ordered Sass partial, theme tokens, and checkout configuration. Copy copies exactly the selected source text. These components require the existing website checkout; they are not standalone bundles. `registry.ts` references the other app modules, fonts live under `public/fonts`, and Sass resolves its partials through `site.scss`. The standalone vanilla Treasure Tiles starter is in `../docs/knowledge/features/project-cookbook.md`.
 
 The gallery uses data-attribute focus presentation. The current library's class-based focus updates can retrigger its DOM observer indefinitely while a native modal is open; the gallery avoids that interaction with the public `useDataAttributes` option. The original basic playground retains its existing presentation.
 

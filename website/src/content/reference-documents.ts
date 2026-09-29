@@ -7,7 +7,7 @@ export const referenceDocs: Doc[] = referenceSources.map(([source, id, title]) =
     id,
     title,
     source,
-    group: source === 'docs/CONFIGURATION.md' ? 'CORE CONCEPTS' : source.startsWith('skills/') || source === 'docs/AGENT_SKILLS.md' ? 'AI SKILLS & RECIPES' : 'SOURCE GUIDES',
+    group: source === 'docs/knowledge/foundations/configuration.md' ? 'CORE CONCEPTS' : source.startsWith('skills/') || source === 'docs/knowledge/integrations/consumer-skills.md' ? 'AI SKILLS & RECIPES' : 'SOURCE GUIDES',
     summary: 'Local package documentation · ' + source,
     sections: parseReference(loadReferenceSource(source)),
 }));

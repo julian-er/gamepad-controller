@@ -51,7 +51,7 @@ Branch names use a `type/short-kebab-description` shape, for example `fix/axis-d
 - Consumer examples and website code import only from the `gamepad-ui-engine` public entry
   point — never private library modules.
 - Docs and sample claims must match the current public API (`src/index.ts`,
-  `docs/API.md`).
+  `docs/knowledge/foundations/api.md`).
 - UI interaction changes need browser verification recorded per
   [website/VERIFICATION.md](website/VERIFICATION.md).
 - Preserve unrelated working-tree changes; keep your diff scoped to the task.

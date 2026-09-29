@@ -1,6 +1,29 @@
+---
+type: "Integration Guide"
+title: "Vanilla JavaScript and TypeScript"
+description: "Initialize and clean up a service in a vanilla browser view or custom host."
+tags: ["javascript", "integration"]
+where: ["gamepad-ui-engine"]
+sources:
+  - title: "Public package exports"
+    resource: "../../../src/index.ts"
+  - title: "Service implementation"
+    resource: "../../../src/service/GamepadService.ts"
+  - title: "Input pipeline"
+    resource: "../../../src/input/InputPipeline.ts"
+generated:
+  by: process:maintain-documentation
+  at: "2026-09-24T05:34:57.831Z"
+doc_version: 1
+status: draft
+---
 # Vanilla JavaScript / TypeScript
 
-Install with `npm install gamepad-ui-engine`. To try unreleased changes, install the local tarball described in [BUILDING.md](BUILDING.md#testing-the-package-inside-another-project).
+Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
+
+Latest change: Organized this guide in the OKF knowledge base.
+
+Install with `npm install gamepad-ui-engine`. To try unreleased changes, install the local tarball described in [BUILDING.md](../operations/building-and-packaging.md#testing-the-package-inside-another-project).
 
 ## Mount a view
 
@@ -65,4 +88,4 @@ window.dispatchEvent(new CustomEvent('hubgamepadstatechanged', {
 // On view teardown: service.destroy();
 ```
 
-The all-released snapshot establishes the input baseline. A primary button held in that baseline must be released and pressed again to select. Preserve snapshot delivery order. On a host disconnect or recovery boundary, dispatch the disconnect event or call `service.resetInput()`, then send a fresh baseline when valid input resumes. See [API.md](API.md#custom-event-host-transport).
+The all-released snapshot establishes the input baseline. A primary button held in that baseline must be released and pressed again to select. Preserve snapshot delivery order. On a host disconnect or recovery boundary, dispatch the disconnect event or call `service.resetInput()`, then send a fresh baseline when valid input resumes. See [API.md](../foundations/api.md#custom-event-host-transport).

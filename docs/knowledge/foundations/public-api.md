@@ -1,6 +1,29 @@
+---
+type: "Reference"
+title: "Public API contracts"
+description: "Review public service, event, helper, context, and platform contracts."
+tags: ["api", "types"]
+where: ["gamepad-ui-engine"]
+sources:
+  - title: "Public package exports"
+    resource: "../../../src/index.ts"
+  - title: "Service implementation"
+    resource: "../../../src/service/GamepadService.ts"
+  - title: "Configuration interfaces"
+    resource: "../../../src/interfaces/GamepadServiceOptions.ts"
+generated:
+  by: process:maintain-documentation
+  at: "2026-09-24T05:34:57.831Z"
+doc_version: 1
+status: draft
+---
 # Public API contracts
 
-Import these runtime values and types from `gamepad-ui-engine`. Internal subpaths are not package exports. Start with [service lifecycle and host contracts](API.md) and [complete configuration](CONFIGURATION.md).
+Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
+
+Latest change: Organized this guide in the OKF knowledge base.
+
+Import these runtime values and types from `gamepad-ui-engine`. Internal subpaths are not package exports. Start with [service lifecycle and host contracts](api.md) and [complete configuration](configuration.md).
 
 ## Service signatures
 
@@ -49,11 +72,11 @@ Import these runtime values and types from `gamepad-ui-engine`. Internal subpath
 | `contextswitch` | `(newContext: GamepadNavigationContext, oldContext: GamepadNavigationContext \| null) => void` | Borrowed contexts; no prior context is null. |
 | `gamepaderror` | `(error: Error) => void` | Blocked input access or consumer callback failure. |
 
-`GamepadActionEvent` has readonly type (`move`, `select`, `back`, `shoulder`, `scroll`), gamepad, target (Element or null), optional direction and button, plus mutable defaultPrevented and preventDefault(): void. `Direction` is up/down/left/right; `ShoulderButton` is L1/R1 (uppercase). `GamepadEvent extends Event` adds gamepad: Gamepad for browser-like input events; it is not the custom snapshot detail schema. See [custom transport](API.md#custom-event-host-transport).
+`GamepadActionEvent` has readonly type (`move`, `select`, `back`, `shoulder`, `scroll`), gamepad, target (Element or null), optional direction and button, plus mutable defaultPrevented and preventDefault(): void. `Direction` is up/down/left/right; `ShoulderButton` is L1/R1 (uppercase). `GamepadEvent extends Event` adds gamepad: Gamepad for browser-like input events; it is not the custom snapshot detail schema. See [custom transport](api.md#custom-event-host-transport).
 
 ## Factories and shared utilities
 
-`gamepadService(containerSelector?: string | null, options?: GamepadServiceConfig): GamepadService`, `initGamepadForPage(options?: GamepadServiceConfig): GamepadService`, `initDualContextGamepad(options?: GamepadServiceConfig): GamepadService`, and `initCustomEventGamepad(options?: GamepadServiceConfig): GamepadService` initialize and replace one shared instance. Caller configuration overrides factory defaults; grouped values override flat values. `cleanupGamepadService(): void` destroys and clears that instance, safely doing nothing when absent. See [factory defaults](CONFIGURATION.md#factory-defaults).
+`gamepadService(containerSelector?: string | null, options?: GamepadServiceConfig): GamepadService`, `initGamepadForPage(options?: GamepadServiceConfig): GamepadService`, `initDualContextGamepad(options?: GamepadServiceConfig): GamepadService`, and `initCustomEventGamepad(options?: GamepadServiceConfig): GamepadService` initialize and replace one shared instance. Caller configuration overrides factory defaults; grouped values override flat values. `cleanupGamepadService(): void` destroys and clears that instance, safely doing nothing when absent. See [factory defaults](configuration.md#factory-defaults).
 
 `gamepadUtils` delegates to that same shared instance, not independent class instances:
 
@@ -161,4 +184,4 @@ DOM queries, geometry and focus remain browser DOM operations outside this seam.
 
 `GridDimensions` contains rows:number and cols:number. `NavigationState` contains focusedElementIndex:number, elements:Element[], gridDimensions:GridDimensions, options:GamepadServiceOptions, nullable onFocus/onSelect callbacks `(element: Element, index: number) => void`, and optional isElementEligible:(Element)=>boolean, isRuntimeActive:()=>boolean and runtimeGeneration:()=>number. These types describe integration data; no public service getter returns a mutable NavigationState. Use service/context methods to operate navigation.
 
-Configuration types `GamepadServiceOptions`, `GamepadServiceConfig`, `NavigationOptionsGroup`, `InputOptionsGroup`, `StylingOptionsGroup`, `StatusOptionsGroup`, `ScrollingOptionsGroup`, `ContextOptionsGroup` and `CustomEventsOptionsGroup` are defined by the [canonical configuration reference](CONFIGURATION.md).
+Configuration types `GamepadServiceOptions`, `GamepadServiceConfig`, `NavigationOptionsGroup`, `InputOptionsGroup`, `StylingOptionsGroup`, `StatusOptionsGroup`, `ScrollingOptionsGroup`, `ContextOptionsGroup` and `CustomEventsOptionsGroup` are defined by the [canonical configuration reference](configuration.md).

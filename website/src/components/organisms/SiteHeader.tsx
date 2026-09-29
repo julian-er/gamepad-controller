@@ -1,4 +1,5 @@
 import type { Theme } from '../../hooks/useTheme';
+import { packageVersion } from '../../package-info';
 import { Icon } from '../atoms/Icon';
 import { Brand } from '../molecules/Brand';
 
@@ -18,7 +19,7 @@ export function SiteHeader({ isDocs, docTitle, theme, menuOpen, repository, onSe
         <header className="site-header">
             <div className="header-inner">
                 <Brand />
-                <span className="version mono">v1.0.0</span>
+                <span className="version mono">v{packageVersion}</span>
                 {isDocs ? (
                     <div className="header-breadcrumb">
                         <span>Documentation</span><span>/</span><strong>{docTitle ?? 'Not found'}</strong>
