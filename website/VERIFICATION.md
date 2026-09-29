@@ -1,5 +1,51 @@
 # Website verification record
 
+## Home page review and design refresh — 2026-09-29
+
+The home page now pairs its introduction/actions/install command with the existing
+controller photograph on desktop. Tablet and phone layouts stack in reading order;
+phone actions use a common full-width edge. Feature descriptions, navigation, links,
+integration examples, footer links, and playground controls are more readable. The light
+home primary action uses the existing darker semantic accent for normal-text contrast.
+Documentation refresh work, content, URLs, SEO metadata, and demo logic are preserved.
+
+### Automated checks
+
+- Website typecheck: passed.
+- Website Vitest suite: passed, 14 files and 96 tests, including home CTA focus/idle-state,
+  route and package-identity safeguards, framework copy, and real-library playground tests.
+- Final website production build: passed, 188 modules. Main JS: 151.33 kB gzip;
+  main CSS: 9.72 kB gzip. No runtime dependency or image/font was added. The existing
+  500 kB chunk warning remains.
+- Prettier check of the four changed landing/responsive Sass files: passed.
+- `git diff --check`: passed.
+
+### Browser verification
+
+The Codex in-app browser reviewed development at `http://127.0.0.1:5173/` and the built
+production page at `http://127.0.0.1:4173/`. [Full-page before/after captures and review](design/home-refresh/README.md)
+are saved in light/dark themes at 1280 and 375 × 900. Final production captures also cover
+768 × 900 in both themes. The final matrix has zero horizontal page overflow; development
+also showed zero overflow at 320px.
+
+- Home playground CTA retained `#/`, scrolled to and focused idle Start, and did not start
+  input until the button was activated. Simulation moved focus to Living room, selected it,
+  and released all visible pressed controls. Stop completed before reload.
+- Install command and selected Angular example copy controls displayed `Copied!`. Keyboard
+  End selected Angular in the framework tabs. Clipboard contents were not independently
+  read back through the browser tool.
+- Mobile menu opened, Documentation navigation closed it, and the home Start building action
+  reached Installation. The narrow documentation destination showed no page overflow.
+- Computed production primary-button contrast measured 5.48:1 light and 6.28:1 dark;
+  desktop hero action height measured 47 CSS px.
+- No production browser warning/error logs were observed in these journeys.
+
+This pass did not exercise physical controllers/mobile devices, native WebView transport,
+3D performance, additional browser engines, screen readers, forced-colors rendering,
+200% text resize, reduced-motion emulation, or field performance. Existing reduced-motion
+rules and the previously recorded search focus-restoration defect are unchanged. No
+library release/version change is needed for this website-only refresh.
+
 ## Documentation visual refresh — 2026-09-29
 
 The shared documentation template now has a separated title block, 16px prose, 14px

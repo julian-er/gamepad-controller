@@ -45,10 +45,15 @@
         width: calc(100% - 48px);
     }
     .hero {
-        padding-top: 60px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+        padding-top: 48px;
+    }
+    .hero-copy {
+        max-width: 680px;
     }
     .hero h1 {
-        font-size: 57px;
+        font-size: clamp(40px, 6vw, 56px);
     }
     .hero-stage img {
         height: 360px;
@@ -119,11 +124,12 @@
         width: calc(100% - 36px);
     }
     .hero {
-        padding-top: 46px;
+        padding-top: 32px;
+        gap: 28px;
     }
     .hero-eyebrow {
-        font-size: 8px;
-        letter-spacing: 0.6px;
+        font-size: 10px;
+        letter-spacing: 0;
         padding-inline: 10px;
         margin-bottom: 22px;
     }
@@ -134,26 +140,28 @@
         display: none;
     }
     .hero-lede {
-        font-size: 14px;
-        padding-inline: 6px;
+        font-size: 16px;
+        padding-inline: 0;
     }
     .hero-actions {
         gap: 8px;
+        flex-direction: column;
     }
     .hero-actions .button {
         padding: 11px 14px;
-        font-size: 10px;
+        font-size: 14px;
+        width: 100%;
     }
     .install-command {
-        font-size: 10px;
-        margin-bottom: 24px;
+        font-size: 11px;
+        padding-inline: 12px;
     }
     .hero-stage img {
         height: 285px;
     }
     .stage-caption {
         gap: 17px;
-        font-size: 8px;
+        font-size: 10px;
         bottom: 17px;
     }
     .stage-caption span:last-child {
@@ -162,14 +170,20 @@
     .stage-label {
         top: 12px;
         left: 12px;
-        font-size: 7px;
+        font-size: 9px;
         padding: 4px 7px;
     }
     .proof-strip {
         grid-template-columns: repeat(2, 1fr);
         gap: 25px 0;
-        margin-top: 27px;
-        padding-bottom: 27px;
+        margin-top: 0;
+        padding: 24px 0;
+        > div {
+            padding-inline: 12px;
+        }
+        > div:nth-child(odd) {
+            padding-left: 0;
+        }
         > div:nth-child(2) {
             border: 0;
         }
@@ -177,7 +191,7 @@
             font-size: 20px;
         }
         span {
-            font-size: 8px;
+            font-size: 10px;
         }
     }
     .landing-section {
@@ -191,14 +205,14 @@
             margin-bottom: 16px;
         }
         > p {
-            font-size: 12px;
+            font-size: 16px;
         }
         .text-link {
             margin-top: 5px;
         }
     }
     .eyebrow {
-        font-size: 9px;
+        font-size: 10px;
     }
     .playground-toolbar {
         padding: 13px;
@@ -281,7 +295,7 @@
             font-size: 18px;
         }
         p {
-            font-size: 13px;
+            font-size: 16px;
         }
     }
     .feature-grid {
@@ -300,6 +314,9 @@
             font-size: 35px;
         }
     }
+    .landing-app .integration-section pre {
+        font-size: 12px;
+    }
     .cta-section {
         margin-top: 60px;
         padding: 38px 15px;
@@ -307,12 +324,12 @@
             font-size: 29px;
         }
         p {
-            font-size: 12px;
+            font-size: 16px;
         }
         .button {
             padding-inline: 13px;
-            font-size: 11px;
-            margin: 4px;
+            font-size: 14px;
+            margin: 0;
         }
     }
     .site-footer {
@@ -447,4 +464,3 @@
         animation: none !important;
     }
 }
-
