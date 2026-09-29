@@ -1,6 +1,27 @@
+---
+type: "Integration Guide"
+title: "Angular"
+description: "Own a gamepad service through an Angular component lifecycle."
+tags: ["angular", "integration"]
+where: ["gamepad-ui-engine"]
+sources:
+  - title: "Public package exports"
+    resource: "../../../src/index.ts"
+  - title: "Service implementation"
+    resource: "../../../src/service/GamepadService.ts"
+generated:
+  by: process:maintain-documentation
+  at: "2026-09-24T05:34:57.831Z"
+doc_version: 1
+status: draft
+---
 # Angular
 
-Install with `npm install gamepad-ui-engine`. To try unreleased changes, install the local tarball described in [BUILDING.md](BUILDING.md#testing-the-package-inside-another-project).
+Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
+
+Latest change: Organized this guide in the OKF knowledge base.
+
+Install with `npm install gamepad-ui-engine`. To try unreleased changes, install the local tarball described in [BUILDING.md](../operations/building-and-packaging.md#testing-the-package-inside-another-project).
 
 ## Component lifecycle
 
@@ -34,4 +55,4 @@ Initialize after the view creates its targets. Register event listeners before `
 
 For server-rendered applications, guard browser-only setup and initialize after hydration has completed. The shown example is for a client-rendered view. Route asynchronous service callbacks through the application’s change-detection mechanism when they update Angular state.
 
-`autoAddStyles: true` opts into the library’s default focus styles. For your own styles, use the focus data attributes described in [API.md](API.md#focus-presentation).
+`autoAddStyles: true` opts into the library’s default focus styles. For your own styles, use the focus data attributes described in [API.md](../foundations/api.md#focus-presentation).

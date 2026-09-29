@@ -1,7 +1,28 @@
+---
+type: "Operations Guide"
+title: "Building and packaging"
+description: "Build, pack, and test the ESM library from a repository checkout."
+tags: ["build", "package"]
+where: ["gamepad-ui-engine"]
+sources:
+  - title: "Package manifest"
+    resource: "../../../package.json"
+  - title: "Vite library build"
+    resource: "../../../vite.config.ts"
+generated:
+  by: process:maintain-documentation
+  at: "2026-09-24T05:34:57.831Z"
+doc_version: 1
+status: draft
+---
 # Building & Packaging `gamepad-ui-engine`
 
+Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
+
+Latest change: Organized this guide in the OKF knowledge base.
+
 This guide covers building the library from source, packing it, and testing it locally
-inside another project. Version 1.0.0 is published on npm; use a local tarball to try unreleased changes.
+inside another project. Version 1.0.1 is the current package release; use a local tarball to try unreleased changes.
 
 ## Prerequisites
 
@@ -76,9 +97,9 @@ Two options:
 
 ```bash
 pnpm run build
-pnpm pack                     # -> gamepad-ui-engine-1.0.0.tgz
+pnpm pack                     # -> gamepad-ui-engine-1.0.1.tgz
 cd ../my-app
-npm install ../gamepad-controller/gamepad-ui-engine-1.0.0.tgz
+npm install ../gamepad-controller/gamepad-ui-engine-1.0.1.tgz
 ```
 
 Note: The consuming app can use any package manager (npm, yarn, pnpm); the example above shows npm for cross-manager compatibility.

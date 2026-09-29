@@ -1,4 +1,27 @@
+---
+type: "Architecture Guide"
+title: "Architecture"
+description: "Understand the service, input, focus, and platform boundaries."
+tags: ["architecture", "input"]
+where: ["gamepad-ui-engine"]
+sources:
+  - title: "Service implementation"
+    resource: "../../../src/service/GamepadService.ts"
+  - title: "Input pipeline"
+    resource: "../../../src/input/InputPipeline.ts"
+  - title: "Action dispatch"
+    resource: "../../../src/actions/ActionDispatcher.ts"
+generated:
+  by: process:maintain-documentation
+  at: "2026-09-24T05:34:57.831Z"
+doc_version: 1
+status: draft
+---
 # Architecture
+
+Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
+
+Latest change: Organized this guide in the OKF knowledge base.
 
 `GamepadService` is the public lifecycle owner. It composes the input pipeline, focus renderer, status reporter, action dispatch callbacks, and platform adapter behind one package entry point.
 

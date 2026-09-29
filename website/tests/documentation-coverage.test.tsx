@@ -34,7 +34,7 @@ function markdownFiles(directory: string): string[] {
 
 it('documents each source option in its actual group with type, default and purpose', () => {
     const path = 'src/interfaces/GamepadServiceOptions.ts';
-    const markdown = read('docs/CONFIGURATION.md');
+    const markdown = read('docs/knowledge/foundations/configuration.md');
     const sections = parseReference(markdown);
     const rows = sections.flatMap((section) => section.rows ?? []);
     for (const key of interfaceKeys(path, 'GamepadServiceOptions')) {
@@ -66,8 +66,8 @@ it('documents each source option in its actual group with type, default and purp
 });
 
 it('covers every exported entry-point symbol and service event from source', () => {
-    const reference = read('docs/PUBLIC_API.md');
-    expect(missingNames(exportNames(), reference + read('docs/CONFIGURATION.md'))).toEqual([]);
+    const reference = read('docs/knowledge/foundations/public-api.md');
+    expect(missingNames(exportNames(), reference + read('docs/knowledge/foundations/configuration.md'))).toEqual([]);
     const eventRows = parseReference(reference).flatMap((section) => section.rows ?? []);
     for (const event of interfaceKeys('src/service/GamepadService.ts', 'GamepadServiceEventMap')) {
         const row = eventRows.find((cells) => cells[0] === '`' + event + '`');
@@ -77,14 +77,14 @@ it('covers every exported entry-point symbol and service event from source', () 
 });
 
 it('detects deliberately omitted config and export documentation', () => {
-    const markdown = read('docs/CONFIGURATION.md');
+    const markdown = read('docs/knowledge/foundations/configuration.md');
     const key = 'shoulderCooldown';
     const omitted = markdown.replace(new RegExp('^\\| `' + key + '`.*\\n', 'm'), '');
     expect(missingNames([key], omitted)).toEqual([key]);
     expect(
         missingNames(
             exportNames(),
-            read('docs/PUBLIC_API.md').replaceAll('WindowEventListener', 'RemovedListener') + markdown
+            read('docs/knowledge/foundations/public-api.md').replaceAll('WindowEventListener', 'RemovedListener') + markdown
         )
     ).toContain('WindowEventListener');
 });

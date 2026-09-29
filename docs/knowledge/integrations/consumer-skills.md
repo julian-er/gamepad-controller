@@ -1,6 +1,31 @@
+---
+type: "Integration Guide"
+title: "Consumer skills"
+description: "Install and use the portable gamepad-ui-engine consumer skills."
+tags: ["skills", "integration"]
+where: ["gamepad-ui-engine"]
+sources:
+  - title: "Consumer skill instructions"
+    resource: "../../../skills/gamepad-integrate/SKILL.md"
+  - title: "Navigation skill instructions"
+    resource: "../../../skills/gamepad-navigation/SKILL.md"
+  - title: "Host protocol skill instructions"
+    resource: "../../../skills/gamepad-webview2/SKILL.md"
+  - title: "Diagnostics skill instructions"
+    resource: "../../../skills/gamepad-debug/SKILL.md"
+generated:
+  by: process:maintain-documentation
+  at: "2026-09-24T05:34:57.831Z"
+doc_version: 1
+status: draft
+---
 # gamepad-ui-engine consumer skills
 
-`gamepad-ui-engine` **1.0.0** includes four portable consumer skills in the package’s `skills/` directory. They are guidance for an AI coding harness; installing the npm package does not register them automatically.
+Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
+
+Latest change: Organized this guide in the OKF knowledge base.
+
+`gamepad-ui-engine` **1.0.1** includes four portable consumer skills in the package’s `skills/` directory. Their guides describe the library API introduced in 1.0.0, which remains available in 1.0.1. They are guidance for an AI coding harness; installing the npm package does not register them automatically.
 
 | Skill | Use it for |
 | --- | --- |

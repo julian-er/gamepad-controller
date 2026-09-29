@@ -29,7 +29,7 @@ For a browser page without a bundler, import the versioned ESM build from a CDN 
 </script>
 ```
 
-The package is ESM only; the CDN URL is a module import, not a classic script with a global variable. Version 1.0.0 was the first published release. To try unreleased changes, [build and install a local tarball](docs/BUILDING.md#testing-the-package-inside-another-project).
+The package is ESM only; the CDN URL is a module import, not a classic script with a global variable. Version 1.0.0 was the first published release. To try unreleased changes, [build and install a local tarball](docs/knowledge/operations/building-and-packaging.md#testing-the-package-inside-another-project).
 
 ## Quick Start
 
@@ -59,20 +59,21 @@ service.init();
 
 ## API Usage
 
-`GamepadService` owns an instance's input and focus lifecycle. Subscribe with `service.on(event, listener)` before `init()` when you need controller or navigation events; the returned function removes that listener. Use `service.refresh()` after changing navigation elements, and call `service.destroy()` when the owning view is removed. See the [public API reference](docs/API.md) and [configuration guide](docs/CONFIGURATION.md) for methods, events, and options.
+`GamepadService` owns an instance's input and focus lifecycle. Subscribe with `service.on(event, listener)` before `init()` when you need controller or navigation events; the returned function removes that listener. Use `service.refresh()` after changing navigation elements, and call `service.destroy()` when the owning view is removed. See the [public API reference](docs/knowledge/foundations/api.md) and [configuration guide](docs/knowledge/foundations/configuration.md) for methods, events, and options.
 
 ## Documentation
 
 - [Package guide](docs/README.md)
-- [Project cookbook: websites, small apps, landing pages, and mini games](docs/PROJECT_COOKBOOK.md)
-- [Vanilla JavaScript / TypeScript](docs/USAGE_VANILLA.md), [React](docs/USAGE_REACT.md), [Angular](docs/USAGE_ANGULAR.md)
-- [Public API](docs/API.md) and [architecture](docs/ARCHITECTURE.md)
-- [Building and packaging](docs/BUILDING.md)
-- [First-release notes](docs/CHANGELOG.md)
-- [AI consumer skills](docs/AGENT_SKILLS.md)
+- [Knowledge base by category](docs/knowledge/index.md)
+- [Project cookbook: websites, small apps, landing pages, and mini games](docs/knowledge/features/project-cookbook.md)
+- [Vanilla JavaScript / TypeScript](docs/knowledge/integrations/vanilla.md), [React](docs/knowledge/integrations/react.md), [Angular](docs/knowledge/integrations/angular.md)
+- [Public API](docs/knowledge/foundations/api.md) and [architecture](docs/knowledge/architecture/overview.md)
+- [Building and packaging](docs/knowledge/operations/building-and-packaging.md)
+- [Release notes](docs/CHANGELOG.md)
+- [AI consumer skills](docs/knowledge/integrations/consumer-skills.md)
 - [Contributing](CONTRIBUTING.md)
 
-Library guides live in `docs/`. Portable AI skill folders remain self-contained in `skills/`.
+Current library guides live in `docs/knowledge/`; release notes and the package entry guide remain in `docs/`. Portable AI skill folders remain self-contained in `skills/`.
 
-- [Complete configuration](docs/CONFIGURATION.md)
-- [Complete public contracts](docs/PUBLIC_API.md)
+- [Complete configuration](docs/knowledge/foundations/configuration.md)
+- [Complete public contracts](docs/knowledge/foundations/public-api.md)

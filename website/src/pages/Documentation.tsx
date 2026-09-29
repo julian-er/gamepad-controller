@@ -27,7 +27,7 @@ export function Documentation({ doc, suspended = false }: { doc: Doc; suspended?
             {doc.sections.map((section) => <DocumentationSection key={section.id} doc={doc} section={section} />)}
             <div className="doc-source">
                 <Icon name="github" size={16} /><span>Matches the current library source.</span>
-                <a href={repository + '/blob/main/' + (doc.source ?? ({ angular: 'docs/USAGE_ANGULAR.md', react: 'docs/USAGE_REACT.md', vanilla: 'docs/USAGE_VANILLA.md' } as Record<string, string>)[doc.id] ?? 'docs/API.md')}>View source reference ↗</a>
+                <a href={repository + '/blob/main/' + (doc.source ?? ({ angular: 'docs/knowledge/integrations/angular.md', react: 'docs/knowledge/integrations/react.md', vanilla: 'docs/knowledge/integrations/vanilla.md' } as Record<string, string>)[doc.id] ?? 'docs/knowledge/foundations/api.md')}>View source reference ↗</a>
             </div>
             <DocPagination doc={doc} />
         </main>

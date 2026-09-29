@@ -1,4 +1,27 @@
+---
+type: "Feature Guide"
+title: "Project cookbook"
+description: "Build controller-navigable sites, apps, landing pages, and mini games."
+tags: ["examples", "navigation"]
+where: ["gamepad-ui-engine website", "gamepad-ui-engine"]
+sources:
+  - title: "Demo registry"
+    resource: "../../../website/src/demos/registry.ts"
+  - title: "Demo session"
+    resource: "../../../website/src/demos/useDemoSession.ts"
+  - title: "Public package exports"
+    resource: "../../../src/index.ts"
+generated:
+  by: process:maintain-documentation
+  at: "2026-09-24T05:34:57.831Z"
+doc_version: 1
+status: draft
+---
 # Project cookbook
+
+Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
+
+Latest change: Organized this guide in the OKF knowledge base.
 
 Build something you can explore from the couch. These projects use gamepad-ui-engine to move focus and activate ordinary web controls. Your application owns the content, state, routes, and game rules.
 
@@ -23,7 +46,7 @@ The gallery uses React components inside a shared documentation host; its source
 
 This small DOM game demonstrates a complete interaction: move between tiles, press the primary select button to reveal one, and use the back button to start a new round. Mouse clicks and keyboard Tab/Enter also work through native buttons. The library handles controller focus and activation; the application handles scoring and tile contents.
 
-Prerequisites: an existing vanilla JavaScript project with an ES-module bundler and gamepad-ui-engine installed. Before the first release, follow [local tarball installation](BUILDING.md#testing-the-package-inside-another-project). See [the vanilla guide](USAGE_VANILLA.md) for setup, or port the mount/cleanup ownership using [React](USAGE_REACT.md) or [Angular](USAGE_ANGULAR.md).
+Prerequisites: an existing vanilla JavaScript project with an ES-module bundler and gamepad-ui-engine installed. For unreleased changes, follow [local tarball installation](../operations/building-and-packaging.md#testing-the-package-inside-another-project). See [the vanilla guide](../integrations/vanilla.md) for setup, or port the mount/cleanup ownership using [React](../integrations/react.md) or [Angular](../integrations/angular.md).
 
 Create these three files in that project's served application directory. If your project already has an HTML entry point, put the markup into its body and adapt the asset paths. Render only one instance of this example at a time.
 
@@ -170,7 +193,7 @@ Try opening the last poster, navigating inside its details, and closing it. Focu
 
 ### Playable portfolio
 
-Turn project cards into real links, arranged around a hero and a contact section. Use spatial navigation and a visible focus style that fits your visual design. Native links keep the portfolio usable without a controller. Start with normal page navigation; an SPA router must cancel the relevant select action synchronously before routing, as explained in the [API reference](API.md#focus-presentation).
+Turn project cards into real links, arranged around a hero and a contact section. Use spatial navigation and a visible focus style that fits your visual design. Native links keep the portfolio usable without a controller. Start with normal page navigation; an SPA router must cancel the relevant select action synchronously before routing, as explained in the [API reference](../foundations/api.md#focus-presentation).
 
 Try reaching every case study on both wide and narrow layouts. Avoid making decorative cards focusable or adding a second controller-only route system. Add a custom project preview as an extension once ordinary link activation works.
 
@@ -184,7 +207,7 @@ Try repeated Start presses, leaving and returning to the view, and opening setti
 
 ### Recipe browser
 
-Build category filters above recipe buttons. When filtering changes the DOM, call `refresh()` after rendering. If using `setElements()`, supply the new ordered list before refreshing; refresh alone does not replace a manual registry. Put the recipe steps in scrollable content and explore the library's right-stick scrolling options in [Configuration](CONFIGURATION.md).
+Build category filters above recipe buttons. When filtering changes the DOM, call `refresh()` after rendering. If using `setElements()`, supply the new ordered list before refreshing; refresh alone does not replace a manual registry. Put the recipe steps in scrollable content and explore the library's right-stick scrolling options in [Configuration](../foundations/configuration.md).
 
 Try a filter with zero results, then restore the full collection. Keep filters reachable and choose a visible fallback if the focused recipe disappears. Add saved recipes as a later app feature; persistence belongs to the application.
 
@@ -232,5 +255,5 @@ After trying the starter, explore the live film catalog and its scoped details p
 - Refresh after DOM changes; replace manual target lists when their membership changes.
 - Cancel a default action in `beforeaction`, synchronously, when the application takes ownership of it.
 - Test hidden and disabled controls, no results, disconnects, and focus return from panels.
-- Use the [configuration guide](CONFIGURATION.md) and [public contracts](PUBLIC_API.md) when extending a concept.
+- Use the [configuration guide](../foundations/configuration.md) and [public contracts](../foundations/public-api.md) when extending a concept.
 
