@@ -1,4 +1,5 @@
 import { Playground } from '../../Playground';
+import { packageName, packageVersion } from '../../package-info';
 import { integrationExamples } from '../../examples';
 import { Badge } from '../atoms/Badge';
 import { Icon } from '../atoms/Icon';
@@ -25,7 +26,7 @@ export function LandingHero() {
             ><Icon name="pad" size={18} />Try the playground</a>
         </div>
         <InstallCommand />
-        <p className="snippet-note">Registry install is available after the first publication.{' '}<a href="#/docs/building">Build and install locally →</a></p>
+        <p className="snippet-note">Install from npm, or try unreleased changes with a local build.{' '}<a href="#/docs/building">Build and install locally →</a></p>
         <div className="hero-stage">
             <img src="./images/controllers.png" alt="Xbox and PlayStation controllers on a dark reflective stage with mint lighting" fetchPriority="high" width="1376" height="768" />
             <span className="stage-label mono"><span className="status-dot on" /> ONE ENGINE. EVERY CONTROLLER.</span>
@@ -121,6 +122,6 @@ export function SiteFooter({ repository }: { repository: string }) {
         <div><strong>Build</strong><a href="#/docs/installation">Get started</a><a href="#/docs/react">React guide</a><a href="#/docs/angular">Angular guide</a><a href="#/docs/vanilla">Vanilla JS / TS guide</a><a href="#/docs/agent-skills">AI skills</a><a href="#/docs/playground">Playground</a></div>
         <div><strong>Explore</strong><a href="#/docs/api">API reference</a><a href="#/docs/controllers">Controller mappings</a><a href="#/docs/host-bridge">Host integration</a></div>
         <div><strong>Open source</strong><a href={repository}>GitHub ↗</a><a href={repository + '/issues'}>Report an issue ↗</a><span>MIT licensed</span></div>
-        <div className="footer-bottom"><span>gamepad-ui-engine · Built for the web, played your way.</span><span className="mono">v1.0.0</span></div>
+        <div className="footer-bottom"><span>{packageName} · Built for the web, played your way.</span><span className="mono">v{packageVersion}</span></div>
     </footer>;
 }

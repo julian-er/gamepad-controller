@@ -1,5 +1,56 @@
 # Website verification record
 
+## Package identity and documentation migration — 2026-09-29
+
+The website uses the root library manifest for its shared brand and current-version labels.
+This verification includes the preserved migration into `docs/knowledge/` and the corrected
+installation, release-status, API, and consumer-skill copy. The library remains at 1.0.1;
+historical 1.0.0 release notes and compatibility statements remain intact.
+
+### Automated and build checks
+
+- `pnpm --filter gamepad-ui-engine-website run typecheck`: passed (exit 0).
+- `pnpm --filter gamepad-ui-engine-website run test`: passed (14 files, 96 tests).
+- `pnpm --filter gamepad-ui-engine-website run build`: passed (188 modules transformed).
+- The new rendered-identity regression failed against the old `gamepad-ui-controller` brand
+  before the fix and passed after it. It compares home/header/footer/docs labels and the
+  installation tarball with the root manifest, preserving the existing release-history tests.
+- Library lint, formatting, typecheck, coverage tests (23 files, 155 tests), build, and
+  `pnpm pack --dry-run` passed. The packed allowlist includes the migrated guides and skills.
+- `node .github/scripts/check-pr-target.test.mjs`: passed (5 tests).
+- `git diff --check`: passed.
+- Source comparison between tags `v1.0.0` and `v1.0.1` showed no library-source changes,
+  supporting the skills' explicit API compatibility wording.
+
+The main production JavaScript is 151.29 kB gzip, compared with 151.03 kB after the docs
+migration but before this identity correction (0.26 kB increase). Vite's existing warning
+about chunks larger than 500 kB remains; this change does not alter the deferred 3D renderer.
+
+### Production browser verification
+
+The Codex in-app browser loaded the production preview at
+`http://127.0.0.1:4173/gamepad-controller/`, using desktop 1280 × 800 and mobile 390 × 844
+viewport emulation. Relative assets, styles, images, and hash routes loaded from that subpath.
+
+- Home showed the correct shared header/footer brand, current version, npm command, and
+  published-package availability wording. The copy control displayed its success feedback.
+- Introduction, installation, API, and release notes displayed 1.0.1 as the current version;
+  installation named `gamepad-ui-engine-1.0.1.tgz`. Both dated release-history sections remained.
+- All four consumer-skill routes and their four linked reference routes loaded and displayed
+  1.0.1 applicability with explicit 1.0.0 API compatibility.
+- Migrated documentation appeared in navigation/search, and source links used `docs/knowledge/`.
+- Mobile Start building navigation and the mobile menu's Release notes link worked; the menu
+  closed after navigation. Desktop search found Release notes, and Enter opened the result.
+- Home and documentation remained readable without horizontal page overflow at either width;
+  code blocks retained their internal horizontal scrolling. No browser warning/error logs
+  were observed during these journeys.
+
+Screenshots are retained locally with the implementation plan. The browser tool's virtual
+clipboard could not read back the page's clipboard write, so clipboard contents were not
+independently verified through that tool. No physical mobile device or controller, native
+WebView host, additional browser engine, or 3D/hardware performance test was exercised in this
+content-focused pass. Prior hardware coverage and limitations below are historical records.
+
 ## Three.js controller playground — 2026-09-19
 
 This record covers the integrated home and documentation playground at the current working-tree

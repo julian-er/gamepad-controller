@@ -61,7 +61,7 @@ it('publishes every selected guide and resolves skill references and source anch
     expect(referenceLink('references/integration.md', 'skills/gamepad-integrate/SKILL.md')).toBe(
         '#/docs/integration-recipes'
     );
-    expect(referenceLink('API.md#events')).toBe('#/docs/source-api#events');
+    expect(referenceLink('knowledge/foundations/api.md#events')).toBe('#/docs/source-api#events');
     expect(referenceLink('javascript:alert(1)')).toBe('#/docs/introduction');
     const parsed = parseReference(
         '# Reference\n\n| Method | Behavior |\n|---|---|\n| init() | Start |\n\n```ts\nservice.init();\n```'

@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 it('runs the cookbook starter with repeat protection, round reset, and cleanup', () => {
-    const markdown = readFileSync('docs/PROJECT_COOKBOOK.md', 'utf8').replace(/\r\n/g, '\n');
+    const markdown = readFileSync('docs/knowledge/features/project-cookbook.md', 'utf8').replace(/\r\n/g, '\n');
     const html = /```html\n([\s\S]*?)```/.exec(markdown)![1]!;
     const script = /```js\n([\s\S]*?)```/.exec(markdown)![1]!;
     document.body.innerHTML = /<body>([\s\S]*?)<\/body>/.exec(html)![1]!;

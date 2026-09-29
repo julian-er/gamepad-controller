@@ -7,17 +7,18 @@ import type { Doc } from '../content/types';
 import { DemoGallery } from '../demos/DemoGallery';
 import { DemoPage } from '../demos/DemoPage';
 import { Playground } from '../Playground';
+import { packageVersion } from '../package-info';
 
 const repository = 'https://github.com/julian-er/gamepad-controller';
 
 export function Documentation({ doc, suspended = false }: { doc: Doc; suspended?: boolean }) {
     return <>
         <main className="docs-content" id="main-content" tabIndex={-1}>
-            <div className="doc-eyebrow"><span>{doc.group}</span><span className="mono">VERSION 1.0.0</span></div>
+            <div className="doc-eyebrow"><span>{doc.group}</span><span className="mono">VERSION {packageVersion}</span></div>
             <h1>{doc.title}<span className="mint">.</span></h1>
             <p className="doc-lede">{doc.summary}</p>
             <div className="doc-meta">
-                <Badge>Version 1.0.0</Badge><Badge>TypeScript first</Badge><Badge>Zero runtime dependencies</Badge><Badge>MIT license</Badge>
+                <Badge>Version {packageVersion}</Badge><Badge>TypeScript first</Badge><Badge>Zero runtime dependencies</Badge><Badge>MIT license</Badge>
             </div>
             {(doc.id === 'introduction' || doc.id === 'playground') && <section id="interactive-preview" className="doc-section">
                 <Playground suspended={suspended} /><p><a href="#/docs/examples">Explore eight complete mini apps →</a></p>
@@ -27,7 +28,7 @@ export function Documentation({ doc, suspended = false }: { doc: Doc; suspended?
             {doc.sections.map((section) => <DocumentationSection key={section.id} doc={doc} section={section} />)}
             <div className="doc-source">
                 <Icon name="github" size={16} /><span>Matches the current library source.</span>
-                <a href={repository + '/blob/main/' + (doc.source ?? ({ angular: 'docs/USAGE_ANGULAR.md', react: 'docs/USAGE_REACT.md', vanilla: 'docs/USAGE_VANILLA.md' } as Record<string, string>)[doc.id] ?? 'docs/API.md')}>View source reference ↗</a>
+                <a href={repository + '/blob/main/' + (doc.source ?? ({ angular: 'docs/knowledge/integrations/angular.md', react: 'docs/knowledge/integrations/react.md', vanilla: 'docs/knowledge/integrations/vanilla.md' } as Record<string, string>)[doc.id] ?? 'docs/knowledge/foundations/api.md')}>View source reference ↗</a>
             </div>
             <DocPagination doc={doc} />
         </main>

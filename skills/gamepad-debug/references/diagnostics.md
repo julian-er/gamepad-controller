@@ -1,4 +1,6 @@
-# Diagnostics for gamepad-ui-engine 1.0.0
+# Diagnostics for gamepad-ui-engine 1.0.1
+
+These diagnostics also apply to the public API introduced in 1.0.0.
 
 ## Add a temporary event probe
 

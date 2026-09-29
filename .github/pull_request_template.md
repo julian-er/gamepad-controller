@@ -2,6 +2,10 @@
 
 <!-- What does this PR change, and why? -->
 
+## Target branch
+
+- [ ] This PR targets the branch specified in `CONTRIBUTING.md`.
+
 ## Type of change
 
 - [ ] feat
@@ -25,6 +29,6 @@
 - [ ] Website checks pass (if `website/` or docs were touched):
       `pnpm --filter gamepad-ui-engine-website run typecheck / test / build`
 - [ ] `docs/CHANGELOG.md` updated for user-facing changes
-- [ ] Docs updated and API claims verified against `src/index.ts` / `docs/API.md`
+- [ ] Docs updated and API claims verified against `src/index.ts` / `docs/knowledge/foundations/api.md`
 - [ ] Browser verification recorded per `website/VERIFICATION.md` (for UI interaction changes)
 - [ ] PR title is a Conventional Commit (`type(scope): summary`)

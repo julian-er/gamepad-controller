@@ -1,4 +1,27 @@
+---
+type: "Configuration Guide"
+title: "Configuration"
+description: "Configure the service options, defaults, validation, and factory overrides."
+tags: ["configuration", "options"]
+where: ["gamepad-ui-engine"]
+sources:
+  - title: "Configuration interfaces"
+    resource: "../../../src/interfaces/GamepadServiceOptions.ts"
+  - title: "Option normalization"
+    resource: "../../../src/config/normalizeOptions.ts"
+  - title: "Factories"
+    resource: "../../../src/factory.ts"
+generated:
+  by: process:maintain-documentation
+  at: "2026-09-24T05:34:57.831Z"
+doc_version: 1
+status: draft
+---
 # Configuration
+
+Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
+
+Latest change: Organized this guide in the OKF knowledge base.
 
 Use `GamepadServiceConfig` for constructor and factory input. `GamepadServiceOptions` describes flat service settings. Every field below is optional; table defaults describe an omitted field in `new GamepadService()`, not factory overrides.
 
@@ -103,7 +126,7 @@ service.init();
 
 ## Platform dependency
 
-`platform?: PlatformAdapter` is accepted only on `GamepadServiceConfig`. It defaults to `defaultPlatformAdapter`, is captured separately, and is removed from `service.options`. It supplies time, frame scheduling, gamepads, window events, navigation and mutation observers. It does not abstract DOM querying/layout; a fake adapter with isBrowser true still needs a DOM. See [platform contracts](PUBLIC_API.md#platform).
+`platform?: PlatformAdapter` is accepted only on `GamepadServiceConfig`. It defaults to `defaultPlatformAdapter`, is captured separately, and is removed from `service.options`. It supplies time, frame scheduling, gamepads, window events, navigation and mutation observers. It does not abstract DOM querying/layout; a fake adapter with isBrowser true still needs a DOM. See [platform contracts](public-api.md#platform).
 
 ## Validation and selector behavior
 
@@ -117,4 +140,4 @@ Automatic discovery excludes hidden, detached, disabled and inert targets; activ
 
 `gamepadService()` and `initGamepadForPage()` choose spatial navigation, statusElementId gamepad-status and automatic status creation. `initDualContextGamepad()` also enables dual contexts and defaults useDataAttributes to false. `initCustomEventGamepad()` defaults custom transport on and useDataAttributes false. All factory-supplied values can be overridden by caller options; defined grouped values retain precedence. Each factory replaces and destroys the shared instance. Direct class construction leaves ownership to the caller.
 
-See [API contracts](API.md), [public helper contracts](PUBLIC_API.md), and [host usage](USAGE_VANILLA.md).
+See [API contracts](api.md), [public helper contracts](public-api.md), and [host usage](../integrations/vanilla.md).

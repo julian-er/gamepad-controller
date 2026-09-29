@@ -13,6 +13,35 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  branch-policy:
+    name: branch policy
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '20.x'
+      - run: node .github/scripts/check-pr-target.test.mjs
+      - name: Check PR target
+        if: github.base_ref == 'main'
+        run: |
+          set -euo pipefail
+          MERGE_BASE="$(git merge-base "$PR_BASE_SHA" "$PR_HEAD_SHA")"
+          git diff --no-renames --name-only -z "$MERGE_BASE" "$PR_HEAD_SHA" > "$RUNNER_TEMP/pr-changed-files"
+          node .github/scripts/check-pr-target.mjs
+        env:
+          PR_BASE: ${{ github.base_ref }}
+          PR_HEAD: ${{ github.head_ref }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_CHANGED_FILES: ${{ runner.temp }}/pr-changed-files
+
   library:
     name: library (${{ matrix.node }})
     runs-on: ubuntu-latest
