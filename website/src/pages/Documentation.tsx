@@ -14,12 +14,14 @@ const repository = 'https://github.com/julian-er/gamepad-controller';
 export function Documentation({ doc, suspended = false }: { doc: Doc; suspended?: boolean }) {
     return <>
         <main className="docs-content" id="main-content" tabIndex={-1}>
-            <div className="doc-eyebrow"><span>{doc.group}</span><span className="mono">VERSION {packageVersion}</span></div>
-            <h1>{doc.title}<span className="mint">.</span></h1>
-            <p className="doc-lede">{doc.summary}</p>
-            <div className="doc-meta">
-                <Badge>Version {packageVersion}</Badge><Badge>TypeScript first</Badge><Badge>Zero runtime dependencies</Badge><Badge>MIT license</Badge>
-            </div>
+            <header className="doc-header">
+                <div className="doc-eyebrow"><span>{doc.group}</span><span className="mono">VERSION {packageVersion}</span></div>
+                <h1>{doc.title}<span className="mint">.</span></h1>
+                <p className="doc-lede">{doc.summary}</p>
+                <div className="doc-meta">
+                    <Badge>Version {packageVersion}</Badge><Badge>TypeScript first</Badge><Badge>Zero runtime dependencies</Badge><Badge>MIT license</Badge>
+                </div>
+            </header>
             {(doc.id === 'introduction' || doc.id === 'playground') && <section id="interactive-preview" className="doc-section">
                 <Playground suspended={suspended} /><p><a href="#/docs/examples">Explore eight complete mini apps →</a></p>
             </section>}

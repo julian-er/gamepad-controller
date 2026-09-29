@@ -2,6 +2,9 @@
 
 A React + TypeScript landing page and documentation site, styled with Sass and the supplied Stitch design system.
 
+See [DESIGN.md](DESIGN.md) for the maintained visual direction and runtime token ownership,
+including the documentation reading layout and its before/after evidence.
+
 ## Run locally
 
 From the repository root:
