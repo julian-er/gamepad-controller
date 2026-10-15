@@ -2,8 +2,6 @@
 
 ## Unreleased
 
-- Load local website startup variables from the pinned Julian Rosalen Infisical project.
-
 ### Documentation
 
 - Updated installation and local tarball examples for 1.0.1, then organized current guides with OKF metadata and category indexes.

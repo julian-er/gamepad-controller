@@ -56,16 +56,13 @@
     "build": "rimraf dist && vite build",
     "build:types": "tsc --emitDeclarationOnly",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run && node --test scripts/secrets/runtime-checks.mjs",
+    "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage && node --test scripts/secrets/runtime-checks.mjs",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
-    "prepublishOnly": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
-    "secrets:check": "node scripts/secrets/run.mjs web --check",
-    "test:secrets": "node --test scripts/secrets/runtime-checks.mjs",
-    "dev": "pnpm --filter gamepad-ui-engine-website run dev"
+    "prepublishOnly": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

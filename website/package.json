@@ -4,9 +4,9 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "node ../scripts/secrets/run.mjs web -- vite --host 127.0.0.1",
+        "dev": "vite --host 127.0.0.1",
         "build": "tsc --noEmit && vite build",
-        "preview": "node ../scripts/secrets/run.mjs web -- vite preview --host 127.0.0.1",
+        "preview": "vite preview --host 127.0.0.1",
         "typecheck": "tsc --noEmit",
         "test": "vitest run --config vitest.config.ts"
     },
