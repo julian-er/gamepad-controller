@@ -14,6 +14,7 @@ const sources = import.meta.glob<string>(
         '../../../docs/knowledge/features/action-detection.md',
         '../../../docs/knowledge/architecture/overview.md',
         '../../../docs/knowledge/operations/building-and-packaging.md',
+        '../../../docs/knowledge/operations/secrets-recovery.md',
         '../../../docs/CHANGELOG.md',
         '../../../docs/knowledge/integrations/consumer-skills.md',
         '../../../skills/**/*.md',

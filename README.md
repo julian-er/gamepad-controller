@@ -77,3 +77,7 @@ Current library guides live in `docs/knowledge/`; release notes and the package 
 
 - [Complete configuration](docs/knowledge/foundations/configuration.md)
 - [Complete public contracts](docs/knowledge/foundations/public-api.md)
+
+## Local secret recovery
+
+See the [Infisical recovery guide](docs/knowledge/operations/secrets-recovery.md) before reinstalling Windows or recreating local environment files.

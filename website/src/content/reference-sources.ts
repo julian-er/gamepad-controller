@@ -18,6 +18,7 @@ export const referenceSources: [string, string, string][] = [
     ['docs/knowledge/features/action-detection.md', 'action-detection', 'Action detection'],
     ['docs/knowledge/architecture/overview.md', 'architecture', 'Architecture'],
     ['docs/knowledge/operations/building-and-packaging.md', 'building', 'Building and packaging'],
+    ['docs/knowledge/operations/secrets-recovery.md', 'secrets-recovery', 'Local secrets and startup'],
     ['docs/CHANGELOG.md', 'release-notes', 'Release notes'],
     ['docs/knowledge/integrations/consumer-skills.md', 'agent-skills', 'AI consumer skills'],
     ...['gamepad-integrate', 'gamepad-navigation', 'gamepad-webview2', 'gamepad-debug'].flatMap((name): [string, string, string][] => [[`skills/${name}/SKILL.md`, name, name]]),
