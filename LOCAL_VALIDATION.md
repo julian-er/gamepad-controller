@@ -1,6 +1,6 @@
 # Local validation and required CI
 
-The local commands and runtime matrix remain in [CONTRIBUTING](../../../CONTRIBUTING.md#checks-before-opening-a-pr).
+The local commands and runtime matrix remain in [CONTRIBUTING](CONTRIBUTING.md#checks-before-opening-a-pr).
 Use pnpm 12.4.2 and locked dependencies. Validate the library on both Node 20 and
 24, and the website on Node 24, sequentially to avoid overloading the machine.
 
