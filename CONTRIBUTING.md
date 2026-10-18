@@ -86,6 +86,8 @@ pnpm --filter gamepad-ui-engine-website run build
 
 Dev server: `pnpm --filter gamepad-ui-engine-website run dev`.
 
+See [local validation and required CI](docs/knowledge/operations/local-validation.md) for commit-specific evidence and the current delivery-only migration blocker.
+
 ## Commit messages and PR titles
 
 Use [Conventional Commits](https://www.conventionalcommits.org/): `type(scope): summary`.
