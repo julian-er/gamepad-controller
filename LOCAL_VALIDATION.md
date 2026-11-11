@@ -2,7 +2,7 @@
 
 The local commands and runtime matrix remain in [CONTRIBUTING](CONTRIBUTING.md#checks-before-opening-a-pr).
 Use pnpm 12.4.2 and locked dependencies. Validate the library on both Node 20 and
-24, and the website on Node 24, sequentially to avoid overloading the machine.
+24.22.3, and the website on Node 24.22.3, sequentially to avoid overloading the machine.
 
 Run from a clean committed checkout after installing locked dependencies. The runner
 stops on the first failure and prints the exact commit SHA, runtime, date and result.
