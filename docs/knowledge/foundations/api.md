@@ -23,7 +23,7 @@ Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
 
 Latest change: Organized this guide in the OKF knowledge base.
 
-This reference covers the public `gamepad-ui-engine` **1.0.1** entry point. Version 1.0.1 retains the 1.0.0 library API.
+This reference covers the public `gamepad-ui-engine` **1.0.2** entry point. Version 1.0.2 retains the 1.0.0 library API.
 
 ## Create a service
 

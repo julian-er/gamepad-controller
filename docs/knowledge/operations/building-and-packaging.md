@@ -22,12 +22,12 @@ Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
 Latest change: Organized this guide in the OKF knowledge base.
 
 This guide covers building the library from source, packing it, and testing it locally
-inside another project. Version 1.0.1 is the current package release; use a local tarball to try unreleased changes.
+inside another project. Version 1.0.2 is the current package release; use a local tarball to try unreleased changes.
 
 ## Prerequisites
 
-- **Node.js ≥ 20.19** and pnpm (pinned via packageManager; `corepack enable`). This is the tested development baseline for the current Vite and
-  Vitest toolchain; use a currently supported Node.js release for ongoing development.
+- **Node.js 24.22.3**, pinned in `.node-version`, and **pnpm 12.4.2** (pinned via packageManager; `corepack enable`). CI, release publishing, and GitHub Pages use this patched Node.js 24 runtime.
+- The `library (20.x)` job remains for legacy compatibility only. Node.js 20 is not covered by the November 2026 security releases; use the patched Node.js 24 baseline for development and publishing.
 - The development toolchain uses **Vite 6.4.3** and **Vitest 4.1.11**, as configured in package.json.
 - The package ships an **ESM-only** browser bundle and TypeScript declarations. The JavaScript build target follows the installed Vite defaults; the configuration does not declare an ES2017 browser support guarantee.
 
@@ -97,9 +97,9 @@ Two options:
 
 ```bash
 pnpm run build
-pnpm pack                     # -> gamepad-ui-engine-1.0.1.tgz
+pnpm pack                     # -> gamepad-ui-engine-1.0.2.tgz
 cd ../my-app
-npm install ../gamepad-controller/gamepad-ui-engine-1.0.1.tgz
+npm install ../gamepad-controller/gamepad-ui-engine-1.0.2.tgz
 ```
 
 Note: The consuming app can use any package manager (npm, yarn, pnpm); the example above shows npm for cross-manager compatibility.
