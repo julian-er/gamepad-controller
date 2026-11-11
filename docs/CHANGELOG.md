@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.0.2 - 2026-11-11
+
+### Build and release
+
+- Pinned development, Node.js 24 CI, npm publishing, and documentation-site builds to Node.js 24.22.3, the patched November 2026 release.
+- Kept the required `library (20.x)` and `library (24.x)` check names. Node.js 20 remains legacy compatibility coverage and is not covered by this security update.
+- Updated current package examples and build guidance for 1.0.2. The browser library public API is unchanged; the Node.js update applies to development and publishing tools.
+
 ### Documentation
 
 - Updated installation and local tarball examples for 1.0.1, then organized current guides with OKF metadata and category indexes.

@@ -75,9 +75,9 @@ Patches are never shipped as release candidates.
 
 ## One-time setup
 
-These steps must be completed once, before the first `v1.0.0` tag is pushed — the package is
-**not yet published to npm**. Kept here for reference and for recovery if OIDC ever needs
-re-checking. Do them in this order:
+The initial `1.0.0` bootstrap is complete and the package is published on npm. The steps
+below are historical setup instructions, retained for recovery if OIDC needs re-checking.
+For subsequent releases, follow [Standard release](#standard-release).
 
 1. **Merge the `release/v1.0.0` PR to `main`.** Follow the normal PR flow (see
    [Standard release](#standard-release)) up through the squash merge; do not tag yet.
@@ -195,7 +195,7 @@ In the order they run in `release.yml`:
 - **Compute release metadata** — derives `VERSION` from `package.json`, and sets `dist-tag` to
   `next` (with `prerelease=true`) when the version contains a `-`, otherwise `latest`
   (`prerelease=false`). Informational only; nothing to fail here.
-- **Set up pnpm** / **Set up Node.js** — installs the pinned pnpm and Node.js 24.x, with the
+- **Set up pnpm** / **Set up Node.js** — installs the pinned pnpm and Node.js 24.22.3, with the
   npm registry URL configured for the later OIDC publish.
 - **Ensure npm >= 11.5.1** — upgrades the runner's global npm if it's older than 11.5.1
   (trusted publishing requires it). Self-healing; not a failure gate.

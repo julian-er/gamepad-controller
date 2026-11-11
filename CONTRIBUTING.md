@@ -4,7 +4,8 @@ Thanks for considering a contribution to `gamepad-ui-engine`.
 
 ## Prerequisites
 
-- Node.js >= 20.19
+- Node.js 24.22.3 for development and publishing (pinned in `.node-version`).
+- Node.js 20 remains a legacy compatibility CI job, not a supported security baseline.
 - pnpm 12.4.2, via Corepack: `corepack enable`
 
 ## Setup

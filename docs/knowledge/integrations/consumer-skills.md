@@ -25,7 +25,7 @@ Document version: 1 | Updated: 2026-09-24T05:34:57.831Z
 
 Latest change: Organized this guide in the OKF knowledge base.
 
-`gamepad-ui-engine` **1.0.1** includes four portable consumer skills in the package’s `skills/` directory. Their guides describe the library API introduced in 1.0.0, which remains available in 1.0.1. They are guidance for an AI coding harness; installing the npm package does not register them automatically.
+`gamepad-ui-engine` **1.0.2** includes four portable consumer skills in the package’s `skills/` directory. Their guides describe the library API introduced in 1.0.0, which remains available in 1.0.2. They are guidance for an AI coding harness; installing the npm package does not register them automatically.
 
 | Skill | Use it for |
 | --- | --- |
