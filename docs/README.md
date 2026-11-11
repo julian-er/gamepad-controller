@@ -1,6 +1,6 @@
 # gamepad-ui-engine
 
-Browser gamepad navigation for grid, spatial, and horizontal UI layouts. The current package version is **1.0.1**. It uses the native Gamepad API by default and can accept a validated custom-event input transport for WinUI/WebView2 hosts.
+Browser gamepad navigation for grid, spatial, and horizontal UI layouts. The current package version is **1.0.2**. It uses the native Gamepad API by default and can accept a validated custom-event input transport for WinUI/WebView2 hosts.
 
 **Install:** Install the published package from npm. To try unreleased changes, [build and install a local tarball](knowledge/operations/building-and-packaging.md#testing-the-package-inside-another-project).
 

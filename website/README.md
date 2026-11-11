@@ -7,7 +7,8 @@ including the documentation reading layout and its before/after evidence.
 
 ## Run locally
 
-From the repository root:
+Use Node.js **24.22.3** (see `../.node-version`) and pnpm **12.4.2**, matching the
+CI and GitHub Pages build runtime. From the repository root:
 
 ```sh
 pnpm install
